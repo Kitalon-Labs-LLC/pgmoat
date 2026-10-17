@@ -1,447 +1,453 @@
-# TRD: pgbridge
-Doc owner: Sowad Al-Mughni
-Status: Draft
-Last updated: 2026-05-12
-Companion docs: PRD (01-pgbridge-prd.md), Feature Spec (02-pgbridge-feature-spec.md), Technical Architecture (03-pgbridge-technical-architecture.md)
+# TRD: pgmoat
 
-This Technical Requirements Document distills every requirement pgbridge v1 must satisfy into traceable, measurable, testable units. The PRD answers "what and why." The Feature Spec answers "exactly what each feature does." The Technical Architecture answers "how we build it." This TRD answers "what must be true for v1 to ship, and how do we verify each one."
+Doc owner: Sowad Al-Mughni (Kitalon Labs)
+Status: Draft v2 (supersedes pgbridge TRD v1)
+Last updated: 2026-10-17
+Companion docs: 01 PRD, 02 Feature Spec, 03 Technical Architecture, 05 Backend Schema
 
-A reader picking up only this document should be able to (a) understand the full requirements surface, (b) write a verification suite for any single requirement, (c) trace any acceptance test back to a numbered requirement, and (d) audit a future contribution against the v1 contract.
+This Technical Requirements Document turns the PRD and Feature Spec into traceable, testable requirements. The PRD says what and why; the Feature Spec says exactly what each feature does; the Tech Arch says how; this TRD says what must be true to ship and how each item is verified.
 
 ---
 
-## 1) How to read this document
+## 1) Conventions
 
-### Requirement ID convention
+### 1.1 IDs
 
-Every requirement carries a stable ID. IDs never change once shipped (deprecation is allowed; renaming is not). Format:
-
-`<CATEGORY>-<DOMAIN>-<NN>`
+`<CATEGORY>-<DOMAIN>-<NN>`. IDs are stable once published; deprecate, never renumber.
 
 | Category | Meaning |
 |---|---|
-| FR | Functional requirement (the system must do X) |
-| NFR | Non-functional requirement (measurable quality target) |
-| SEC | Security requirement (threat-driven) |
-| COMP | Compliance requirement (audit-driven) |
-| IR | Interface requirement (protocol/CLI/config surface) |
-| CON | Constraint (immovable platform/runtime fact) |
-| QA | Quality attribute (testability, maintainability) |
+| FR | Functional requirement |
+| NFR | Non-functional requirement (measurable) |
+| SEC | Security requirement |
+| COMP | Compliance-supporting requirement |
+| IR | Interface requirement (protocol, CLI, config, audit format) |
+| CON | Constraint |
+| QA | Quality attribute |
 
-Example: `FR-READ-03` is the third functional requirement in the read-only enforcement domain.
-
-### Verification method codes
-
-Each requirement specifies how it gets verified:
+### 1.2 Verification methods
 
 | Code | Method |
 |---|---|
-| UT | Unit test (Vitest in `packages/core/tests/`) |
-| IT | Integration test (Dockerized Postgres via testcontainers) |
-| E2E | End-to-end test (Playwright + Claude Desktop) |
-| BENCH | Benchmark suite assertion |
-| MAN | Manual checklist verified at release gate |
-| AUDIT | Code review or static analysis |
+| UT | Unit test (Vitest) |
+| CO | Corpus case (Vitest corpus runner) |
+| IT | Integration test (Testcontainers Postgres + MCP client) |
+| PT | Property test (fast-check) |
+| BENCH | Benchmark assertion |
+| AUDIT | Code review or static analysis rule |
 | DOC | Documentation review |
+| MAN | Manual release checklist |
 
-### Priority
+### 1.3 Priority
 
 | Priority | Meaning |
 |---|---|
-| P0 | Ship-blocker for M3 (M3 = public launch on 2026-05-26) |
-| P1 | Ship target for M3, slip-tolerant to v1.1 if shown trivial |
-| P2 | Should land by v1.1 (2026-06-15) |
-| P3 | Could land in v1.x |
+| P0 | Blocks v1.0 launch (2026-12-08) |
+| P1 | Target for v1.0; may slip to v1.1 with sign-off |
+| P2 | v1.1 (2027-01-26) |
+| P3 | Later |
 
 ---
 
-## 2) Functional Requirements
+## 2) Functional requirements
 
-### FR-PROTO: MCP protocol compliance
+### FR-PROTO: MCP protocol
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-PROTO-01 | pgbridge MUST register as a compliant MCP stdio server using `@modelcontextprotocol/sdk` and respond to `initialize`, `tools/list`, `tools/call`, `shutdown` without protocol errors | P0 | IT, E2E | PRD R1, Feat F3 |
-| FR-PROTO-02 | pgbridge MUST register at least 7 read tools (`list_tables`, `describe_table`, `list_views`, `query`, `explain`, `sample_table`, `count`) in read-only mode | P0 | IT | Feat F3 |
-| FR-PROTO-03 | pgbridge MUST additionally register `insert`, `update`, `delete` tools in scoped-write mode, gated per table allow-list | P1 | IT | Feat F5 |
-| FR-PROTO-04 | Each tool MUST emit a deterministic, short description (<400 chars) that includes the mode, safety guidance, and current budgets | P0 | UT | Feat F3 |
-| FR-PROTO-05 | Concurrent tool calls MUST be isolated; pgbridge MUST not share transaction state across in-flight requests | P0 | IT | PRD R1 |
-| FR-PROTO-06 | Client disconnect mid-query MUST cancel the underlying Postgres query via `pg_cancel_backend` within 1s | P0 | IT | PRD R1 edge cases |
-| FR-PROTO-07 | Unknown tool name MUST return a structured error with code `PGB-001` and isError=true | P0 | UT | Feat F3 |
-| FR-PROTO-08 | MCP protocol version skew MUST emit a startup warning but not crash | P1 | IT | PRD R1 edge cases |
+| FR-PROTO-01 | Serve MCP over stdio using SDK v2 `serveStdio` with `legacy: 'serve'`, supporting protocol 2026-07-28 and 2025-11-25 | P0 | IT | R1, F4 |
+| FR-PROTO-02 | Register exactly five tools in v1.0 read-only mode, in alphabetical order: `describe_table`, `explain`, `list_tables`, `query`, `sample_table` | P0 | IT | R1, F4 |
+| FR-PROTO-03 | `tools/list` output is byte-identical across calls for the same config | P0 | IT | R1 |
+| FR-PROTO-04 | Every tool declares `title`, `description`, `inputSchema`, `outputSchema`, `annotations` | P0 | UT | R22 |
+| FR-PROTO-05 | Read tools set `readOnlyHint: true`, `destructiveHint: false`, `openWorldHint: false`; `idempotentHint: true` except `sample_table` | P0 | UT | R22 |
+| FR-PROTO-06 | Server `instructions` include mode, budgets, recommended tool order, and the untrusted-data rule | P0 | UT | R20 |
+| FR-PROTO-07 | Concurrent tool calls use separate connections and transactions and produce separate audit entries | P0 | IT | R1 |
+| FR-PROTO-08 | Client abort cancels the backend query within 2 s and records `canceled` / PGM-505 | P0 | IT | R1 |
+| FR-PROTO-09 | Unknown tool returns PGM-001; schema-invalid arguments return PGM-004 | P0 | UT | R1 |
+| FR-PROTO-10 | Refusal and error results set `isError: true` and include `_meta` keys `com.kitalonlabs.pgmoat/error_code` and `com.kitalonlabs.pgmoat/request_id` | P0 | UT | F11 |
+| FR-PROTO-11 | No bytes other than protocol messages are written to stdout in stdio mode | P0 | IT | F1, F4 |
+| FR-PROTO-12 | Graceful shutdown on stdin EOF, SIGTERM, SIGINT: drain up to 10 s, flush audit up to 5 s | P0 | IT | R8 |
+
+### FR-ZERO: Zero-config and compatibility
+
+| ID | Requirement | P | Verify | Source |
+|---|---|---|---|---|
+| FR-ZERO-01 | `pgmoat <url>` without a config file starts read-only with Backend Schema 05 section 3.3 defaults | P0 | IT | R23 |
+| FR-ZERO-02 | `--url-env <VAR>` and `PGMOAT_DATABASE_URL` supply the URL without argv exposure | P0 | UT | R23 |
+| FR-ZERO-03 | `query` accepts `{ sql }` like the archived reference server | P0 | IT | R23 |
+| FR-ZERO-04 | Zero-config prints a single stderr notice with mode, table count, budgets, audit path, doctor summary, next step | P0 | IT | F1 |
 
 ### FR-READ: Read-only enforcement
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-READ-01 | In `read-only` mode, pgbridge MUST refuse any top-level statement other than `SelectStmt`, `ExplainStmt`, `VariableShowStmt` with error `PGB-201` | P0 | UT | PRD R2, Feat F4 |
-| FR-READ-02 | pgbridge MUST refuse `SELECT ... INTO` with error `PGB-202` | P0 | UT | Feat F4 |
-| FR-READ-03 | pgbridge MUST refuse `SELECT ... FOR UPDATE` and `SELECT ... FOR SHARE` with error `PGB-202` | P0 | UT | Feat F4 |
-| FR-READ-04 | pgbridge MUST refuse any CTE whose inner statement is on the FORBIDDEN_NODES list with error `PGB-203` | P0 | UT | Feat F4 |
-| FR-READ-05 | pgbridge MUST refuse any query containing a function call on the FORBIDDEN_FUNCTIONS list with error `PGB-205` | P0 | UT | Feat F4 |
-| FR-READ-06 | pgbridge MUST refuse multiple-statement queries (split on top-level semicolons) with error `PGB-204` | P0 | UT | Feat F4 |
-| FR-READ-07 | Custom user-defined functions MUST default to deny in read-only mode unless explicitly allowed in `extensions.allowed_functions` | P1 | UT | Feat F4 edge cases |
-| FR-READ-08 | Parser MUST handle bracket-quoted identifiers, mixed-case names, and double-quoted reserved words via AST walk, never string regex | P0 | UT, AUDIT | Feat F4 edge cases |
+| FR-READ-01 | Parse all SQL with libpg-query 18; parse failure, empty input, or over `max_sql_chars` gives PGM-206 | P0 | UT, CO | R2 |
+| FR-READ-02 | Exactly one statement, else PGM-204 | P0 | CO | R2 |
+| FR-READ-03 | Top-level type in {SelectStmt, ExplainStmt, VariableShowStmt}, else PGM-201 | P0 | CO | R2 |
+| FR-READ-04 | Any forbidden node type anywhere gives PGM-201, or PGM-203 inside a CTE | P0 | CO | R2 |
+| FR-READ-05 | Unknown node types not on the reviewed expression list fail closed with PGM-201 | P0 | UT | R2 |
+| FR-READ-06 | `intoClause` or `lockingClause` gives PGM-202 | P0 | CO | R2 |
+| FR-READ-07 | Functions must be on the allow-list; never-allowed list cannot be overridden; else PGM-205 | P0 | CO | R2 |
+| FR-READ-08 | `EXPLAIN` with ANALYZE gives PGM-209 | P0 | CO | R2 |
+| FR-READ-09 | Execution uses `BEGIN READ ONLY` | P0 | IT | R2 |
+| FR-READ-10 | Agent SQL executes only through `pg-cursor` (extended protocol), so Postgres rejects multiple commands | P0 | IT | R2 |
+| FR-READ-11 | For every refused write in the corpus, a database-layer test proves Postgres also rejects it when called directly | P0 | CO, IT | R2, R24 |
+| FR-READ-12 | No safety decision depends on string matching of SQL text | P0 | AUDIT | R2 |
 
-### FR-WRITE: Scoped-write enforcement
+### FR-POLICY: Query-time access policy
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-WRITE-01 | In `scoped-write` mode, pgbridge MUST refuse writes to any table not listed in `tables.<name>.write` with error `PGB-211`/`PGB-213` | P1 | UT, IT | Feat F5 |
-| FR-WRITE-02 | UPDATE MUST refuse any SET column not in `tables.<name>.update_columns` with error `PGB-212` | P1 | UT | Feat F5 |
-| FR-WRITE-03 | UPDATE and DELETE MUST refuse empty WHERE or always-true WHERE clauses (e.g., `WHERE 1=1`) with error `PGB-214` | P1 | UT | Feat F5 |
-| FR-WRITE-04 | INSERT MUST refuse missing `insert_required_columns` with error `PGB-215` | P1 | UT | Feat F5 |
-| FR-WRITE-05 | INSERT MUST auto-merge `insert_default_columns` such that defaults always override agent input | P1 | UT | Feat F5 |
-| FR-WRITE-06 | DELETE MUST cap affected rows at `max_affected_rows` (default 100); excess MUST refuse pre-execution where possible | P1 | IT | Feat F5 |
-| FR-WRITE-07 | Bulk INSERT >100 rows MUST chunk into batches, each in its own transaction | P2 | IT | Feat F5 edge cases |
-| FR-WRITE-08 | All write tools MUST share RLS-injection and audit-logging paths with read tools | P1 | UT | Feat F5, F8, F9 |
+| FR-POLICY-01 | References to hidden relations give PGM-207 | P0 | CO | R18 |
+| FR-POLICY-02 | References to relations outside `connection.schemas` or not in the snapshot give PGM-207 | P0 | CO | R18 |
+| FR-POLICY-03 | Catalog schema references give PGM-207 unless `allow_catalog_queries: true` | P0 | CO | R18 |
+| FR-POLICY-04 | Hidden column references give PGM-208 | P0 | CO | R18 |
+| FR-POLICY-05 | Whole-row references to relations with hidden columns give PGM-208 | P0 | CO | R18 |
+| FR-POLICY-06 | `*` and `t.*` over relations with hidden columns give PGM-208 with the allowed column list | P0 | CO | R18 |
+| FR-POLICY-07 | CTE names shadow relations within their scope | P0 | CO | R18 |
+| FR-POLICY-08 | Error messages for hidden and unknown relations are identical (no existence leak) | P0 | UT | R18 |
+| FR-POLICY-09 | `policy.allowed_functions` enables schema-qualified user functions only | P1 | CO | R18 |
 
-### FR-SCHEMA: Schema discovery
+### FR-REWRITE: Rewrite and invariants
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-SCHEMA-01 | pgbridge MUST introspect `information_schema` and `pg_catalog` at startup to build a schema snapshot | P0 | IT | Feat F6 |
-| FR-SCHEMA-02 | `list_tables` MUST exclude any table with `hidden: true` from all output and metadata | P0 | UT | PRD R4 |
-| FR-SCHEMA-03 | `describe_table` MUST exclude any column with `hidden: true` from all output and metadata | P0 | UT | PRD R4 |
-| FR-SCHEMA-04 | Schema cache MUST hold a 60-second TTL by default; `--watch` mode MUST reload within 5s of YAML save | P0 | IT | Feat F6 |
-| FR-SCHEMA-05 | Tables present in DB but absent from YAML MUST appear with description "Unannotated" and log a warning | P1 | UT | Feat F6 edge cases |
-| FR-SCHEMA-06 | Tables present in YAML but absent from DB MUST log a warning and exclude from output | P1 | UT | Feat F6 edge cases |
-| FR-SCHEMA-07 | Multiple schemas MUST be supportable via `connection.schema` array (default `["public"]`) | P1 | IT | Feat F6 |
-| FR-SCHEMA-08 | `describe_table` output MUST include columns, types, nullability, PK, FKs, indexes, descriptions, sensitivity labels | P0 | UT | PRD R4 |
+| FR-REWRITE-01 | Inject `LIMIT max_rows + 1` when absent on the top-level SELECT | P0 | UT, CO | R5 |
+| FR-REWRITE-02 | Constant LIMIT above `max_rows` gives PGM-302 | P0 | CO | R5 |
+| FR-REWRITE-03 | All rewrites go through AST mutation and `pgsql-deparser`; no string building | P0 | AUDIT | R2 |
+| FR-REWRITE-04 | Deparsed SQL is re-parsed and re-classified; any difference except the LIMIT gives PGM-210 | P0 | UT, PT | R2 |
+| FR-REWRITE-05 | Fingerprint strips constants and is stable across whitespace and literal changes | P1 | UT | F10 |
 
-### FR-BUDGET: Query budgets
+### FR-SCHEMA: Discovery and annotations
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-BUDGET-01 | pgbridge MUST inject `LIMIT max_rows + 1` into any SELECT lacking an explicit LIMIT, then drop the extra row and emit warning `PGB-301` | P0 | UT | PRD R5, Feat F7 |
-| FR-BUDGET-02 | A SELECT with `LIMIT N` where `N > max_rows` MUST refuse with error `PGB-301a` | P0 | UT | Feat F7 |
-| FR-BUDGET-03 | pgbridge MUST issue `SET LOCAL statement_timeout = max_query_ms` before every query | P0 | IT | PRD R5 |
-| FR-BUDGET-04 | A query timing out MUST return error `PGB-302` with the elapsed time | P0 | IT | PRD R5 |
-| FR-BUDGET-05 | Result rows with >`max_columns` keys MUST drop excess columns alphabetically and emit warning `PGB-303` | P0 | UT | PRD R5 |
-| FR-BUDGET-06 | Serialized result exceeding `max_payload_bytes` MUST refuse with error `PGB-304` before transmission | P0 | UT | PRD R5 |
-| FR-BUDGET-07 | `EXPLAIN` runtime MUST be capped at `max_explain_ms` (default 500) | P0 | IT | Feat F11 |
-| FR-BUDGET-08 | Queries with `OFFSET > 10000` MUST emit warning `PGB-305` (not refuse) | P2 | UT | PRD R5 edge cases |
+| FR-SCHEMA-01 | Introspect relations, columns, keys, indexes, RLS flags, owners from `pg_catalog` for exposed schemas | P0 | IT | R4 |
+| FR-SCHEMA-02 | Hidden relations and columns are removed from every tool-facing structure | P0 | UT | R4 |
+| FR-SCHEMA-03 | `list_tables` includes views with `kind`, sorted, with `hidden_count` | P0 | IT | F7 |
+| FR-SCHEMA-04 | `describe_table` returns the fields in F7; `referenced_by` excludes hidden relations | P0 | IT | F7 |
+| FR-SCHEMA-05 | Unannotated relations show "Unannotated" and log a startup warning | P0 | UT | R4 |
+| FR-SCHEMA-06 | Cache TTL default 60 s; single-flight refresh; failure keeps previous snapshot | P0 | UT | F7 |
+| FR-SCHEMA-07 | `--watch` applies annotation changes within 5 s; invalid YAML keeps the old config | P1 | IT | R4 |
 
-### FR-RLS: Row-level security
+### FR-BUDGET: Budgets
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-RLS-01 | When `rls.session_variables` are configured, pgbridge MUST call `set_config($1, $2, true)` for each variable inside the same transaction as the query | P0 | IT | PRD R6, Feat F8 |
-| FR-RLS-02 | RLS variable names MUST match regex `[a-zA-Z_][a-zA-Z0-9_.]*` and refuse otherwise at config-load time | P0 | UT | Feat F8 |
-| FR-RLS-03 | RLS variable values MUST flow through parameterized `set_config` (no string concatenation) | P0 | UT, AUDIT | SEC-INJECT-02 |
-| FR-RLS-04 | When `rls.required: true` and a required key is absent or empty in `_meta.rls_context`, pgbridge MUST refuse with `PGB-401` | P0 | UT | Feat F8 |
-| FR-RLS-05 | Variable injection MUST occur after BEGIN and before the user query, so SET LOCAL rolls back on error | P0 | IT | Feat F8 |
-| FR-RLS-06 | 100 alternating queries between tenant A and tenant B MUST never leak rows across | P0 | IT | Feat F8 acceptance |
+| FR-BUDGET-01 | Defaults per Backend Schema 05: 200 rows, 5000 ms, 500 ms explain, 1000 ms lock, 50 columns, 65,536 bytes, 500 chars per cell | P0 | UT | R5 |
+| FR-BUDGET-02 | Cursor reads at most `max_rows + 1` rows regardless of SQL shape | P0 | IT | R5 |
+| FR-BUDGET-03 | Over-cap results return `max_rows` rows and PGM-301 | P0 | IT | R5 |
+| FR-BUDGET-04 | `statement_timeout`, `lock_timeout`, `idle_in_transaction_session_timeout` set with `set_config(..., true)` per transaction | P0 | IT | R5 |
+| FR-BUDGET-05 | Timeout and lock timeout map to PGM-303 | P0 | IT | R5 |
+| FR-BUDGET-06 | Columns over `max_columns` truncated alphabetically with PGM-304 | P0 | UT | R5 |
+| FR-BUDGET-07 | Cells over `max_cell_chars` truncated with PGM-307 | P0 | UT | F8 |
+| FR-BUDGET-08 | Serialized structured result over `max_payload_bytes` gives PGM-305 | P0 | UT | R5 |
+| FR-BUDGET-09 | Constant OFFSET above `offset_warning` adds PGM-306 | P2 | UT | F8 |
 
-### FR-AUDIT: Audit logging
+### FR-RLS: Identity-bound RLS
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-AUDIT-01 | Every tool call MUST emit exactly one structured audit entry containing the fields listed in Feature Spec F9 | P0 | UT, IT | PRD R7 |
-| FR-AUDIT-02 | Audit MUST support destinations: stdout, file (NDJSON, daily rotation), Postgres table, Datadog, S3 | P0 (stdout, file, postgres), P1 (Datadog, S3) | IT | PRD R7 |
-| FR-AUDIT-03 | Audit MUST be asynchronous and never block the query path; enqueue p95 MUST be <1ms | P0 | BENCH | NFR-PERF-04 |
-| FR-AUDIT-04 | Audit queue MUST be bounded by `buffer_max_bytes` (default 10MB); overflow MUST drop with stderr CRITICAL alarm | P0 | IT | PRD R7 edge cases |
-| FR-AUDIT-05 | `redact_fields` MUST mask matching keys in params, rls_context, and (when `redact_in_sql: true`) in SQL literal values | P0 | UT | PRD R7 |
-| FR-AUDIT-06 | Error messages MUST be sanitized before audit log entry (e.g., Postgres constraint-violation payloads) | P0 | UT | Feat F9 edge cases |
-| FR-AUDIT-07 | `pgbridge audit prune` command MUST delete files older than `retain_days` | P1 | UT | Feat F9 |
-| FR-AUDIT-08 | Audit destination outage MUST NOT crash pgbridge or stall the query path | P0 | IT | Feat F9 edge cases |
+| FR-RLS-01 | Sources supported: `token.<claim>`, `env.<VAR>`, `static:<value>`, `meta.<key>` | P0 | UT | R6 |
+| FR-RLS-02 | `meta.*` only with stdio and `trust_request_meta: true` (PGM-112); `token.*` only with HTTP OAuth (PGM-113) | P0 | UT | R6 |
+| FR-RLS-03 | Variables set with `SELECT set_config($1, $2, true)` after BEGIN and before the query | P0 | IT | R6 |
+| FR-RLS-04 | `required` refuses missing (PGM-401), empty or non-scalar (PGM-403), missing claim (PGM-405) before any database contact | P0 | UT, IT | R6 |
+| FR-RLS-05 | Untrusted meta present gives PGM-404 | P0 | UT | F9 |
+| FR-RLS-06 | 1,000 alternating-tenant queries show zero cross-tenant rows | P0 | IT | R6 |
+| FR-RLS-07 | Session variables are not visible on the pooled connection after the transaction ends | P0 | IT | R6 |
 
-### FR-CONFIG: Configuration management
+### FR-AUDIT: Audit
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-CONFIG-01 | pgbridge MUST validate `pgbridge.yaml` via Zod schema at startup and refuse to start with line-numbered errors if invalid | P0 | UT | Feat F2 |
-| FR-CONFIG-02 | `${ENV_VAR}` interpolation MUST work in any string field; missing required env var MUST fail with a clear error | P0 | UT | PRD §6 |
-| FR-CONFIG-03 | `${file:path}` interpolation MUST work for secrets stored as files (Docker/k8s secrets pattern) | P1 | UT | PRD §6 |
-| FR-CONFIG-04 | Config search order: `--config` flag, then `./pgbridge.yaml`, then `~/.config/pgbridge/config.yaml`, then `/etc/pgbridge.yaml` | P0 | UT | Feat F2 |
-| FR-CONFIG-05 | `--watch` mode MUST reload schema cache within 5s of YAML save; invalid YAML MUST keep the prior valid config and log an error | P1 | IT | Feat F2 |
-| FR-CONFIG-06 | Insecure config combinations MUST refuse startup (e.g., `mode: scoped-write` with no table-level write allow-list) | P0 | UT | SEC-DEFAULT-03 |
+| FR-AUDIT-01 | Exactly one entry per tool call, including refusals, errors, cancellations | P0 | UT, IT | R7 |
+| FR-AUDIT-02 | Destinations `file`, `stderr`, `postgres` in v1.0; `stdout` only with HTTP | P0 | IT | R7 |
+| FR-AUDIT-03 | Hash chain per instance with `prev_hash`, `entry_hash`, `seq` | P0 | UT | R7 |
+| FR-AUDIT-04 | `audit verify` detects edits, deletions, reordering; reports recorded drops separately | P0 | UT | R7 |
+| FR-AUDIT-05 | Redaction of keys, SQL literals, patterns, and Postgres error details before hashing and writing | P0 | UT | R7 |
+| FR-AUDIT-06 | Enqueue never blocks over 1 ms p95; overflow drops with stderr CRITICAL and a recorded counter | P0 | BENCH, IT | R7 |
+| FR-AUDIT-07 | Postgres destination uses a separate pool; DDL idempotent; batched inserts with bound parameters | P0 | IT | R7 |
+| FR-AUDIT-08 | File destination: NDJSON, daily rotation, mode 0600, per-OS default path | P0 | IT | F10 |
+| FR-AUDIT-09 | `audit tail`, `audit query`, `audit prune` work for the file destination; `audit query` and `verify` work for Postgres | P1 | IT | F10 |
+| FR-AUDIT-10 | Datadog, S3, OpenTelemetry destinations | P2 | IT | R26 |
 
-### FR-CLI: CLI commands
+### FR-DOCTOR: Role preflight
 
-| ID | Requirement | Priority | Verify | Source |
+| ID | Requirement | P | Verify | Source |
 |---|---|---|---|---|
-| FR-CLI-01 | `pgbridge init` wizard MUST complete a fresh config in under 5 minutes on a 50-table schema | P0 | E2E, MAN | Feat F1 |
-| FR-CLI-02 | `pgbridge init` MUST never overwrite an existing `pgbridge.yaml` without explicit confirmation | P0 | UT | Feat F1 edge cases |
-| FR-CLI-03 | `pgbridge validate` MUST verify config against schema and Postgres connectivity, exiting non-zero on any failure | P0 | UT | PRD §3 |
-| FR-CLI-04 | `pgbridge start` MUST print a copy-paste-ready Claude Desktop config block | P0 | MAN | Feat F1 |
-| FR-CLI-05 | `pgbridge audit prune` MUST delete audit files older than retention with `--dry-run` support | P1 | UT | Feat F9 |
-| FR-CLI-06 | `pgbridge schema-export` MUST emit a Markdown representation of the introspected schema for human review | P2 | UT | PRD §3 |
-| FR-CLI-07 | All commands MUST support `--json` for machine-readable output | P1 | UT | PRD §3 |
-| FR-CLI-08 | Every error MUST include a unique `PGB-XXX` code and link to `pgbridge.dev/docs/error-codes#PGB-XXX` | P0 | AUDIT | PRD §3 |
+| FR-DOCTOR-01 | Checks PGM-701 to PGM-707 as specified in Tech Arch 03 section 6.4 | P0 | IT | R21 |
+| FR-DOCTOR-02 | `start` with a config file refuses on fail findings unless `--allow-unsafe-role`; zero-config warns | P0 | IT | R21 |
+| FR-DOCTOR-03 | `--allow-unsafe-role` sets `unsafe_role_override: true` on every audit entry | P0 | UT | R21 |
+| FR-DOCTOR-04 | Each finding includes a copy-paste fix | P0 | UT | F14 |
+
+### FR-AUTH: HTTP transport and OAuth
+
+| ID | Requirement | P | Verify | Source |
+|---|---|---|---|---|
+| FR-AUTH-01 | Stateless Streamable HTTP on `http.host:port` + `http.path`, default 127.0.0.1:8787/mcp | P1 | IT | R19 |
+| FR-AUTH-02 | Non-loopback bind without OAuth refused (PGM-114) | P1 | UT | R19 |
+| FR-AUTH-03 | Protected Resource Metadata served at `/.well-known/oauth-protected-resource` | P1 | IT | R19 |
+| FR-AUTH-04 | JWT validated for signature (JWKS), issuer, audience equal to canonical URL, expiry, not-before | P1 | IT | R19 |
+| FR-AUTH-05 | 401 with `WWW-Authenticate` (resource_metadata, scope) for missing or invalid token | P1 | IT | R19 |
+| FR-AUTH-06 | 403 `insufficient_scope` when required scopes missing | P1 | IT | R19 |
+| FR-AUTH-07 | Host and Origin validation; 403 on mismatch | P1 | IT | R19 |
+| FR-AUTH-08 | Tokens never forwarded, logged, or stored | P1 | AUDIT, UT | R19 |
+| FR-AUTH-09 | Request body limit (default 1 MB), 413 over limit | P1 | IT | F15 |
+
+### FR-OUTPUT: Output
+
+| ID | Requirement | P | Verify | Source |
+|---|---|---|---|---|
+| FR-OUTPUT-01 | Row results return `structuredContent` that validates against the tool's `outputSchema` | P0 | UT, CO | R22 |
+| FR-OUTPUT-02 | Text rendering wraps rows in the fixed preamble and `<<<pgmoat:data ...>>>` / `<<<pgmoat:end>>>` fence | P0 | UT | R20 |
+| FR-OUTPUT-03 | Fence strings inside data are escaped | P0 | UT | R20 |
+| FR-OUTPUT-04 | `bigint` and `numeric` as strings; `bytea` summarized; NULL distinct from empty | P0 | UT | F11 |
+| FR-OUTPUT-05 | `untrusted` columns flagged in structured output and listed in text | P0 | UT | R20 |
+
+### FR-CLI: CLI
+
+| ID | Requirement | P | Verify | Source |
+|---|---|---|---|---|
+| FR-CLI-01 | Commands: zero-config, `init`, `start`, `validate`, `doctor`, `audit` (tail, query, verify, prune), `schema-export`, `test-corpus`, `version` | P0 | UT | R25 |
+| FR-CLI-02 | `init` completes on a 50-table schema in under 5 minutes interactively and under 10 s with `--yes` | P0 | MAN, IT | F2 |
+| FR-CLI-03 | `init` never overwrites without confirmation; `--merge` preserves edits | P0 | UT | F2 |
+| FR-CLI-04 | `--json` on every command emits NDJSON | P1 | UT | F17 |
+| FR-CLI-05 | Every error includes a PGM code and docs URL | P0 | AUDIT, UT | R25 |
+| FR-CLI-06 | Exit codes 0, 1, 2, 3 as specified in F17 | P0 | UT | F17 |
+
+### FR-CORPUS: Adversarial corpus
+
+| ID | Requirement | P | Verify | Source |
+|---|---|---|---|---|
+| FR-CORPUS-01 | At least 300 cases across the groups in F18 | P0 | CO | R24 |
+| FR-CORPUS-02 | Runs on every push (pipeline mode) and against Postgres 15 to 18 (database mode) | P0 | CO | R24 |
+| FR-CORPUS-03 | `test-corpus` runs locally in an isolated, auto-dropped schema and refuses non-disposable-looking databases without `--force` | P0 | IT | F18 |
+| FR-CORPUS-04 | Every known bypass class in PRD section 14.1 has at least one case | P0 | DOC, CO | R24 |
+
+### FR-DIST: Distribution
+
+| ID | Requirement | P | Verify | Source |
+|---|---|---|---|---|
+| FR-DIST-01 | npm package `pgmoat` with provenance, `bin: pgmoat`, `mcpName: io.github.kitalonlabs/pgmoat` | P0 | MAN | R9 |
+| FR-DIST-02 | Docker image on GHCR, multi-arch, non-root | P0 | MAN | R9 |
+| FR-DIST-03 | MCPB bundle with sensitive `database_url` user config, installs on macOS and Windows Claude Desktop | P0 | MAN | R9 |
+| FR-DIST-04 | MCP Registry entry published from CI with a valid `server.json` | P0 | MAN | R9 |
+| FR-DIST-05 | Single-file binaries via Node SEA after the WASM spike | P2 | MAN | R28 |
+
+### FR-WRITE: Scoped writes (v1.1)
+
+| ID | Requirement | P | Verify | Source |
+|---|---|---|---|---|
+| FR-WRITE-01 | Per-table `insert`, `update`, `delete` tools with structured inputs | P2 | IT | R3 |
+| FR-WRITE-02 | Column allow-lists, required columns, injected defaults, non-empty WHERE, affected-row cap (PGM-211 to PGM-217) | P2 | UT, IT | R3 |
+| FR-WRITE-03 | Human confirmation via `input_required` elicitation; refuse with PGM-218 if unsupported or declined | P2 | IT | R3 |
 
 ---
 
-## 3) Non-Functional Requirements
+## 3) Non-functional requirements
 
-### NFR-PERF: Performance
-
-| ID | Requirement | Target | Verify |
-|---|---|---|---|
-| NFR-PERF-01 | Overhead vs raw `pg` client for `query` tool | <10ms p95 | BENCH |
-| NFR-PERF-02 | `list_tables` end-to-end on 50-table schema | <50ms | BENCH |
-| NFR-PERF-03 | `describe_table` end-to-end (warm cache) | <30ms | BENCH |
-| NFR-PERF-04 | Audit emit enqueue latency | <1ms p95 | BENCH |
-| NFR-PERF-05 | SQL parse + classify on 1KB query | <2ms p95 | BENCH |
-| NFR-PERF-06 | Schema introspection cold start (100 tables) | <500ms | BENCH |
-| NFR-PERF-07 | Memory baseline RSS | <100MB | BENCH |
-| NFR-PERF-08 | Sustained request rate on 4 vCPU / 4GB RAM | ≥500 req/s | BENCH |
-
-### NFR-SCALE: Scalability
+### NFR-PERF
 
 | ID | Requirement | Target | Verify |
 |---|---|---|---|
-| NFR-SCALE-01 | Pool size configurable, default min 2 / max 20 | Settable via YAML | UT |
-| NFR-SCALE-02 | Pool exhaustion MUST queue requests with `queue_timeout_ms` (default 3000) before erroring | Behavioral | IT |
-| NFR-SCALE-03 | Audit queue MUST batch flush every 100ms when non-empty | Behavioral | UT |
-| NFR-SCALE-04 | Schema cache MUST be process-local; no external cache infra required | Architectural | DOC |
+| NFR-PERF-01 | `query` overhead over raw `pg` | < 10 ms p95 | BENCH |
+| NFR-PERF-02 | Parse + classify + policy, 1 KB SQL | < 3 ms p95 | BENCH |
+| NFR-PERF-03 | `list_tables`, 100 relations, warm | < 50 ms | IT |
+| NFR-PERF-04 | `describe_table`, warm | < 30 ms | IT |
+| NFR-PERF-05 | Cold start to ready, 100 relations | < 1 s | BENCH |
+| NFR-PERF-06 | Audit enqueue | < 1 ms p95 | BENCH |
+| NFR-PERF-07 | HTTP throughput on 2 vCPU / 2 GB, `SELECT 1` | 300 req/s, p95 < 50 ms | BENCH |
+| NFR-PERF-08 | Idle RSS with 200 relations | < 150 MB | BENCH |
 
-### NFR-AVAIL: Availability
+### NFR-REL
 
-| ID | Requirement | Target | Verify |
-|---|---|---|---|
-| NFR-AVAIL-01 | Process MUST be stateless; restart MUST recover full functionality with no data loss outside the audit in-flight window | Behavioral | IT |
-| NFR-AVAIL-02 | Postgres connection loss MUST trigger pool reconnect with exponential backoff (cap 30s) | Behavioral | IT |
-| NFR-AVAIL-03 | Audit destination outage MUST NOT impact query availability | Behavioral | IT |
-| NFR-AVAIL-04 | SIGTERM MUST drain in-flight requests within 10s before exit | Behavioral | IT |
+| ID | Requirement | Verify |
+|---|---|---|
+| NFR-REL-01 | Process is stateless; restart restores full function; only unflushed audit (100 ms window) can be lost | IT |
+| NFR-REL-02 | Pool reconnect with exponential backoff capped at 30 s | IT |
+| NFR-REL-03 | Audit destination outage does not affect query success | IT |
+| NFR-REL-04 | Errored connections are destroyed, never reused | IT |
 
-### NFR-COMPAT: Platform compatibility
+### NFR-COMPAT
 
-| ID | Requirement | Target | Verify |
-|---|---|---|---|
-| NFR-COMPAT-01 | Node.js runtime | 20 LTS minimum | UT (engines field) |
-| NFR-COMPAT-02 | Operating systems | macOS Sonoma+, Ubuntu 22.04+, Windows 11 | E2E, MAN |
-| NFR-COMPAT-03 | Postgres versions | 13, 14, 15, 16 | IT matrix |
-| NFR-COMPAT-04 | MCP protocol version | Latest stable + immediately prior version | IT matrix |
-| NFR-COMPAT-05 | Distribution channels | npm, npx, Docker (GHCR), GH Releases binaries | MAN |
+| ID | Requirement | Verify |
+|---|---|---|
+| NFR-COMPAT-01 | Node `>=22.12.0`; CI on 22, 24, 26 | CI |
+| NFR-COMPAT-02 | Postgres 15, 16, 17, 18 (19 after GA and parser support) | CI matrix |
+| NFR-COMPAT-03 | macOS 14+, Ubuntu 22.04+, Windows 11 | MAN |
+| NFR-COMPAT-04 | MCP protocol 2026-07-28 and 2025-11-25 | IT |
+| NFR-COMPAT-05 | Clients: Claude Desktop, Claude Code, Cursor, VS Code, MCP Inspector | MAN |
+| NFR-COMPAT-06 | Hosted Postgres: Supabase, Neon, RDS, Cloud SQL, Azure Flexible Server (doctor and query smoke test) | MAN |
 
-### NFR-RES: Resource limits
+### NFR-RES
 
-| ID | Requirement | Target | Verify |
-|---|---|---|---|
-| NFR-RES-01 | Bundle size (npm tarball) | <5MB | BENCH |
-| NFR-RES-02 | Cold start time | <300ms to "ready for first tool call" | BENCH |
-| NFR-RES-03 | File descriptors held | pool.max + log handles + 8 baseline | AUDIT |
-| NFR-RES-04 | CPU at idle | <1% on 4 vCPU machine | BENCH |
+| ID | Requirement | Target |
+|---|---|---|
+| NFR-RES-01 | npm tarball size | < 3 MB (excluding dependencies) |
+| NFR-RES-02 | Runtime dependencies (not bundled) | `libpg-query`, `pg`, `pg-cursor` only |
+| NFR-RES-03 | Idle CPU | < 1% on 2 vCPU |
 
 ---
 
-## 4) Security Requirements
+## 4) Security requirements
 
-### SEC-INJECT: SQL injection prevention
-
-| ID | Requirement | Verify |
-|---|---|---|
-| SEC-INJECT-01 | All user-supplied SQL MUST flow through `pg-query-emscripten` AST analysis before execution | UT, AUDIT |
-| SEC-INJECT-02 | RLS values MUST flow through `set_config($1, $2, true)` parameterized; no string concatenation | UT, AUDIT |
-| SEC-INJECT-03 | AST modifications (auto-LIMIT, etc.) MUST round-trip through `deparse()`; the system MUST NEVER concatenate strings into SQL | UT, AUDIT |
-| SEC-INJECT-04 | A repo-level lint rule MUST forbid string concatenation patterns matching SQL-shaped templates | AUDIT (CI) |
-| SEC-INJECT-05 | Variable names in `set_config` MUST be regex-validated at config-load time | UT |
-
-### SEC-ESCAPE: Escaping and isolation
+### SEC-INJECT
 
 | ID | Requirement | Verify |
 |---|---|---|
-| SEC-ESCAPE-01 | Every query MUST run in its own transaction; SET LOCAL state MUST NOT leak across requests | IT |
-| SEC-ESCAPE-02 | Connection pool MUST NOT reuse a connection with uncommitted session state | IT |
-| SEC-ESCAPE-03 | A connection pooler in front of pgbridge MUST be documented as unsupported (statement-pooling mode breaks SET LOCAL) | DOC |
-| SEC-ESCAPE-04 | Multi-tenant alternation test (100 queries, tenant A vs B) MUST show zero cross-tenant rows | IT |
+| SEC-INJECT-01 | All agent SQL passes the safety pipeline before any database call | UT, AUDIT |
+| SEC-INJECT-02 | Values (RLS, budgets, audit inserts) are always bound parameters | UT, AUDIT |
+| SEC-INJECT-03 | Lint rule `no-sql-string-building` enabled with zero violations outside documented exceptions | AUDIT (CI) |
+| SEC-INJECT-04 | Table names from tool arguments are resolved against the snapshot and emitted only through AST `RangeVar` nodes | UT |
 
-### SEC-DEFAULT: Safe defaults
-
-| ID | Requirement | Verify |
-|---|---|---|
-| SEC-DEFAULT-01 | Default mode MUST be `read-only` | UT |
-| SEC-DEFAULT-02 | Default `audit.destination` MUST be a real destination (file), not "off" | UT |
-| SEC-DEFAULT-03 | `scoped-write` with no per-table allow-list MUST refuse startup | UT |
-| SEC-DEFAULT-04 | Default `redact_fields` MUST include: password, password_hash, fein, ssn, api_key, token, credit_card | UT |
-| SEC-DEFAULT-05 | Default `statement_timeout_ms` MUST be 5000 (never unlimited) | UT |
-| SEC-DEFAULT-06 | Default pool `max` MUST be 20 (bounded) | UT |
-| SEC-DEFAULT-07 | Telemetry MUST be off by default; opt-in only | UT |
-
-### SEC-AUDIT: Audit integrity
+### SEC-ISOLATION
 
 | ID | Requirement | Verify |
 |---|---|---|
-| SEC-AUDIT-01 | Refusals MUST be logged at the same severity as successes | UT |
-| SEC-AUDIT-02 | Audit emission MUST occur even on error path | IT |
-| SEC-AUDIT-03 | Audit MUST never block on destination unavailability; CRITICAL alarm to stderr instead | IT |
-| SEC-AUDIT-04 | Postgres audit destination MUST be a separate connection from query-execution pool (avoids self-deadlock) | AUDIT, IT |
+| SEC-ISO-01 | One transaction per tool call; transaction-local settings only | IT |
+| SEC-ISO-02 | Agent SQL cannot change session state (`SET`, `set_config`, `RESET`, `DISCARD` refused) | CO |
+| SEC-ISO-03 | Docs state that statement-mode poolers in front of pgmoat are unsupported | DOC |
 
-### SEC-SUPPLY: Supply chain
-
-| ID | Requirement | Verify |
-|---|---|---|
-| SEC-SUPPLY-01 | All dependencies MUST be pinned via lockfile | AUDIT |
-| SEC-SUPPLY-02 | CI MUST run CodeQL, Snyk, npm audit, TruffleHog secret scan on every PR | AUDIT (CI) |
-| SEC-SUPPLY-03 | Dependency licenses MUST be MIT, Apache 2.0, BSD, or ISC; copyleft refused | AUDIT (CI) |
-| SEC-SUPPLY-04 | Release artifacts MUST be built via GH Actions, not local machines | AUDIT |
-| SEC-SUPPLY-05 | Docker images MUST run as non-root (UID 1000) | AUDIT |
-| SEC-SUPPLY-06 | Pre-built binaries MUST be code-signed on macOS (Apple notarization v1.1) | MAN |
-
-### SEC-DISCLOSE: Disclosure
+### SEC-DEFAULT
 
 | ID | Requirement | Verify |
 |---|---|---|
-| SEC-DISCLOSE-01 | `SECURITY.md` MUST publish `security@pgbridge.dev`, PGP key, 90-day disclosure window | DOC |
-| SEC-DISCLOSE-02 | First-time-to-acknowledge a security report MUST be <72h | MAN |
-| SEC-DISCLOSE-03 | Critical-severity CVEs MUST be patched within 7 days of confirmation | MAN |
-| SEC-DISCLOSE-04 | CVE filing MUST occur via GitHub Security Advisories | MAN |
+| SEC-DEFAULT-01 | Default mode `read-only`; `scoped-write` refused in v1.0 | UT |
+| SEC-DEFAULT-02 | Default audit destination `file` | UT |
+| SEC-DEFAULT-03 | Default HTTP bind 127.0.0.1 | UT |
+| SEC-DEFAULT-04 | Default `allow_catalog_queries: false`, `trust_request_meta: false` | UT |
+| SEC-DEFAULT-05 | Telemetry off by default | UT |
+| SEC-DEFAULT-06 | `doctor.on_start: enforce` when a config file exists | UT |
+
+### SEC-AUTH
+
+| ID | Requirement | Verify |
+|---|---|---|
+| SEC-AUTH-01 | Audience must match the canonical URL; mismatched tokens rejected | IT |
+| SEC-AUTH-02 | Algorithms restricted to an allow-list; `none` never accepted | UT |
+| SEC-AUTH-03 | Bearer tokens accepted only in the `Authorization` header | UT |
+| SEC-AUTH-04 | JWKS fetched over HTTPS with caching and cooldown | UT |
+
+### SEC-AUDIT
+
+| ID | Requirement | Verify |
+|---|---|---|
+| SEC-AUDIT-01 | Refusals and errors logged like successes | UT |
+| SEC-AUDIT-02 | Separate audit pool and recommended append-only role | DOC, IT |
+| SEC-AUDIT-03 | Chain covers stored (redacted) content | UT |
+
+### SEC-SUPPLY
+
+| ID | Requirement | Verify |
+|---|---|---|
+| SEC-SUPPLY-01 | Lockfile committed; `pnpm install --frozen-lockfile` in CI | CI |
+| SEC-SUPPLY-02 | CodeQL, dependency review, and secret scanning on every PR | CI |
+| SEC-SUPPLY-03 | Dependency licenses limited to MIT, Apache-2.0, BSD, ISC | CI |
+| SEC-SUPPLY-04 | Releases built only in GitHub Actions with npm provenance | CI |
+| SEC-SUPPLY-05 | Docker image runs as non-root | MAN |
+| SEC-SUPPLY-06 | MCPB bundle signed with `mcpb sign` | MAN |
+
+### SEC-DISCLOSE
+
+| ID | Requirement | Verify |
+|---|---|---|
+| SEC-DISCLOSE-01 | SECURITY.md lists security@kitalonlabs.com, PGP key, 90-day window | DOC |
+| SEC-DISCLOSE-02 | Acknowledge reports within 72 h | MAN |
+| SEC-DISCLOSE-03 | Patch critical issues within 72 h of confirmation, high within 7 days | MAN |
+| SEC-DISCLOSE-04 | Advisories and CVEs via GitHub Security Advisories | MAN |
 
 ---
 
-## 5) Compliance Requirements
+## 5) Compliance-supporting requirements
 
 | ID | Requirement | Verify |
 |---|---|---|
-| COMP-SOC2-01 | Audit log content MUST be sufficient to answer "what queries did the agent run, on whose behalf, with what result" for any 90-day window | DOC, IT |
-| COMP-SOC2-02 | Audit retention MUST be configurable per `retain_days` | UT |
-| COMP-SOC2-03 | `SECURITY.md` MUST document encryption-at-rest expectations for audit destinations (operator responsibility) | DOC |
-| COMP-GDPR-01 | Redaction MUST be applied to PII fields in both params and SQL literal values when `redact_in_sql: true` | UT |
-| COMP-GDPR-02 | Telemetry payload MUST contain no PII when enabled; documented schema | DOC |
-| COMP-HIPAA-01 | Sensitive column flagging (`sensitive: high`, `hidden: true`) MUST be expressible and enforced | UT |
-| COMP-PCI-01 | Default `redact_fields` MUST include `credit_card` and `card_number` | UT |
-| COMP-DC-01 | Coordinated disclosure process MUST be published and followed | DOC, MAN |
+| COMP-01 | Audit answers who (principal), what (tool, SQL), for whom (RLS context), when, and outcome for any period retained | DOC, IT |
+| COMP-02 | Integrity evidence via `audit verify` exportable with query results | IT |
+| COMP-03 | Configurable retention for file audit; documented retention recipes for Postgres | DOC |
+| COMP-04 | PII redaction defaults cover passwords, secrets, tokens, SSN, card numbers | UT |
+| COMP-05 | Hidden and sensitive column controls documented for HIPAA and PCI scoping conversations (pgmoat makes no certification claim) | DOC |
 
 ---
 
-## 6) Interface Requirements
-
-### IR-MCP: MCP protocol surface
+## 6) Interface requirements
 
 | ID | Requirement | Verify |
 |---|---|---|
-| IR-MCP-01 | Transport MUST be stdio in v1; HTTP/SSE deferred to v1.1+ | UT |
-| IR-MCP-02 | Tool input schemas MUST be JSON Schema draft-07 compliant | UT |
-| IR-MCP-03 | Tool responses MUST include `_meta` with at minimum `request_id` | UT |
-| IR-MCP-04 | Error responses MUST set `isError: true` and include `_meta.error_code: "PGB-XXX"` | UT |
-| IR-MCP-05 | `_meta.rls_context` MUST be read from request when present | IT |
-
-### IR-CLI: CLI surface
-
-| ID | Requirement | Verify |
-|---|---|---|
-| IR-CLI-01 | Commands: `init`, `start`, `validate`, `audit`, `schema-export`, `version`, `--help` | UT |
-| IR-CLI-02 | Human output MUST be the default; `--json` flag MUST switch to NDJSON | UT |
-| IR-CLI-03 | Exit codes: 0 success, 1 user error, 2 system error, 3 config error, 64+ reserved | UT |
-| IR-CLI-04 | Color output MUST honor `NO_COLOR` env var | UT |
-| IR-CLI-05 | All errors MUST end with `Learn more: pgbridge.dev/docs/error-codes#PGB-XXX` | UT |
-
-### IR-CONFIG: Config file surface
-
-| ID | Requirement | Verify |
-|---|---|---|
-| IR-CONFIG-01 | Config file format MUST be YAML 1.2 | UT |
-| IR-CONFIG-02 | Schema version MUST be declared via top-level `version: 1` | UT |
-| IR-CONFIG-03 | Validation errors MUST include line number, column, and the field path | UT |
-| IR-CONFIG-04 | All field defaults MUST be documented in `pgbridge.dev/docs/config` | DOC |
-
-### IR-AUDIT: Audit log surface
-
-| ID | Requirement | Verify |
-|---|---|---|
-| IR-AUDIT-01 | NDJSON format: one JSON object per line, UTF-8 | UT |
-| IR-AUDIT-02 | All timestamps MUST be ISO 8601 UTC with millisecond precision | UT |
-| IR-AUDIT-03 | Identifiers MUST be ULIDs (sortable, URL-safe) | UT |
-| IR-AUDIT-04 | Postgres destination table schema MUST be stable; column additions only, never renames or drops in minor versions | AUDIT |
+| IR-MCP-01 | stdio (v1.0 P0) and Streamable HTTP (v1.0 P1); no HTTP+SSE | IT |
+| IR-MCP-02 | Schemas are JSON Schema 2020-12 (SDK converts Zod) | UT |
+| IR-MCP-03 | Custom `_meta` keys use prefix `com.kitalonlabs.pgmoat/` | UT |
+| IR-CLI-01 | Human output default; `--json` NDJSON; `NO_COLOR` honored | UT |
+| IR-CONFIG-01 | YAML 1.2; `version: 1`; validation errors include path, line, column | UT |
+| IR-AUDIT-01 | NDJSON one object per line, UTF-8, snake_case | UT |
+| IR-AUDIT-02 | Timestamps ISO 8601 UTC with milliseconds; IDs ULID | UT |
+| IR-AUDIT-03 | `pgmoat.audit` schema changes are additive within 1.x | AUDIT |
 
 ---
 
 ## 7) Constraints
 
-| ID | Constraint | Rationale |
+| ID | Constraint |
+|---|---|
+| CON-01 | TypeScript on Node; MIT license |
+| CON-02 | Postgres only; one database per process |
+| CON-03 | Parser grammar is Postgres 18 until libpg-query ships 19 |
+| CON-04 | pgmoat is an OAuth resource server only, never an authorization server |
+| CON-05 | No telemetry without explicit opt-in |
+
+---
+
+## 8) Quality attributes
+
+| ID | Attribute | Target |
 |---|---|---|
-| CON-01 | Node.js 20 LTS minimum | LTS through 2026; matches MCP SDK ecosystem |
-| CON-02 | Postgres 13 minimum | RLS + `set_config` semantics stable from 12; we add a margin |
-| CON-03 | Single-DB connection per pgbridge instance | Multi-DB out of scope for v1; documented in PRD non-goals |
-| CON-04 | Stdio MCP transport only in v1 | HTTP/SSE deferred; matches Claude Desktop dominant pattern |
-| CON-05 | TypeScript implementation only | Per Tech Arch §1 rationale |
-| CON-06 | MIT license | Project positioning per PRD; non-negotiable |
+| QA-01 | Coverage | 85% lines overall, 90% lines on `packages/core/src/safety`, enforced in CI |
+| QA-02 | Type safety | `strict: true`, `noUncheckedIndexedAccess: true`, no `any` in `safety/` |
+| QA-03 | Lint | Zero warnings |
+| QA-04 | Docs | Every error code and config field documented (CI check) |
+| QA-05 | Examples | Five runnable examples with READMEs |
+| QA-06 | Issue response | < 24 h first 30 days post-launch |
 
 ---
 
-## 8) Quality Attributes
-
-| ID | Attribute | Target | Verify |
-|---|---|---|---|
-| QA-01 | Test coverage | ≥85% lines, ≥80% branches | CI gate |
-| QA-02 | TypeScript strict mode | `strict: true`, no implicit any | UT (tsc) |
-| QA-03 | Lint clean | ESLint with security plugin, zero warnings | CI gate |
-| QA-04 | Public API stability post-1.0 | SemVer strict; breaking changes only in majors | AUDIT |
-| QA-05 | Issue triage SLA | <24h first response in first 30 days post-launch | MAN |
-| QA-06 | PR review SLA | <48h first review | MAN |
-| QA-07 | Documentation coverage | Every error code documented; every config field documented | DOC |
-| QA-08 | Example coverage | 5 reference example projects in `/examples` | DOC, MAN |
-
----
-
-## 9) Acceptance and verification matrix
-
-The launch (M3, 2026-05-26) ships when:
+## 9) Ship gate (v1.0, 2026-12-08)
 
 | Gate | Criterion | Verify |
 |---|---|---|
-| G1 | 100% of P0 requirements pass their verification method | CI + MAN review |
-| G2 | 0 P0 bugs open; ≤3 P1 bugs open | GH issue audit |
-| G3 | Test coverage ≥85% lines | CI gate |
-| G4 | Benchmark suite passes all NFR-PERF targets | CI bench run |
-| G5 | README quickstart runs cleanly for 3 fresh external testers | MAN |
-| G6 | 5 example projects shipped under `/examples` with their own READMEs | MAN |
-| G7 | `SECURITY.md` published with PGP key + disclosure email | MAN |
-| G8 | npm + GHCR + GH Releases artifacts published | MAN |
-| G9 | `pgbridge.dev` live with quickstart, config reference, error codes, security | MAN |
-| G10 | Compatibility verified on macOS Sonoma, Ubuntu 22.04, Windows 11 | MAN |
+| G1 | All P0 requirements pass | CI + review |
+| G2 | P1 requirements pass or have signed slip notes | Review |
+| G3 | Corpus 100% on Postgres 15 to 18 | CI |
+| G4 | Coverage gates met | CI |
+| G5 | NFR-PERF targets met | Bench |
+| G6 | 0 open P0 bugs, at most 3 P1 | Issues |
+| G7 | Quickstart verified by 3 external testers in under 5 minutes | MAN |
+| G8 | Doctor validated on vanilla, Supabase, Neon, RDS | MAN |
+| G9 | npm, GHCR, MCPB, MCP Registry published | MAN |
+| G10 | Docs live: quickstart, migration, config, safety, security, errors | MAN |
 
 ---
 
-## 10) Out of scope (v1)
+## 10) Traceability
 
-Restates PRD non-goals for completeness and traceability:
-
-- Other databases (MySQL, MSSQL, MongoDB, ClickHouse).
-- Graphical query builder, admin panel.
-- Query optimizer, index advisor.
-- Replication, CDC.
-- Managed cloud service (deferred to v1.5).
-- Custom DSL over SQL.
-- LLM eval, agent harness, prompt management.
-
-Any requirement matching these is rejected from v1 with a pointer to the relevant non-goal.
-
----
-
-## 11) Open issues
-
-| ID | Question | Owner | Due |
-|---|---|---|---|
-| TRD-OI-01 | Should `redact_in_sql` default to true or false? Argument for true: safer. Argument for false: surprising auto-mutation of log content. | Sowad | 2026-05-15 |
-| TRD-OI-02 | Do we ship a `--unsafe-allow-strings` escape hatch for advanced operators, or refuse all string concatenation paths? | Sowad | 2026-05-15 |
-| TRD-OI-03 | Should `pgbridge audit prune` be a no-op on Postgres destination (operator's responsibility) or actively delete rows older than retention? | Sowad | 2026-05-20 |
-| TRD-OI-04 | Minimum Postgres version: 13 (covers most installs) or 14 (better default RLS UX)? | Sowad | 2026-05-12 |
-| TRD-OI-05 | Should `mode: scoped-write` be allowed in v1.0, or held to v1.1 to reduce surface? | Sowad | 2026-05-13 |
-
----
-
-## 12) Requirement traceability index
-
-Use this when reviewing a PR to confirm it touches the right requirement IDs. Format: `<Feature Spec section>` → `<Requirement IDs>`.
-
-| Feature Spec | TRD requirements |
+| Feature | Requirements |
 |---|---|
-| F1 init wizard | FR-CLI-01, FR-CLI-02, FR-CONFIG-04 |
-| F2 yaml config | FR-CONFIG-01..06, IR-CONFIG-01..04 |
-| F3 MCP protocol | FR-PROTO-01..08, IR-MCP-01..05 |
-| F4 SQL safety | FR-READ-01..08, SEC-INJECT-01,03,04 |
-| F5 scoped-write | FR-WRITE-01..08 |
-| F6 schema discovery | FR-SCHEMA-01..08 |
-| F7 budgets | FR-BUDGET-01..08, NFR-PERF-01..05 |
-| F8 RLS | FR-RLS-01..06, SEC-INJECT-02,05, SEC-ESCAPE-01..04 |
-| F9 audit | FR-AUDIT-01..08, SEC-AUDIT-01..04, COMP-SOC2-01..03 |
-| F10 query tool | FR-PROTO-04, FR-BUDGET-01..06 |
-| F11 explain | FR-BUDGET-07 |
-| F12 sample_table | FR-SCHEMA-03 (sensitivity masking) |
-| F13 distribution | NFR-COMPAT-01..05, SEC-SUPPLY-01..06 |
-| F14 docs site | QA-07, IR-CLI-05 |
-| F15 community | SEC-DISCLOSE-01..04, QA-05, QA-06 |
+| F1 Zero-config | FR-ZERO-01..04, FR-PROTO-11 |
+| F2 init | FR-CLI-02, FR-CLI-03 |
+| F3 Config | IR-CONFIG-01, SEC-DEFAULT-* |
+| F4 Stdio server | FR-PROTO-01..12 |
+| F5 Safety | FR-READ-01..12, FR-REWRITE-01..04, SEC-INJECT-*, SEC-ISO-02 |
+| F6 Policy | FR-POLICY-01..09 |
+| F7 Discovery | FR-SCHEMA-01..07 |
+| F8 Budgets | FR-BUDGET-01..09 |
+| F9 RLS | FR-RLS-01..07 |
+| F10 Audit | FR-AUDIT-01..10, SEC-AUDIT-*, COMP-01..04 |
+| F11 to F13 Tools | FR-PROTO-04..05, FR-OUTPUT-* |
+| F14 Doctor | FR-DOCTOR-01..04 |
+| F15 HTTP | FR-AUTH-01..09, SEC-AUTH-* |
+| F16 Output | FR-OUTPUT-01..05 |
+| F17 CLI | FR-CLI-01..06 |
+| F18 Corpus | FR-CORPUS-01..04 |
+| F19 Distribution | FR-DIST-01..05, SEC-SUPPLY-* |
+| F22 Writes | FR-WRITE-01..03 |
 
-Any PR claiming to implement feature F4 should touch tests for the FR-READ family. Any PR that adds a new error code (PGB-XXX) MUST update both this TRD and the docs site error-codes page.
+Every pull request names the TRD IDs it implements or affects in its description. Adding an error code updates Backend Schema 05 section 4, `errors.ts`, and the docs page in the same PR.
