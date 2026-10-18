@@ -1,6 +1,11 @@
 packages:
   - 'packages/*'
 
+allowBuilds:
+  cpu-features: true
+  protobufjs: true
+  ssh2: true
+
 overrides:
   '@typescript-eslint/typescript-estree>typescript': '5.9.3'
   '@typescript-eslint/parser>typescript': '5.9.3'

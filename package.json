@@ -14,7 +14,7 @@
     "test": "vitest run --project unit",
     "test:corpus": "vitest run --project corpus",
     "test:corpus:db": "echo 'test:corpus:db placeholder' && exit 0",
-    "test:integration": "echo 'test:integration placeholder' && exit 0",
+    "test:integration": "vitest run --project integration",
     "coverage": "vitest run --coverage",
     "bench": "vitest run --project bench",
     "build": "echo 'build placeholder' && exit 0",
