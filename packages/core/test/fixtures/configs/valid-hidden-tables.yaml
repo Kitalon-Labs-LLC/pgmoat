@@ -1,0 +1,9 @@
+# expect: valid
+version: 1
+server:
+  name: hidden-tbl
+connection:
+  url: postgresql://localhost/app
+tables:
+  internal_secrets:
+    hidden: true

@@ -1,0 +1,6 @@
+# expect: PGM-109
+version: 1
+server:
+  name: -leading-dash
+connection:
+  url: postgresql://localhost/app

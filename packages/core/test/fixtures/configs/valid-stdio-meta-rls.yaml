@@ -1,0 +1,11 @@
+# expect: valid
+version: 1
+server:
+  name: local-agent
+transport: stdio
+connection:
+  url: postgresql://localhost/app
+rls:
+  trust_request_meta: true
+  session_variables:
+    app.tenant_id: meta.tenant_id

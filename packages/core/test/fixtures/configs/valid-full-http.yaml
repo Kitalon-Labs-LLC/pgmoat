@@ -1,0 +1,41 @@
+# expect: valid
+version: 1
+server:
+  name: acme-prod
+  description: Acme production database proxy
+transport: http
+http:
+  host: 127.0.0.1
+  port: 8787
+  path: /mcp
+  public_url: https://mcp.acme.internal
+  allowed_hosts: [mcp.acme.internal]
+  allowed_origins: [https://claude.ai]
+auth:
+  mode: oauth
+  issuer: https://auth.acme.internal
+  audience: https://mcp.acme.internal
+  jwks_url: https://auth.acme.internal/.well-known/jwks.json
+connection:
+  url: postgresql://pgmoat_reader:secret@db.acme.internal:5432/app
+  schemas: [public, analytics]
+  pool:
+    min: 2
+    max: 20
+    acquire_timeout_ms: 5000
+budgets:
+  max_rows: 500
+  max_query_ms: 10000
+rls:
+  required: true
+  session_variables:
+    app.tenant_id: token.tenant_id
+policy:
+  allow_catalog_queries: false
+  allowed_functions: [public.business_days]
+audit:
+  destination: postgres
+  postgres:
+    url: postgresql://pgmoat_audit:secret@db.acme.internal:5432/app
+    schema: pgmoat
+    table: audit

@@ -1,0 +1,9 @@
+# expect: PGM-111
+version: 1
+server:
+  name: stdout-stdio
+transport: stdio
+connection:
+  url: postgresql://localhost/app
+audit:
+  destination: stdout

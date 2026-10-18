@@ -1,0 +1,6 @@
+# expect: valid
+version: 1
+server:
+  name: default-interp
+connection:
+  url: postgresql://${MISSING_USER:-default_user}@localhost/app

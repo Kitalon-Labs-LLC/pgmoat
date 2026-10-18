@@ -1,0 +1,11 @@
+# expect: PGM-112
+version: 1
+server:
+  name: meta-http
+transport: http
+connection:
+  url: postgresql://localhost/app
+rls:
+  trust_request_meta: true
+  session_variables:
+    app.tenant: meta.tenant_id

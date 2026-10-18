@@ -1,0 +1,11 @@
+# expect: valid
+version: 1
+server:
+  name: ipv6-noauth
+transport: http
+http:
+  host: "::1"
+auth:
+  mode: none
+connection:
+  url: postgresql://localhost/app

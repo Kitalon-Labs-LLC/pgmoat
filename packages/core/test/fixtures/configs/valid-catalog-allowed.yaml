@@ -1,0 +1,8 @@
+# expect: valid
+version: 1
+server:
+  name: catalog-server
+connection:
+  url: postgresql://localhost/app
+policy:
+  allow_catalog_queries: true

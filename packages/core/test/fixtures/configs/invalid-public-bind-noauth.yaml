@@ -1,0 +1,11 @@
+# expect: PGM-114
+version: 1
+server:
+  name: public-noauth
+transport: http
+http:
+  host: 0.0.0.0
+auth:
+  mode: none
+connection:
+  url: postgresql://localhost/app

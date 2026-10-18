@@ -1,0 +1,11 @@
+# expect: valid
+version: 1
+server:
+  name: custom-budgets
+connection:
+  url: postgresql://localhost/app
+budgets:
+  max_rows: 1000
+  max_query_ms: 15000
+  max_columns: 100
+  max_payload_bytes: 131072

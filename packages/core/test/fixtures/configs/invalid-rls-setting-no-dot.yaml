@@ -1,0 +1,9 @@
+# expect: PGM-109
+version: 1
+server:
+  name: bad-rls-key
+connection:
+  url: postgresql://localhost/app
+rls:
+  session_variables:
+    tenant_id: static:abc

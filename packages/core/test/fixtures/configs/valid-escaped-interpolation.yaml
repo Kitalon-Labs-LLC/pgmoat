@@ -1,0 +1,7 @@
+# expect: valid
+version: 1
+server:
+  name: escaped-interp
+  description: Template has $${LITERAL_VAR}
+connection:
+  url: postgresql://localhost/app

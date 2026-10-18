@@ -1,0 +1,6 @@
+# expect: PGM-109
+version: 1
+server:
+  name: BAD_NAME
+connection:
+  url: postgresql://localhost/app

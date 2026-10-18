@@ -1,0 +1,6 @@
+# expect: valid
+version: 1
+server:
+  name: pgmoat
+connection:
+  url: postgresql://localhost/db

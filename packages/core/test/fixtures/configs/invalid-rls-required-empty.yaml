@@ -1,0 +1,9 @@
+# expect: PGM-105
+version: 1
+server:
+  name: rls-empty
+connection:
+  url: postgresql://localhost/app
+rls:
+  required: true
+  session_variables: {}

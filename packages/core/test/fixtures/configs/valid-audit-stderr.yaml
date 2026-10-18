@@ -1,0 +1,8 @@
+# expect: valid
+version: 1
+server:
+  name: stderr-server
+connection:
+  url: postgresql://localhost/app
+audit:
+  destination: stderr

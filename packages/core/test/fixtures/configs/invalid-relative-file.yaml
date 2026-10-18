@@ -1,0 +1,6 @@
+# expect: PGM-108
+version: 1
+server:
+  name: rel-file
+connection:
+  url: postgresql://localhost/${file:relative/path/to/file}

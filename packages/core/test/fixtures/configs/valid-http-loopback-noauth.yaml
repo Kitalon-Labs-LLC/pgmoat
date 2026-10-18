@@ -1,0 +1,11 @@
+# expect: valid
+version: 1
+server:
+  name: loopback-noauth
+transport: http
+http:
+  host: 127.0.0.1
+auth:
+  mode: none
+connection:
+  url: postgresql://localhost/app
