@@ -32,3 +32,4 @@ export const corpusPolicyIndex: ExtendedPolicyIndex = createPolicyIndex({
     'public.events': ['id', 'event_type', 'payload', 'created_at'],
   },
 });
+

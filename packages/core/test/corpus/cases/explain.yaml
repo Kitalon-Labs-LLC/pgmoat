@@ -64,3 +64,4 @@
   sql: "EXPLAIN (FORMAT JSON, COSTS true) SELECT id FROM users"
   expect:
     allowed: true
+

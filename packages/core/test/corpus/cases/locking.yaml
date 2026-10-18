@@ -60,3 +60,4 @@
   expect:
     refused: PGM-202
   note: "Row locking inside subquery is forbidden in read-only mode"
+

@@ -263,3 +263,4 @@
   expect:
     refused: PGM-201
   note: "Explicit table locking is forbidden in read-only mode"
+

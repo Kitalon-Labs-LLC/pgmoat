@@ -20,6 +20,18 @@ export default defineConfig({
       },
       {
         test: {
+          name: 'property',
+          include: ['packages/core/test/property/**/*.test.ts'],
+        },
+      },
+      {
+        test: {
+          name: 'bench',
+          include: ['packages/core/bench/**/*.bench.ts'],
+        },
+      },
+      {
+        test: {
           name: 'integration',
           include: ['packages/core/test/integration/**/*.test.ts'],
           testTimeout: 60000,

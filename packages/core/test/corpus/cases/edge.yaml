@@ -99,3 +99,4 @@
   sql: "SELECT id, 'escape '' quotes' AS val FROM users"
   expect:
     allowed: true
+

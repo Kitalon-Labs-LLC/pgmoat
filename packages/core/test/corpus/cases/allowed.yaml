@@ -393,3 +393,4 @@
   sql: "SELECT id FROM users ORDER BY created_at DESC, id ASC"
   expect:
     allowed: true
+

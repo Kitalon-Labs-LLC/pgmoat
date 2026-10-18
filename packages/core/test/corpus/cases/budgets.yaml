@@ -74,3 +74,4 @@
   sql: "SELECT id FROM orders OFFSET 1000"
   expect:
     allowed: true
+

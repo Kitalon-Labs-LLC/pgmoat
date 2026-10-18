@@ -84,3 +84,4 @@
   sql: "WITH outer_c AS (WITH inner_c AS (SELECT id FROM users) SELECT id FROM inner_c) SELECT * FROM outer_c"
   expect:
     allowed: true
+

@@ -109,3 +109,4 @@
   expect:
     refused: PGM-205
   note: "dblink_exec executes writes via remote dblink connection"
+

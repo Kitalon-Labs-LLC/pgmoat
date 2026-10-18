@@ -90,3 +90,4 @@ describe('Constant-stripped SQL fingerprint (P2.8)', () => {
     expect(fpExp1).toBe(fpExp2);
   });
 });
+
