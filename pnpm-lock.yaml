@@ -214,6 +214,9 @@ importers:
       libpg-query:
         specifier: ^18.1.5
         version: 18.1.5
+      pgsql-deparser:
+        specifier: ^18.3.12
+        version: 18.3.12
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
@@ -404,6 +407,9 @@ packages:
 
   '@oxc-project/types@0.154.0':
     resolution: {integrity: sha512-KYOUGQFlLWR+s4QMV2Q9ko38TZm7EdO87Qm7rvZLqk/webse/cDjtyxKhg/47l0byCbs/k46LT8qc4PKjAikzA==}
+
+  '@pgsql/quotes@18.2.4':
+    resolution: {integrity: sha512-muCDdPu/bM/f9d7IquBNfkMgiRPehv6vvjdhSMxXeVKwJKPX9xIscDu11ju15s7UeEXoWntE8zrSaR9wQ9wgCg==}
 
   '@pgsql/types@18.0.0':
     resolution: {integrity: sha512-jtAY4JU7jdVYZ/Vv3zlZqVP+FRWZokyCLKPPCnAApiaJAElpyyiMC3HRiquBu29kSrVs+rkqZD50SUIb/zyEGw==}
@@ -981,6 +987,9 @@ packages:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
     engines: {node: '>=8'}
 
+  pgsql-deparser@18.3.12:
+    resolution: {integrity: sha512-0azr0ffrTdcZlaWFxZxKou9t0H7PDCZfbyO+XebbPhKPJgu+j5jYN0ToyncQMZIq313JPvdYOpzHYT+FPXXRAg==}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -1426,6 +1435,8 @@ snapshots:
       yaml: 2.9.1
 
   '@oxc-project/types@0.154.0': {}
+
+  '@pgsql/quotes@18.2.4': {}
 
   '@pgsql/types@18.0.0': {}
 
@@ -1941,6 +1952,11 @@ snapshots:
   path-exists@4.0.0: {}
 
   path-key@3.1.1: {}
+
+  pgsql-deparser@18.3.12:
+    dependencies:
+      '@pgsql/quotes': 18.2.4
+      '@pgsql/types': 18.0.0
 
   picocolors@1.1.1: {}
 
