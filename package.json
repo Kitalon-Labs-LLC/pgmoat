@@ -1,0 +1,29 @@
+{
+  "name": "pgmoat-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "lint": "echo 'lint placeholder' && exit 0",
+    "typecheck": "tsc -b",
+    "test": "vitest run --project unit",
+    "test:corpus": "echo 'test:corpus placeholder' && exit 0",
+    "test:corpus:db": "echo 'test:corpus:db placeholder' && exit 0",
+    "test:integration": "echo 'test:integration placeholder' && exit 0",
+    "coverage": "vitest run --coverage",
+    "bench": "echo 'bench placeholder' && exit 0",
+    "build": "echo 'build placeholder' && exit 0",
+    "check:errors": "echo 'check:errors placeholder' && exit 0",
+    "check:docs": "echo 'check:docs placeholder' && exit 0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
