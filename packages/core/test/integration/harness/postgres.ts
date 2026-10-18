@@ -29,6 +29,7 @@ const ROLE_PASSWORDS: Record<TestRole, string> = {
 
 let activeContainer: StartedPostgreSqlContainer | null = null;
 let activePgVersion: string | null = null;
+let activeStartingPromise: Promise<StartedPostgreSqlContainer> | null = null;
 
 const seedSql = readFileSync(join(__dirname, 'seed.sql'), 'utf-8');
 const rolesSql = readFileSync(join(__dirname, 'roles.sql'), 'utf-8');
@@ -48,35 +49,47 @@ export async function startPostgres(
     return activeContainer;
   }
 
-  if (activeContainer) {
-    await activeContainer.stop();
-    activeContainer = null;
-    activePgVersion = null;
+  if (activeStartingPromise && activePgVersion === targetVersion) {
+    return activeStartingPromise;
   }
 
-  const container = await new PostgreSqlContainer(`postgres:${targetVersion}`)
-    .withDatabase('testdb')
-    .withUsername('postgres')
-    .withPassword('postgres')
-    .start();
+  activeStartingPromise = (async () => {
+    if (activeContainer) {
+      await activeContainer.stop();
+      activeContainer = null;
+      activePgVersion = null;
+    }
 
-  activeContainer = container;
-  activePgVersion = targetVersion;
+    const container = await new PostgreSqlContainer(`postgres:${targetVersion}`)
+      .withDatabase('testdb')
+      .withUsername('postgres')
+      .withPassword('postgres')
+      .start();
 
-  // Execute initialization scripts as superuser
-  const superuserUrl = container.getConnectionUri();
-  const client = new pg.Client({ connectionString: superuserUrl });
-  await client.connect();
+    activeContainer = container;
+    activePgVersion = targetVersion;
+
+    // Execute initialization scripts as superuser
+    const superuserUrl = container.getConnectionUri();
+    const client = new pg.Client({ connectionString: superuserUrl });
+    await client.connect();
+
+    try {
+      await client.query(seedSql);
+      await client.query(rolesSql);
+      await client.query(rlsSql);
+    } finally {
+      await client.end();
+    }
+
+    return container;
+  })();
 
   try {
-    await client.query(seedSql);
-    await client.query(rolesSql);
-    await client.query(rlsSql);
+    return await activeStartingPromise;
   } finally {
-    await client.end();
+    activeStartingPromise = null;
   }
-
-  return container;
 }
 
 /**
