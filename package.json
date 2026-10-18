@@ -18,6 +18,7 @@
     "coverage": "vitest run --coverage",
     "bench": "echo 'bench placeholder' && exit 0",
     "build": "echo 'build placeholder' && exit 0",
+    "check:licenses": "node tools/check-licenses.mjs",
     "check:errors": "echo 'check:errors placeholder' && exit 0",
     "check:docs": "echo 'check:docs placeholder' && exit 0"
   },
