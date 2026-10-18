@@ -19,7 +19,8 @@
     "bench": "echo 'bench placeholder' && exit 0",
     "build": "echo 'build placeholder' && exit 0",
     "check:licenses": "node tools/check-licenses.mjs",
-    "check:errors": "echo 'check:errors placeholder' && exit 0",
+    "gen:errors": "node tools/gen-errors.mjs",
+    "check:errors": "node tools/gen-errors.mjs --check",
     "check:docs": "echo 'check:docs placeholder' && exit 0"
   },
   "devDependencies": {
