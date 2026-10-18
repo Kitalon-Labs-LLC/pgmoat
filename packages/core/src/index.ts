@@ -10,3 +10,4 @@ export * from './output/text.js';
 export * from './budgets/index.js';
 export * from './audit/canonical.js';
 export * from './audit/entry.js';
+export * from './audit/redact.js';
