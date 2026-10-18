@@ -1,2 +1,8 @@
 packages:
   - 'packages/*'
+
+overrides:
+  '@typescript-eslint/typescript-estree>typescript': '5.9.3'
+  '@typescript-eslint/parser>typescript': '5.9.3'
+  '@typescript-eslint/eslint-plugin>typescript': '5.9.3'
+  'typescript-eslint>typescript': '5.9.3'

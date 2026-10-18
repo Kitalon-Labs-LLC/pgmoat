@@ -1,0 +1,46 @@
+name: Bug Report
+description: File a bug report for pgmoat
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue!
+        **For security vulnerabilities, please do NOT use this form; refer to [SECURITY.md](SECURITY.md).**
+  - type: input
+    id: version
+    attributes:
+      label: pgmoat Version
+      description: What version of pgmoat are you running?
+      placeholder: "e.g. 0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: pg-version
+    attributes:
+      label: PostgreSQL Version
+      description: What version of PostgreSQL are you connecting to?
+      placeholder: "e.g. 16.2"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Steps or query to reproduce the behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
