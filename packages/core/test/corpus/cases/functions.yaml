@@ -1,0 +1,267 @@
+- id: functions-001
+  group: functions
+  sql: "SELECT pg_sleep(1)"
+  expect:
+    refused: PGM-205
+  note: "pg_sleep causes denial of service by pausing backend execution"
+
+- id: functions-002
+  group: functions
+  sql: "SELECT pg_catalog.pg_sleep(1)"
+  expect:
+    refused: PGM-205
+  note: "Schema-qualified pg_catalog.pg_sleep is never allowed"
+
+- id: functions-003
+  group: functions
+  sql: "SELECT pg_sleep_for('1 second')"
+  expect:
+    refused: PGM-205
+  note: "pg_sleep_for process delay is never allowed"
+
+- id: functions-004
+  group: functions
+  sql: "SELECT pg_sleep_until(now() + interval '1 second')"
+  expect:
+    refused: PGM-205
+  note: "pg_sleep_until process delay is never allowed"
+
+- id: functions-005
+  group: functions
+  sql: "SELECT set_config('work_mem', '1GB', false)"
+  expect:
+    refused: PGM-205
+  note: "set_config modifies server or session configuration"
+
+- id: functions-006
+  group: functions
+  sql: "SELECT pg_catalog.set_config('statement_timeout', '0', false)"
+  expect:
+    refused: PGM-205
+  note: "pg_catalog.set_config attempting to disable statement_timeout"
+
+- id: functions-007
+  group: functions
+  sql: "SELECT nextval('user_id_seq')"
+  expect:
+    refused: PGM-205
+  note: "nextval mutates sequence state"
+
+- id: functions-008
+  group: functions
+  sql: "SELECT setval('user_id_seq', 1000)"
+  expect:
+    refused: PGM-205
+  note: "setval mutates sequence state"
+
+- id: functions-009
+  group: functions
+  sql: "SELECT pg_advisory_lock(1234)"
+  expect:
+    refused: PGM-205
+  note: "pg_advisory_lock takes persistent locks across transactions"
+
+- id: functions-010
+  group: functions
+  sql: "SELECT pg_try_advisory_lock(1234)"
+  expect:
+    refused: PGM-205
+  note: "pg_try_advisory_lock mutates advisory lock state"
+
+- id: functions-011
+  group: functions
+  sql: "SELECT pg_notify('channel', 'msg')"
+  expect:
+    refused: PGM-205
+  note: "pg_notify triggers asynchronous notifications"
+
+- id: functions-012
+  group: functions
+  sql: "SELECT txid_current()"
+  expect:
+    refused: PGM-205
+  note: "txid_current assigns a transaction ID to a read-only transaction"
+
+- id: functions-013
+  group: functions
+  sql: "SELECT pg_current_xact_id()"
+  expect:
+    refused: PGM-205
+  note: "pg_current_xact_id assigns an XID"
+
+- id: functions-014
+  group: functions
+  sql: "SELECT pg_terminate_backend(1234)"
+  expect:
+    refused: PGM-205
+  note: "pg_terminate_backend terminates database connections"
+
+- id: functions-015
+  group: functions
+  sql: "SELECT pg_cancel_backend(1234)"
+  expect:
+    refused: PGM-205
+  note: "pg_cancel_backend aborts queries on other backends"
+
+- id: functions-016
+  group: functions
+  sql: "SELECT pg_reload_conf()"
+  expect:
+    refused: PGM-205
+  note: "pg_reload_conf alters server runtime configuration"
+
+- id: functions-017
+  group: functions
+  sql: "SELECT pg_rotate_logfile()"
+  expect:
+    refused: PGM-205
+  note: "pg_rotate_logfile forces log rotation on the host"
+
+- id: functions-018
+  group: functions
+  sql: "SELECT pg_switch_wal()"
+  expect:
+    refused: PGM-205
+  note: "pg_switch_wal alters WAL state"
+
+- id: functions-019
+  group: functions
+  sql: "SELECT pg_read_file('postgresql.conf')"
+  expect:
+    refused: PGM-205
+  note: "pg_read_file reads host server files"
+
+- id: functions-020
+  group: functions
+  sql: "SELECT pg_read_binary_file('server.key')"
+  expect:
+    refused: PGM-205
+  note: "pg_read_binary_file reads sensitive host server files"
+
+- id: functions-021
+  group: functions
+  sql: "SELECT * FROM pg_ls_dir('.')"
+  expect:
+    refused: PGM-205
+  note: "pg_ls_dir directory traversal in FROM clause is forbidden"
+
+- id: functions-022
+  group: functions
+  sql: "SELECT pg_ls_logdir()"
+  expect:
+    refused: PGM-205
+  note: "pg_ls_logdir inspects server log directories"
+
+- id: functions-023
+  group: functions
+  sql: "SELECT pg_ls_waldir()"
+  expect:
+    refused: PGM-205
+  note: "pg_ls_waldir inspects server WAL directories"
+
+- id: functions-024
+  group: functions
+  sql: "SELECT pg_stat_file('postgresql.conf')"
+  expect:
+    refused: PGM-205
+  note: "pg_stat_file probes host file metadata"
+
+- id: functions-025
+  group: functions
+  sql: "SELECT pg_file_write('test.txt', 'data', false)"
+  expect:
+    refused: PGM-205
+  note: "pg_file_write writes to host server filesystem"
+
+- id: functions-026
+  group: functions
+  sql: "SELECT pg_file_unlink('test.txt')"
+  expect:
+    refused: PGM-205
+  note: "pg_file_unlink deletes host server files"
+
+- id: functions-027
+  group: functions
+  sql: "SELECT id FROM users WHERE id = (SELECT length(pg_sleep(1)::text))"
+  expect:
+    refused: PGM-205
+  note: "pg_sleep hidden inside a WHERE subquery is refused"
+
+- id: functions-028
+  group: functions
+  sql: "SELECT id FROM users ORDER BY pg_sleep(1)"
+  expect:
+    refused: PGM-205
+  note: "pg_sleep inside an ORDER BY clause is refused"
+
+- id: functions-029
+  group: functions
+  sql: "SELECT abs(-42)"
+  expect:
+    allowed: true
+
+- id: functions-030
+  group: functions
+  sql: "SELECT sqrt(16), power(2, 8), round(3.14159, 2)"
+  expect:
+    allowed: true
+
+- id: functions-031
+  group: functions
+  sql: "SELECT lower('HELLO'), upper('world'), length('test')"
+  expect:
+    allowed: true
+
+- id: functions-032
+  group: functions
+  sql: "SELECT trim('  hello  '), substr('database', 1, 4)"
+  expect:
+    allowed: true
+
+- id: functions-033
+  group: functions
+  sql: "SELECT concat('a', 'b', 'c'), concat_ws('-', '2026', '10', '18')"
+  expect:
+    allowed: true
+
+- id: functions-034
+  group: functions
+  sql: "SELECT now(), current_date, current_time"
+  expect:
+    allowed: true
+
+- id: functions-035
+  group: functions
+  sql: "SELECT date_trunc('year', now()), extract(hour FROM now())"
+  expect:
+    allowed: true
+
+- id: functions-036
+  group: functions
+  sql: "SELECT json_build_object('key', 'value'), to_jsonb(123)"
+  expect:
+    allowed: true
+
+- id: functions-037
+  group: functions
+  sql: "SELECT array_length(ARRAY[1, 2, 3], 1), cardinality(ARRAY['a', 'b'])"
+  expect:
+    allowed: true
+
+- id: functions-038
+  group: functions
+  sql: "SELECT gen_random_uuid()"
+  expect:
+    allowed: true
+
+- id: functions-039
+  group: functions
+  sql: "SELECT current_user, version()"
+  expect:
+    allowed: true
+
+- id: functions-040
+  group: functions
+  sql: "SELECT current_setting('server_version_num')"
+  expect:
+    allowed: true

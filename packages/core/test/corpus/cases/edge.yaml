@@ -1,0 +1,101 @@
+- id: edge-001
+  group: edge
+  sql: ""
+  expect:
+    refused: PGM-206
+  note: "Empty string SQL input is refused with PGM-206"
+
+- id: edge-002
+  group: edge
+  sql: "    \n\t  "
+  expect:
+    refused: PGM-206
+  note: "Whitespace-only SQL input is refused with PGM-206"
+
+- id: edge-003
+  group: edge
+  sql: "-- this is just a single line comment"
+  expect:
+    refused: PGM-206
+  note: "Comment-only SQL input is refused with PGM-206"
+
+- id: edge-004
+  group: edge
+  sql: "/* multi-line\n   block comment\n   only */"
+  expect:
+    refused: PGM-206
+  note: "Block-comment-only SQL input is refused with PGM-206"
+
+- id: edge-005
+  group: edge
+  sql: "SELECT * FROM"
+  expect:
+    refused: PGM-206
+  note: "Incomplete syntax missing relation is refused with PGM-206"
+
+- id: edge-006
+  group: edge
+  sql: "SELECT 1 WHERE %%% syntax error"
+  expect:
+    refused: PGM-206
+  note: "Malformed tokens and future PG syntax not recognized by parser yield PGM-206"
+
+- id: edge-007
+  group: edge
+  sql: "SELECT id AS \"имя\" FROM users"
+  expect:
+    allowed: true
+
+- id: edge-008
+  group: edge
+  sql: "SELECT id AS \"témoin\" FROM users"
+  expect:
+    allowed: true
+
+- id: edge-009
+  group: edge
+  sql: "SELECT id AS \"日本語\" FROM users"
+  expect:
+    allowed: true
+
+- id: edge-010
+  group: edge
+  sql: "SELECT id AS \"select\", name AS \"from\", email AS \"where\" FROM users"
+  expect:
+    allowed: true
+
+- id: edge-011
+  group: edge
+  sql: "SELECT id AS \"order\", name AS \"group\" FROM users"
+  expect:
+    allowed: true
+
+- id: edge-012
+  group: edge
+  sql: "SELECT id FROM users WHERE id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)"
+  expect:
+    allowed: true
+
+- id: edge-013
+  group: edge
+  sql: "SELECT (SELECT (SELECT (SELECT (SELECT id FROM users LIMIT 1))))"
+  expect:
+    allowed: true
+
+- id: edge-014
+  group: edge
+  sql: "SELECT $tag$Hello World$tag$ AS msg"
+  expect:
+    allowed: true
+
+- id: edge-015
+  group: edge
+  sql: "SELECT $$line1\nline2$$ AS msg"
+  expect:
+    allowed: true
+
+- id: edge-016
+  group: edge
+  sql: "SELECT id, 'escape '' quotes' AS val FROM users"
+  expect:
+    allowed: true

@@ -30,7 +30,7 @@ export const CorpusExpectSchema = z.union([
 export const CorpusCaseSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
   group: CorpusGroupSchema,
-  sql: z.string().min(1),
+  sql: z.string(),
   config: z.string().optional(),
   expect: CorpusExpectSchema,
   executes: z.boolean().optional(),

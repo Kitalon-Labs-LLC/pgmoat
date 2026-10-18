@@ -55,7 +55,12 @@ describe('Corpus Lint (P2.10)', () => {
     const duplicates: string[] = [];
 
     for (const c of allCases) {
-      const normalizedSql = c.sql.trim().replace(/\s+/g, ' ');
+      const normalizedSql =
+        c.sql.length === 0
+          ? '<empty>'
+          : c.sql.trim().length === 0
+            ? `<whitespace:${c.sql}>`
+            : c.sql.trim().replace(/\s+/g, ' ');
       if (!groupSqlMap.has(c.group)) {
         groupSqlMap.set(c.group, new Set());
       }
