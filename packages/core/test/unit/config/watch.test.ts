@@ -162,4 +162,36 @@ budgets:
       }, 50);
     });
   });
+
+  it('falls back to polling when fs.watch throws', () => {
+    vi.spyOn(fs, 'watch').mockImplementation(() => {
+      throw new Error('ENOSYS');
+    });
+    const watchFileSpy = vi.spyOn(fs, 'watchFile');
+    const unwatchFileSpy = vi.spyOn(fs, 'unwatchFile');
+
+    const unsubscribe = watchConfig(
+      configFile,
+      initialConfig,
+      () => {},
+    );
+
+    expect(watchFileSpy).toHaveBeenCalledWith(
+      configFile,
+      { interval: 1000 },
+      expect.any(Function),
+    );
+
+    // Simulate watchFile callback
+    const callback = watchFileSpy.mock.calls[0]?.[2] as (curr: fs.Stats, prev: fs.Stats) => void;
+    expect(callback).toBeDefined();
+    // Same mtimeMs should do nothing
+    callback({ mtimeMs: 100 } as fs.Stats, { mtimeMs: 100 } as fs.Stats);
+    // Different mtimeMs triggers change
+    callback({ mtimeMs: 200 } as fs.Stats, { mtimeMs: 100 } as fs.Stats);
+
+    unsubscribe();
+    expect(unwatchFileSpy).toHaveBeenCalledWith(configFile);
+  });
 });
+
