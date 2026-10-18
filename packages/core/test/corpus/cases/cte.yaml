@@ -1,6 +1,7 @@
 - id: cte-001
   group: cte
   sql: "WITH del AS (DELETE FROM users RETURNING id) SELECT * FROM del"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "DELETE statement inside Common Table Expression"
@@ -8,6 +9,7 @@
 - id: cte-002
   group: cte
   sql: "WITH ins AS (INSERT INTO users (id, name) VALUES (1, 'x') RETURNING id) SELECT * FROM ins"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "INSERT statement inside Common Table Expression"
@@ -15,6 +17,7 @@
 - id: cte-003
   group: cte
   sql: "WITH upd AS (UPDATE users SET name = 'hacked' RETURNING id) SELECT * FROM upd"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "UPDATE statement inside Common Table Expression"
@@ -22,6 +25,7 @@
 - id: cte-004
   group: cte
   sql: "WITH mrg AS (MERGE INTO users u USING orders o ON u.id = o.user_id WHEN MATCHED THEN DELETE RETURNING u.id) SELECT * FROM mrg"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "MERGE statement inside Common Table Expression"
@@ -29,6 +33,7 @@
 - id: cte-005
   group: cte
   sql: "WITH outer_cte AS (WITH inner_del AS (DELETE FROM users RETURNING id) SELECT * FROM inner_del) SELECT * FROM outer_cte"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "Nested writing CTE with DELETE"
@@ -36,6 +41,7 @@
 - id: cte-006
   group: cte
   sql: "SELECT * FROM (WITH del AS (DELETE FROM users RETURNING id) SELECT * FROM del) sub"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "Writing CTE inside FROM subquery"
@@ -43,6 +49,7 @@
 - id: cte-007
   group: cte
   sql: "SELECT * FROM users WHERE id IN (WITH del AS (DELETE FROM orders RETURNING user_id) SELECT user_id FROM del)"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "Writing CTE inside IN subquery"
@@ -50,6 +57,7 @@
 - id: cte-008
   group: cte
   sql: "SELECT * FROM users WHERE EXISTS (WITH del AS (DELETE FROM orders RETURNING id) SELECT id FROM del)"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "Writing CTE inside EXISTS subquery"
@@ -57,6 +65,7 @@
 - id: cte-009
   group: cte
   sql: "SELECT 1 UNION ALL (WITH del AS (DELETE FROM users RETURNING id) SELECT id FROM del)"
+  db_blocks: true
   expect:
     refused: PGM-203
   note: "Writing CTE inside set operation UNION"
@@ -84,4 +93,3 @@
   sql: "WITH outer_c AS (WITH inner_c AS (SELECT id FROM users) SELECT id FROM inner_c) SELECT * FROM outer_c"
   expect:
     allowed: true
-

@@ -1,6 +1,7 @@
 - id: stacking-001
   group: stacking
   sql: "COMMIT; DROP SCHEMA public CASCADE"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking attempting to break out of read-only transaction and drop schema"
@@ -8,6 +9,7 @@
 - id: stacking-002
   group: stacking
   sql: "COMMIT; SET statement_timeout TO 1"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking attempting to reset statement_timeout"
@@ -15,6 +17,7 @@
 - id: stacking-003
   group: stacking
   sql: "SELECT 1; DELETE FROM users"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking appending DELETE statement after harmless query"
@@ -22,6 +25,7 @@
 - id: stacking-004
   group: stacking
   sql: "SELECT 1; SELECT 2"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking with multiple queries is rejected"
@@ -29,6 +33,7 @@
 - id: stacking-005
   group: stacking
   sql: "SELECT id FROM users;\nSELECT count(*) FROM orders"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Newline-separated statement stacking is rejected"
@@ -36,6 +41,7 @@
 - id: stacking-006
   group: stacking
   sql: "SELECT id FROM users; -- line comment\nDROP TABLE orders"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking after line comment is rejected"
@@ -43,6 +49,7 @@
 - id: stacking-007
   group: stacking
   sql: "SELECT id FROM users; /* block comment */ DROP TABLE orders"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking after block comment is rejected"
@@ -50,6 +57,7 @@
 - id: stacking-008
   group: stacking
   sql: "/* prefix comment */ SELECT 1; DROP TABLE users"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking with comment prefix is rejected"
@@ -57,6 +65,7 @@
 - id: stacking-009
   group: stacking
   sql: "SELECT id FROM users; COMMIT"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking attempting early transaction commit"
@@ -64,6 +73,7 @@
 - id: stacking-0010
   group: stacking
   sql: "SELECT id FROM users; ROLLBACK"
+  db_blocks: true
   expect:
     refused: PGM-204
   note: "Statement stacking attempting early transaction rollback"

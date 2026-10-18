@@ -1,266 +1,255 @@
 - id: statements-001
   group: statements
-  sql: "INSERT INTO users (id, name) VALUES (999, 'evil')"
+  sql: INSERT INTO users (id, name) VALUES (999, 'evil')
   expect:
     refused: PGM-201
-  note: "INSERT statement is forbidden in read-only mode"
-
+  note: INSERT statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-002
   group: statements
-  sql: "UPDATE users SET name = 'pwned' WHERE id = 1"
+  sql: UPDATE users SET name = 'pwned' WHERE id = 1
   expect:
     refused: PGM-201
-  note: "UPDATE statement is forbidden in read-only mode"
-
+  note: UPDATE statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-003
   group: statements
-  sql: "DELETE FROM users WHERE id = 1"
+  sql: DELETE FROM users WHERE id = 1
   expect:
     refused: PGM-201
-  note: "DELETE statement is forbidden in read-only mode"
-
+  note: DELETE statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-004
   group: statements
-  sql: "TRUNCATE TABLE users"
+  sql: TRUNCATE TABLE users
   expect:
     refused: PGM-201
-  note: "TRUNCATE statement is forbidden in read-only mode"
-
+  note: TRUNCATE statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-005
   group: statements
-  sql: "MERGE INTO users u USING orders o ON u.id = o.user_id WHEN MATCHED THEN DELETE"
+  sql: MERGE INTO users u USING orders o ON u.id = o.user_id WHEN MATCHED THEN
+    DELETE
   expect:
     refused: PGM-201
-  note: "MERGE statement is forbidden in read-only mode"
-
+  note: MERGE statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-006
   group: statements
-  sql: "CREATE TABLE evil_table (id int)"
+  sql: CREATE TABLE evil_table (id int)
   expect:
     refused: PGM-201
-  note: "CREATE TABLE DDL is forbidden in read-only mode"
-
+  note: CREATE TABLE DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-007
   group: statements
-  sql: "CREATE INDEX evil_idx ON users (email)"
+  sql: CREATE INDEX evil_idx ON users (email)
   expect:
     refused: PGM-201
-  note: "CREATE INDEX DDL is forbidden in read-only mode"
-
+  note: CREATE INDEX DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-008
   group: statements
-  sql: "CREATE VIEW evil_view AS SELECT 1"
+  sql: CREATE VIEW evil_view AS SELECT 1
   expect:
     refused: PGM-201
-  note: "CREATE VIEW DDL is forbidden in read-only mode"
-
+  note: CREATE VIEW DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-009
   group: statements
-  sql: "CREATE SCHEMA evil_schema"
+  sql: CREATE SCHEMA evil_schema
   expect:
     refused: PGM-201
-  note: "CREATE SCHEMA DDL is forbidden in read-only mode"
-
+  note: CREATE SCHEMA DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-010
   group: statements
-  sql: "CREATE ROLE evil_role"
+  sql: CREATE ROLE evil_role
   expect:
     refused: PGM-201
-  note: "CREATE ROLE DDL is forbidden in read-only mode"
-
+  note: CREATE ROLE DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-011
   group: statements
-  sql: "CREATE DATABASE evil_db"
+  sql: CREATE DATABASE evil_db
   expect:
     refused: PGM-201
-  note: "CREATE DATABASE DDL is forbidden in read-only mode"
-
+  note: CREATE DATABASE DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-012
   group: statements
-  sql: "CREATE FUNCTION evil_fn() RETURNS void AS 'SELECT 1;' LANGUAGE sql"
+  sql: CREATE FUNCTION evil_fn() RETURNS void AS 'SELECT 1;' LANGUAGE sql
   expect:
     refused: PGM-201
-  note: "CREATE FUNCTION DDL is forbidden in read-only mode"
-
+  note: CREATE FUNCTION DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-013
   group: statements
-  sql: "ALTER TABLE users ADD COLUMN evil int"
+  sql: ALTER TABLE users ADD COLUMN evil int
   expect:
     refused: PGM-201
-  note: "ALTER TABLE DDL is forbidden in read-only mode"
-
+  note: ALTER TABLE DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-014
   group: statements
-  sql: "ALTER ROLE current_user WITH SUPERUSER"
+  sql: ALTER ROLE current_user WITH SUPERUSER
   expect:
     refused: PGM-201
-  note: "ALTER ROLE privilege escalation is forbidden in read-only mode"
-
+  note: ALTER ROLE privilege escalation is forbidden in read-only mode
+  db_blocks: true
 - id: statements-015
   group: statements
-  sql: "ALTER SCHEMA public RENAME TO secret"
+  sql: ALTER SCHEMA public RENAME TO secret
   expect:
     refused: PGM-201
-  note: "ALTER SCHEMA DDL is forbidden in read-only mode"
-
+  note: ALTER SCHEMA DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-016
   group: statements
-  sql: "ALTER DEFAULT PRIVILEGES GRANT SELECT ON TABLES TO PUBLIC"
+  sql: ALTER DEFAULT PRIVILEGES GRANT SELECT ON TABLES TO PUBLIC
   expect:
     refused: PGM-201
-  note: "ALTER DEFAULT PRIVILEGES is forbidden in read-only mode"
-
+  note: ALTER DEFAULT PRIVILEGES is forbidden in read-only mode
+  db_blocks: true
 - id: statements-017
   group: statements
-  sql: "DROP TABLE users"
+  sql: DROP TABLE users
   expect:
     refused: PGM-201
-  note: "DROP TABLE destructive DDL is forbidden in read-only mode"
-
+  note: DROP TABLE destructive DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-018
   group: statements
-  sql: "DROP SCHEMA public CASCADE"
+  sql: DROP SCHEMA public CASCADE
   expect:
     refused: PGM-201
-  note: "DROP SCHEMA destructive DDL is forbidden in read-only mode"
-
+  note: DROP SCHEMA destructive DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-019
   group: statements
-  sql: "DROP ROLE postgres"
+  sql: DROP ROLE postgres
   expect:
     refused: PGM-201
-  note: "DROP ROLE DDL is forbidden in read-only mode"
-
+  note: DROP ROLE DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-020
   group: statements
-  sql: "DROP DATABASE postgres"
+  sql: DROP DATABASE postgres
   expect:
     refused: PGM-201
-  note: "DROP DATABASE destructive DDL is forbidden in read-only mode"
-
+  note: DROP DATABASE destructive DDL is forbidden in read-only mode
+  db_blocks: true
 - id: statements-021
   group: statements
-  sql: "GRANT ALL PRIVILEGES ON users TO PUBLIC"
+  sql: GRANT ALL PRIVILEGES ON users TO PUBLIC
   expect:
     refused: PGM-201
-  note: "GRANT statement is forbidden in read-only mode"
-
+  note: GRANT statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-022
   group: statements
-  sql: "REVOKE ALL PRIVILEGES ON users FROM PUBLIC"
+  sql: REVOKE ALL PRIVILEGES ON users FROM PUBLIC
   expect:
     refused: PGM-201
-  note: "REVOKE statement is forbidden in read-only mode"
-
+  note: REVOKE statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-023
   group: statements
-  sql: "BEGIN"
+  sql: BEGIN
   expect:
     refused: PGM-201
-  note: "Manual transaction control BEGIN is forbidden in read-only mode"
-
+  note: Manual transaction control BEGIN is forbidden in read-only mode
 - id: statements-024
   group: statements
-  sql: "COMMIT"
+  sql: COMMIT
   expect:
     refused: PGM-201
-  note: "Manual transaction control COMMIT is forbidden in read-only mode"
-
+  note: Manual transaction control COMMIT is forbidden in read-only mode
 - id: statements-025
   group: statements
-  sql: "ROLLBACK"
+  sql: ROLLBACK
   expect:
     refused: PGM-201
-  note: "Manual transaction control ROLLBACK is forbidden in read-only mode"
-
+  note: Manual transaction control ROLLBACK is forbidden in read-only mode
 - id: statements-026
   group: statements
-  sql: "SAVEPOINT sp1"
+  sql: SAVEPOINT sp1
   expect:
     refused: PGM-201
-  note: "SAVEPOINT transaction control is forbidden in read-only mode"
-
+  note: SAVEPOINT transaction control is forbidden in read-only mode
 - id: statements-027
   group: statements
-  sql: "SET work_mem = '1GB'"
+  sql: SET work_mem = '1GB'
   expect:
     refused: PGM-201
-  note: "SET statement modifying session parameters is forbidden in read-only mode"
-
+  note: SET statement modifying session parameters is forbidden in read-only mode
 - id: statements-028
   group: statements
-  sql: "RESET work_mem"
+  sql: RESET work_mem
   expect:
     refused: PGM-201
-  note: "RESET statement modifying session parameters is forbidden in read-only mode"
-
+  note: RESET statement modifying session parameters is forbidden in read-only mode
 - id: statements-029
   group: statements
-  sql: "DISCARD ALL"
+  sql: DISCARD ALL
   expect:
     refused: PGM-201
-  note: "DISCARD statement clearing session state is forbidden in read-only mode"
-
+  note: DISCARD statement clearing session state is forbidden in read-only mode
 - id: statements-030
   group: statements
-  sql: "CHECKPOINT"
+  sql: CHECKPOINT
   expect:
     refused: PGM-201
-  note: "CHECKPOINT administrative statement is forbidden in read-only mode"
-
+  note: CHECKPOINT administrative statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-031
   group: statements
-  sql: "VACUUM users"
+  sql: VACUUM users
   expect:
     refused: PGM-201
-  note: "VACUUM maintenance statement is forbidden in read-only mode"
-
+  note: VACUUM maintenance statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-032
   group: statements
-  sql: "REINDEX TABLE users"
+  sql: REINDEX TABLE users
   expect:
     refused: PGM-201
-  note: "REINDEX maintenance statement is forbidden in read-only mode"
-
+  note: REINDEX maintenance statement is forbidden in read-only mode
+  db_blocks: true
 - id: statements-033
   group: statements
-  sql: "LISTEN alert_channel"
+  sql: LISTEN alert_channel
   expect:
     refused: PGM-201
-  note: "LISTEN statement is forbidden in read-only mode"
-
+  note: LISTEN statement is forbidden in read-only mode
 - id: statements-034
   group: statements
-  sql: "NOTIFY alert_channel, 'pwned'"
+  sql: NOTIFY alert_channel, 'pwned'
   expect:
     refused: PGM-201
-  note: "NOTIFY statement is forbidden in read-only mode"
-
+  note: NOTIFY statement is forbidden in read-only mode
 - id: statements-035
   group: statements
-  sql: "CALL some_procedure()"
+  sql: CALL some_procedure()
   expect:
     refused: PGM-201
-  note: "CALL statement executing stored procedures is forbidden in read-only mode"
-
+  note: CALL statement executing stored procedures is forbidden in read-only mode
 - id: statements-036
   group: statements
-  sql: "DO $$ BEGIN NULL; END $$"
+  sql: DO $$ BEGIN NULL; END $$
   expect:
     refused: PGM-201
-  note: "DO statement executing arbitrary procedural blocks is forbidden in read-only mode"
-
+  note: DO statement executing arbitrary procedural blocks is forbidden in
+    read-only mode
 - id: statements-037
   group: statements
-  sql: "COPY users TO stdout"
+  sql: COPY users TO stdout
   expect:
     refused: PGM-201
-  note: "COPY TO stdout is forbidden in read-only mode"
-
+  note: COPY TO stdout is forbidden in read-only mode
 - id: statements-038
   group: statements
-  sql: "LOCK TABLE users IN ACCESS EXCLUSIVE MODE"
+  sql: LOCK TABLE users IN ACCESS EXCLUSIVE MODE
   expect:
     refused: PGM-201
-  note: "Explicit table locking is forbidden in read-only mode"
-
+  note: Explicit table locking is forbidden in read-only mode

@@ -13,7 +13,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run --project unit",
     "test:corpus": "vitest run --project corpus",
-    "test:corpus:db": "echo 'test:corpus:db placeholder' && exit 0",
+    "test:corpus:db": "vitest run --project corpus-db",
     "test:integration": "vitest run --project integration",
     "coverage": "vitest run --coverage",
     "bench": "vitest run --project bench",

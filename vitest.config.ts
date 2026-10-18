@@ -16,6 +16,14 @@ export default defineConfig({
         test: {
           name: 'corpus',
           include: ['packages/core/test/corpus/**/*.test.ts'],
+          exclude: ['packages/core/test/corpus/db.corpus.test.ts'],
+        },
+      },
+      {
+        test: {
+          name: 'corpus-db',
+          include: ['packages/core/test/corpus/db.corpus.test.ts'],
+          testTimeout: 60000,
         },
       },
       {
