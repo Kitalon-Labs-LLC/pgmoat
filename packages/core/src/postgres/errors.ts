@@ -102,3 +102,4 @@ export function mapPgError(
   const sanitized = sanitizeMessage(message);
   return new PgmoatError('PGM-506', sanitized, 'error');
 }
+

@@ -55,3 +55,4 @@ export async function fingerprint(
 
   return createHash('sha256').update(collapsed, 'utf8').digest('hex').slice(0, 16);
 }
+

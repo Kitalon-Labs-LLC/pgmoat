@@ -5,4 +5,4 @@ coverage
 pnpm-lock.yaml
 spec/
 *.md
-**/test/fixtures/**
+

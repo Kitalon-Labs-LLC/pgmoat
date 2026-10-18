@@ -246,3 +246,4 @@ describe('Postgres Doctor Preflight Checks (P3.6)', () => {
     expect(f707?.message).toContain('140008');
   });
 });
+

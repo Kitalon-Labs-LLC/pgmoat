@@ -134,3 +134,4 @@ INSERT INTO api_keys (id, tenant_id, token_hash, created_at) VALUES
 -- Internal Audit
 INSERT INTO internal_audit (id, event_type, payload, created_at) VALUES
   ('90000000-0000-0000-0000-000000000001', 'cluster_init', '{"node": "primary", "version": 17}'::jsonb, '2026-01-01 00:00:00Z');
+
