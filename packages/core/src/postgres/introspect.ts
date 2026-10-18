@@ -141,24 +141,43 @@ interface RawIndexRow {
   definition: string;
   columns: string[];
 }
+function isPools(obj: unknown): obj is Pools {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'query' in obj &&
+    typeof (obj as { query: unknown }).query === 'object' &&
+    (obj as { query: unknown }).query !== null &&
+    'control' in obj
+  );
+}
+
+function isPool(obj: unknown): obj is pg.Pool {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    ('totalCount' in obj || 'idleCount' in obj) &&
+    typeof (obj as pg.Pool).connect === 'function'
+  );
+}
 
 /**
  * Introspects raw catalog facts for exposed schemas inside a READ ONLY transaction with 10 s timeout.
  */
 export async function introspect(
-  source: pg.Pool | pg.ClientBase | Pools,
-  schemas: string[],
+  source: Pools | pg.Pool | pg.ClientBase,
+  schemas: string[] = ['public'],
 ): Promise<IntrospectionResult> {
   let client: pg.PoolClient | pg.ClientBase;
   let shouldRelease = false;
 
-  if ('query' in source && typeof (source as Pools).end === 'function') {
+  if (isPools(source)) {
     // Pools object
-    client = await acquire((source as Pools).query, 10000);
+    client = await acquire(source.query, 10000);
     shouldRelease = true;
-  } else if ('connect' in source && typeof (source as pg.Pool).connect === 'function') {
+  } else if (isPool(source)) {
     // pg.Pool
-    client = await acquire(source as pg.Pool, 10000);
+    client = await acquire(source, 10000);
     shouldRelease = true;
   } else {
     // Direct pg.ClientBase
