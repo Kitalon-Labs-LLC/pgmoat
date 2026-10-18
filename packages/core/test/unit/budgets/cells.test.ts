@@ -48,3 +48,4 @@ describe('applyCellBudget', () => {
     expect(res.rows[0]).toEqual({ id: 100, active: true, score: 99.5, empty: null });
   });
 });
+

@@ -58,3 +58,4 @@ export function applyColumnBudget<T extends ColumnField>(
     keptColumns: maxColumns,
   };
 }
+

@@ -1,7 +1,7 @@
-import { deparse as defaultDeparse } from 'pgsql-deparser';
+import * as libpgQuery from 'libpg-query';
+import { deparseSync } from 'pgsql-deparser';
 import type { AuditEntry } from '../types.js';
 import type { AuditConfigT } from '../config/schema.js';
-import { parseSql } from '../safety/parse.js';
 import { walk } from '../safety/walk.js';
 
 export const DEFAULT_REDACT_FIELDS = [
@@ -88,15 +88,15 @@ function redactAConst(target: Record<string, unknown>, key: string): void {
 }
 
 /**
- * Redacts secrets from an AuditEntry:
+ * Synchronously redacts secrets from an AuditEntry:
  * 1. Sensitive keys in params and rls_context
  * 2. SQL literals associated with sensitive columns
  * 3. Regular expression patterns in sql_executed and error_message
  */
-export async function redactEntry(
+export function redactEntrySync(
   entry: AuditEntry,
   auditConfig?: Partial<AuditConfigT>,
-): Promise<AuditEntry> {
+): AuditEntry {
   const redactFields = auditConfig?.redact_fields ?? DEFAULT_REDACT_FIELDS;
   const redactPatterns = auditConfig?.redact_patterns ?? DEFAULT_REDACT_PATTERNS;
   const redactInSql = auditConfig?.redact_in_sql ?? true;
@@ -118,8 +118,8 @@ export async function redactEntry(
   // 2. SQL literal redaction
   if (result.sql_executed && redactInSql) {
     try {
-      const parsed = await parseSql(result.sql_executed);
-      walk(parsed.tree, (node, type) => {
+      const parsed = libpgQuery.parseSync(result.sql_executed);
+      walk(parsed, (node, type) => {
         if (type === 'A_Expr') {
           const expr = node as {
             lexpr?: Record<string, unknown>;
@@ -144,7 +144,7 @@ export async function redactEntry(
         }
       });
 
-      result.sql_executed = await defaultDeparse(parsed.tree);
+      result.sql_executed = deparseSync(parsed);
     } catch {
       result.sql_executed = '[REDACTED: unparseable]';
     }
@@ -168,4 +168,14 @@ export async function redactEntry(
   }
 
   return result;
+}
+
+/**
+ * Async wrapper for redactEntrySync.
+ */
+export async function redactEntry(
+  entry: AuditEntry,
+  auditConfig?: Partial<AuditConfigT>,
+): Promise<AuditEntry> {
+  return redactEntrySync(entry, auditConfig);
 }

@@ -298,3 +298,4 @@ describe('renderRefusal', () => {
     expect(rendered).toBe(expected);
   });
 });
+

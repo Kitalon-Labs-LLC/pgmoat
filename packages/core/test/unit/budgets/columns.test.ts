@@ -41,3 +41,4 @@ describe('applyColumnBudget', () => {
     expect(res.rows).toEqual([]);
   });
 });
+

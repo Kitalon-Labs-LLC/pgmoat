@@ -13,3 +13,4 @@ export * from './audit/entry.js';
 export * from './audit/redact.js';
 export * from './audit/chain.js';
 export * from './audit/verify.js';
+export * from './audit/pipeline.js';
