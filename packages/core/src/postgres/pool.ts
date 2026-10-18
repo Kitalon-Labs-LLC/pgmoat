@@ -1,6 +1,7 @@
 import pg from 'pg';
 import { fail, isPgmoatError } from '../errors.js';
 import type { PgmoatConfigT } from '../config/schema.js';
+import { createPgTypeParserOverrides } from '../output/values.js';
 
 export interface Logger {
   info(message: string, ...args: unknown[]): void;
@@ -42,6 +43,7 @@ export function createQueryPool(
     idleTimeoutMillis: 30_000,
     application_name: cfg.application_name,
     statement_timeout: undefined, // set per transaction instead
+    types: createPgTypeParserOverrides(),
     ...(ssl !== undefined ? { ssl } : {}),
   });
 
