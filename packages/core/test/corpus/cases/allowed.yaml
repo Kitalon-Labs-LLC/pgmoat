@@ -27,3 +27,369 @@
   sql: "SHOW work_mem"
   expect:
     allowed: true
+
+- id: allowed-006
+  group: allowed
+  sql: "SELECT u.id, o.amount FROM users u LEFT JOIN orders o ON u.id = o.user_id"
+  expect:
+    allowed: true
+
+- id: allowed-007
+  group: allowed
+  sql: "SELECT u.id, o.amount FROM users u RIGHT JOIN orders o ON u.id = o.user_id"
+  expect:
+    allowed: true
+
+- id: allowed-008
+  group: allowed
+  sql: "SELECT u.id, o.amount FROM users u FULL JOIN orders o ON u.id = o.user_id"
+  expect:
+    allowed: true
+
+- id: allowed-009
+  group: allowed
+  sql: "SELECT u.id, c.name FROM users u CROSS JOIN customers c"
+  expect:
+    allowed: true
+
+- id: allowed-010
+  group: allowed
+  sql: "SELECT u.id, o.id AS order_id, t.id AS ticket_id FROM users u LEFT JOIN orders o ON u.id = o.user_id LEFT JOIN tickets t ON u.id = t.user_id"
+  expect:
+    allowed: true
+
+- id: allowed-011
+  group: allowed
+  sql: "SELECT u1.id, u2.name FROM users u1 JOIN users u2 ON u1.tenant_id = u2.tenant_id WHERE u1.id <> u2.id"
+  expect:
+    allowed: true
+
+- id: allowed-012
+  group: allowed
+  sql: "SELECT id FROM users WHERE email = 'alice@example.com'"
+  expect:
+    allowed: true
+
+- id: allowed-013
+  group: allowed
+  sql: "SELECT id FROM orders WHERE amount > 100.50"
+  expect:
+    allowed: true
+
+- id: allowed-014
+  group: allowed
+  sql: "SELECT id FROM orders WHERE amount >= 50 AND status = 'completed'"
+  expect:
+    allowed: true
+
+- id: allowed-015
+  group: allowed
+  sql: "SELECT id FROM tickets WHERE status = 'open' OR status = 'pending'"
+  expect:
+    allowed: true
+
+- id: allowed-016
+  group: allowed
+  sql: "SELECT id FROM users WHERE NOT (role = 'banned')"
+  expect:
+    allowed: true
+
+- id: allowed-017
+  group: allowed
+  sql: "SELECT id FROM users WHERE id IN (1, 2, 3)"
+  expect:
+    allowed: true
+
+- id: allowed-018
+  group: allowed
+  sql: "SELECT id FROM orders WHERE amount BETWEEN 10 AND 100"
+  expect:
+    allowed: true
+
+- id: allowed-019
+  group: allowed
+  sql: "SELECT id FROM users WHERE name LIKE 'John%'"
+  expect:
+    allowed: true
+
+- id: allowed-020
+  group: allowed
+  sql: "SELECT id FROM users WHERE name ILIKE '%smith%'"
+  expect:
+    allowed: true
+
+- id: allowed-021
+  group: allowed
+  sql: "SELECT id FROM tickets WHERE user_id IS NULL"
+  expect:
+    allowed: true
+
+- id: allowed-022
+  group: allowed
+  sql: "SELECT id FROM tickets WHERE user_id IS NOT NULL"
+  expect:
+    allowed: true
+
+- id: allowed-023
+  group: allowed
+  sql: "SELECT id FROM users WHERE id = ANY (ARRAY[10, 20, 30])"
+  expect:
+    allowed: true
+
+- id: allowed-024
+  group: allowed
+  sql: "SELECT id FROM orders WHERE amount > ALL (ARRAY[5, 10, 15])"
+  expect:
+    allowed: true
+
+- id: allowed-025
+  group: allowed
+  sql: "SELECT status, count(*), sum(amount), avg(amount), min(amount), max(amount) FROM orders GROUP BY status"
+  expect:
+    allowed: true
+
+- id: allowed-026
+  group: allowed
+  sql: "SELECT status, count(*) FROM orders GROUP BY status HAVING count(*) > 10"
+  expect:
+    allowed: true
+
+- id: allowed-027
+  group: allowed
+  sql: "SELECT status, count(*) FILTER (WHERE amount > 100) FROM orders GROUP BY status"
+  expect:
+    allowed: true
+
+- id: allowed-028
+  group: allowed
+  sql: "SELECT status, user_id, count(*) FROM orders GROUP BY GROUPING SETS ((status), (user_id), ())"
+  expect:
+    allowed: true
+
+- id: allowed-029
+  group: allowed
+  sql: "SELECT status, user_id, sum(amount) FROM orders GROUP BY ROLLUP (status, user_id)"
+  expect:
+    allowed: true
+
+- id: allowed-030
+  group: allowed
+  sql: "SELECT status, user_id, sum(amount) FROM orders GROUP BY CUBE (status, user_id)"
+  expect:
+    allowed: true
+
+- id: allowed-031
+  group: allowed
+  sql: "SELECT id, row_number() OVER (PARTITION BY tenant_id ORDER BY created_at) FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-032
+  group: allowed
+  sql: "SELECT id, rank() OVER (ORDER BY amount DESC) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-033
+  group: allowed
+  sql: "SELECT id, dense_rank() OVER (ORDER BY amount DESC) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-034
+  group: allowed
+  sql: "SELECT id, lag(amount, 1) OVER (PARTITION BY user_id ORDER BY created_at) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-035
+  group: allowed
+  sql: "SELECT id, lead(amount, 1) OVER (PARTITION BY user_id ORDER BY created_at) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-036
+  group: allowed
+  sql: "SELECT id, first_value(amount) OVER (PARTITION BY user_id ORDER BY created_at) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-037
+  group: allowed
+  sql: "SELECT id, last_value(amount) OVER (PARTITION BY user_id ORDER BY created_at) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-038
+  group: allowed
+  sql: "SELECT id, ntile(4) OVER (ORDER BY amount) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-039
+  group: allowed
+  sql: "SELECT id FROM users UNION SELECT user_id FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-040
+  group: allowed
+  sql: "SELECT id FROM users UNION ALL SELECT user_id FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-041
+  group: allowed
+  sql: "SELECT id FROM users INTERSECT SELECT user_id FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-042
+  group: allowed
+  sql: "SELECT id FROM users EXCEPT SELECT user_id FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-043
+  group: allowed
+  sql: "WITH o AS (SELECT user_id, sum(amount) AS total FROM orders GROUP BY user_id) SELECT u.id, o.total FROM users u JOIN o ON u.id = o.user_id"
+  expect:
+    allowed: true
+
+- id: allowed-044
+  group: allowed
+  sql: "WITH u AS (SELECT id FROM users), o AS (SELECT id FROM orders) SELECT * FROM u, o"
+  expect:
+    allowed: true
+
+- id: allowed-045
+  group: allowed
+  sql: "WITH RECURSIVE nums AS (SELECT 1 AS n UNION ALL SELECT n + 1 FROM nums WHERE n < 10) SELECT n FROM nums"
+  expect:
+    allowed: true
+
+- id: allowed-046
+  group: allowed
+  sql: "SELECT lower(name), upper(name), length(name), trim(name) FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-047
+  group: allowed
+  sql: "SELECT substr(name, 1, 4), concat(name, ' (user)') FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-048
+  group: allowed
+  sql: "SELECT now(), current_date, current_time, date_trunc('day', created_at) FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-049
+  group: allowed
+  sql: "SELECT extract(year FROM created_at), extract(month FROM created_at) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-050
+  group: allowed
+  sql: "SELECT abs(amount), round(amount), floor(amount), ceil(amount) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-051
+  group: allowed
+  sql: "SELECT to_json(name), to_jsonb(email) FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-052
+  group: allowed
+  sql: "SELECT json_build_object('id', id, 'name', name) FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-053
+  group: allowed
+  sql: "SELECT json_agg(name), jsonb_agg(email) FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-054
+  group: allowed
+  sql: "SELECT array_agg(id ORDER BY id), array_length(ARRAY[1, 2, 3], 1) FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-055
+  group: allowed
+  sql: "SELECT unnest(ARRAY['a', 'b', 'c'])"
+  expect:
+    allowed: true
+
+- id: allowed-056
+  group: allowed
+  sql: "SELECT DISTINCT tenant_id FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-057
+  group: allowed
+  sql: "SELECT DISTINCT ON (tenant_id) id, name FROM users ORDER BY tenant_id, created_at DESC"
+  expect:
+    allowed: true
+
+- id: allowed-058
+  group: allowed
+  sql: "SELECT * FROM (VALUES (1, 'active'), (2, 'inactive')) AS t(id, status)"
+  expect:
+    allowed: true
+
+- id: allowed-059
+  group: allowed
+  sql: "SELECT u.id, o.id AS order_id FROM users u, LATERAL (SELECT id FROM orders WHERE orders.user_id = u.id LIMIT 1) o"
+  expect:
+    allowed: true
+
+- id: allowed-060
+  group: allowed
+  sql: "SELECT id FROM users TABLESAMPLE SYSTEM (10)"
+  expect:
+    allowed: true
+
+- id: allowed-061
+  group: allowed
+  sql: "SELECT coalesce(title, 'Untitled') FROM tickets"
+  expect:
+    allowed: true
+
+- id: allowed-062
+  group: allowed
+  sql: "SELECT nullif(status, 'unknown') FROM tickets"
+  expect:
+    allowed: true
+
+- id: allowed-063
+  group: allowed
+  sql: "SELECT CASE WHEN amount > 100 THEN 'large' ELSE 'small' END FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-064
+  group: allowed
+  sql: "SELECT CASE status WHEN 'completed' THEN 1 WHEN 'pending' THEN 2 ELSE 3 END FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-065
+  group: allowed
+  sql: "SHOW server_version"
+  expect:
+    allowed: true
+
+- id: allowed-066
+  group: allowed
+  sql: "SELECT id FROM users ORDER BY created_at DESC, id ASC"
+  expect:
+    allowed: true

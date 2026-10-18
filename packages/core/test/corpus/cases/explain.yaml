@@ -1,0 +1,66 @@
+- id: explain-001
+  group: explain
+  sql: "EXPLAIN ANALYZE SELECT id FROM users"
+  expect:
+    refused: PGM-209
+  note: "EXPLAIN ANALYZE executes the query and is forbidden in read-only mode"
+
+- id: explain-002
+  group: explain
+  sql: "EXPLAIN (ANALYZE) SELECT id FROM users"
+  expect:
+    refused: PGM-209
+  note: "EXPLAIN option ANALYZE executes query and is forbidden in read-only mode"
+
+- id: explain-003
+  group: explain
+  sql: "EXPLAIN (ANALYZE true, BUFFERS) SELECT id FROM users"
+  expect:
+    refused: PGM-209
+  note: "EXPLAIN with explicit ANALYZE true option is forbidden in read-only mode"
+
+- id: explain-004
+  group: explain
+  sql: "EXPLAIN (ANALYZE 1) SELECT id FROM users"
+  expect:
+    refused: PGM-209
+  note: "EXPLAIN with ANALYZE 1 is forbidden in read-only mode"
+
+- id: explain-005
+  group: explain
+  sql: "EXPLAIN DELETE FROM users"
+  expect:
+    refused: PGM-201
+  note: "EXPLAIN wrapping DELETE write statement is forbidden in read-only mode"
+
+- id: explain-006
+  group: explain
+  sql: "EXPLAIN INSERT INTO users (id, name) VALUES (1, 'alice')"
+  expect:
+    refused: PGM-201
+  note: "EXPLAIN wrapping INSERT write statement is forbidden in read-only mode"
+
+- id: explain-007
+  group: explain
+  sql: "EXPLAIN UPDATE users SET name = 'bob' WHERE id = 1"
+  expect:
+    refused: PGM-201
+  note: "EXPLAIN wrapping UPDATE write statement is forbidden in read-only mode"
+
+- id: explain-008
+  group: explain
+  sql: "EXPLAIN SELECT id FROM users"
+  expect:
+    allowed: true
+
+- id: explain-009
+  group: explain
+  sql: "EXPLAIN (ANALYZE false) SELECT id FROM users"
+  expect:
+    allowed: true
+
+- id: explain-010
+  group: explain
+  sql: "EXPLAIN (FORMAT JSON, COSTS true) SELECT id FROM users"
+  expect:
+    allowed: true
