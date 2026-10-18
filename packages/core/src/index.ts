@@ -5,4 +5,6 @@ export * from './config/index.js';
 export * from './postgres/index.js';
 export * from './rls/index.js';
 export * from './output/values.js';
+export * from './output/schemas.js';
+export * from './output/text.js';
 export * from './budgets/index.js';
