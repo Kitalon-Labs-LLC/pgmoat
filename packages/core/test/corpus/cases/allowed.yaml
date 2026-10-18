@@ -1,0 +1,29 @@
+- id: allowed-001
+  group: allowed
+  sql: "SELECT id, name FROM users"
+  expect:
+    allowed: true
+
+- id: allowed-002
+  group: allowed
+  sql: "SELECT count(*) FROM orders"
+  expect:
+    allowed: true
+
+- id: allowed-003
+  group: allowed
+  sql: "SELECT u.id, o.amount FROM users u JOIN orders o ON u.id = o.user_id"
+  expect:
+    allowed: true
+
+- id: allowed-004
+  group: allowed
+  sql: "WITH recent_users AS (SELECT id, created_at FROM users ORDER BY created_at DESC) SELECT * FROM recent_users"
+  expect:
+    allowed: true
+
+- id: allowed-005
+  group: allowed
+  sql: "SHOW work_mem"
+  expect:
+    allowed: true

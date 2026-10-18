@@ -12,7 +12,7 @@
     "format": "prettier --check .",
     "typecheck": "tsc -b",
     "test": "vitest run --project unit",
-    "test:corpus": "echo 'test:corpus placeholder' && exit 0",
+    "test:corpus": "vitest run --project corpus",
     "test:corpus:db": "echo 'test:corpus:db placeholder' && exit 0",
     "test:integration": "echo 'test:integration placeholder' && exit 0",
     "coverage": "vitest run --coverage",
