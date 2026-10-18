@@ -31,6 +31,7 @@ export default [
       name: 'integration',
       include: ['packages/core/test/integration/**/*.test.ts'],
       testTimeout: 60000,
+      fileParallelism: false,
     },
   },
 ];

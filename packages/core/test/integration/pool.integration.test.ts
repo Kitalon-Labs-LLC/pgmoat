@@ -46,7 +46,7 @@ describe('Postgres Pools and Control Client Integration (P3.2)', () => {
 
     try {
       // 1. Acquire the single allowed connection and hold it
-      const client1 = await acquire(pool);
+      const client1 = await acquire(pool, 5000);
       expect(client1).toBeDefined();
 
       // 2. Attempt to acquire another connection
