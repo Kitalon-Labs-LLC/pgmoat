@@ -8,27 +8,23 @@ export default defineConfig({
           name: 'unit',
           include: [
             'packages/core/test/unit/**/*.test.ts',
-            'packages/cli/test/**/*.test.ts'
-          ]
-        }
+            'packages/cli/test/**/*.test.ts',
+          ],
+        },
       },
       {
         test: {
           name: 'corpus',
-          include: [
-            'packages/core/test/corpus/**/*.test.ts'
-          ]
-        }
+          include: ['packages/core/test/corpus/**/*.test.ts'],
+        },
       },
       {
         test: {
           name: 'integration',
-          include: [
-            'packages/core/test/integration/**/*.test.ts'
-          ],
-          testTimeout: 60000
-        }
-      }
-    ]
-  }
+          include: ['packages/core/test/integration/**/*.test.ts'],
+          testTimeout: 60000,
+        },
+      },
+    ],
+  },
 });
