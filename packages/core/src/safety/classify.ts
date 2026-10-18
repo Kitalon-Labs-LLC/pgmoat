@@ -1,11 +1,14 @@
 import type { ErrorCode } from '../errors.generated.js';
 import type { ParseResult } from '@pgsql/types';
-import { walk, getNodeType, unwrap, type Scope } from './walk.js';
+import { walk, getNodeType, unwrap } from './walk.js';
 import {
   ALLOWED_TOP_LEVEL_STATEMENTS,
   isForbiddenNodeType,
   KNOWN_NODE_TYPES,
 } from './statements.js';
+
+import { functionPolicy, type FunctionCheckHook } from './functions.js';
+import type { PgmoatConfigT } from '../config/schema.js';
 
 export type StatementType = 'select' | 'explain' | 'show';
 
@@ -21,13 +24,8 @@ export type ClassificationResult =
       node?: unknown;
     };
 
-export type FunctionCheckHook = (
-  funcNode: unknown,
-  path: readonly (string | number)[],
-  scope: Scope,
-) => { ok: false; code: ErrorCode; message: string; node?: unknown } | null;
-
 export interface ClassifyOptions {
+  config?: PgmoatConfigT | Partial<PgmoatConfigT>;
   functionHook?: FunctionCheckHook;
 }
 
@@ -112,6 +110,7 @@ export function classify(
   }
 
   // 4. Walk the tree for deeper checks
+  const funcHook = options?.functionHook ?? functionPolicy(options?.config);
   let walkRefusal: ClassificationResult | null = null;
 
   walk(tree, (node, type, path, scope) => {
@@ -200,9 +199,9 @@ export function classify(
       return;
     }
 
-    // Function check hook (for P2.4)
-    if (type === 'FuncCall' && options?.functionHook) {
-      const hookResult = options.functionHook(node, path, scope);
+    // Function check hook (P2.4)
+    if (type === 'FuncCall' && funcHook) {
+      const hookResult = funcHook(node, path, scope);
       if (hookResult) {
         walkRefusal = hookResult;
         return;
