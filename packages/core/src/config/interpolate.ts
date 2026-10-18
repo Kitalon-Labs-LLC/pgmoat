@@ -45,7 +45,6 @@ export function interpolateString(
       defaultVal = content.slice(idx + 2);
     }
 
-     
     const val = env[varName];
     if (val !== undefined && val !== '') {
       return val;
@@ -94,7 +93,6 @@ function interpolateValue(
     for (const [k, v] of Object.entries(value)) {
       const nextPath = currentPath ? `${currentPath}.${k}` : k;
       // Keys are never interpolated
-       
       res[k] = interpolateValue(v, env, readFile, nextPath);
     }
     return res;
