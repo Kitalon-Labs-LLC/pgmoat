@@ -8,3 +8,5 @@ export * from './output/values.js';
 export * from './output/schemas.js';
 export * from './output/text.js';
 export * from './budgets/index.js';
+export * from './audit/canonical.js';
+export * from './audit/entry.js';
