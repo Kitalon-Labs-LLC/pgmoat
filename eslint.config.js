@@ -30,7 +30,7 @@ export default [
     },
   },
   {
-    files: ['**/test/**', 'tools/**'],
+    files: ['**/test/**', 'tools/**', 'packages/core/src/config/**'],
     rules: {
       'pgmoat/no-sql-string-building': 'off',
       'security/detect-object-injection': 'off',

@@ -45,7 +45,7 @@ export function interpolateString(
       defaultVal = content.slice(idx + 2);
     }
 
-    // eslint-disable-next-line security/detect-object-injection
+     
     const val = env[varName];
     if (val !== undefined && val !== '') {
       return val;
@@ -94,7 +94,7 @@ function interpolateValue(
     for (const [k, v] of Object.entries(value)) {
       const nextPath = currentPath ? `${currentPath}.${k}` : k;
       // Keys are never interpolated
-      // eslint-disable-next-line security/detect-object-injection
+       
       res[k] = interpolateValue(v, env, readFile, nextPath);
     }
     return res;

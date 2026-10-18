@@ -34,7 +34,7 @@ export function checkConfig(
   // PGM-103: update_columns non-empty requires update in write
   for (const [tableName, table] of Object.entries(config.tables)) {
     if (table.update_columns.length > 0 && !table.write.includes('update')) {
-      // eslint-disable-next-line pgmoat/no-sql-string-building -- human-facing error message
+       
       const msg = `Table "${tableName}" specifies update_columns but does not include "update" in write operations`;
       errors.push(refuse('PGM-103', msg));
     }
