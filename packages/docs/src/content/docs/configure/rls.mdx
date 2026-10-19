@@ -26,3 +26,4 @@ CREATE POLICY tenant_isolation_policy ON orders
 \`\`\`
 
 When a query runs, pgmoat executes \`SET LOCAL app.tenant_id = '...'\` inside the read-only transaction, ensuring complete cryptographic tenant isolation.
+

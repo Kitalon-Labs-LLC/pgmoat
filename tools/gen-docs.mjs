@@ -289,3 +289,4 @@ if (isCheck && hasDiff) {
 }
 
 console.log('Documentation generation complete.');
+

@@ -33,3 +33,4 @@ This example demonstrates deploying `pgmoat` for customer support and ticketing 
    ```bash
    docker compose down -v
    ```
+

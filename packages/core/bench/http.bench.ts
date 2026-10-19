@@ -88,3 +88,4 @@ describe('HTTP and Streaming Benchmarks (NFR-PERF-04, NFR-PERF-05)', () => {
     expect(p50).toBeLessThan(5.0);
   });
 });
+

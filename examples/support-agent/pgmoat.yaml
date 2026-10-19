@@ -22,3 +22,4 @@ audit:
   destinations:
     - type: file
       path: ./support-audit.log
+

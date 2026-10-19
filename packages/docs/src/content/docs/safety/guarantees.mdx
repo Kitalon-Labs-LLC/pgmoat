@@ -17,3 +17,4 @@ description: "How pgmoat guarantees read-only access and data protection"
 ## Residual Boundaries
 - Custom PL/pgSQL functions marked IMMUTABLE or STABLE that internally modify data outside the transaction are blocked by the function whitelist.
 - Physical database denial of service: mitigated by timeout deadlines and row limits.
+

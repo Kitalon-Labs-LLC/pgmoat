@@ -46,3 +46,4 @@ Code: https://github.com/kitalonlabs/pgmoat
 Docs: https://pgmoat.org
 
 Feedback, security edge cases, and adversarial queries are welcome.
+

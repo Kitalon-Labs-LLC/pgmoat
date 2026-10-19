@@ -50,3 +50,4 @@ describe('Startup Latency Benchmarks (NFR-PERF-03)', () => {
     expect(min).toBeLessThan(1000.0);
   });
 });
+

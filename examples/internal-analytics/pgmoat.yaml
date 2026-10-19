@@ -17,3 +17,4 @@ audit:
   destinations:
     - type: file
       path: ./analytics-audit.log
+

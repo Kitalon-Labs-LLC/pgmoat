@@ -17,3 +17,4 @@ pgmoat is available via npm (npx -y pgmoat), Docker, Claude Desktop bundle (.mcp
 
 Explore the project on GitHub: https://github.com/kitalonlabs/pgmoat
 Documentation and Guides: https://pgmoat.org
+

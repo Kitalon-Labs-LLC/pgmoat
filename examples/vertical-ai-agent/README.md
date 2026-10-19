@@ -32,3 +32,4 @@ This example demonstrates deploying `pgmoat` as a governed stdio server for an e
    ```bash
    docker compose down -v
    ```
+

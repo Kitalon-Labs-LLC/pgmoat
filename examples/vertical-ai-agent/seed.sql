@@ -37,3 +37,4 @@ INSERT INTO projects (name, department_id, budget) VALUES
 ('Moat Platform', 1, 500000.00),
 ('Telemetry Aggregator', 1, 250000.00),
 ('Q3 Strategy', 2, 75000.00);
+

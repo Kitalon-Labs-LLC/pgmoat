@@ -58,3 +58,4 @@ if (fs.existsSync(cliPkgPath)) {
 }
 
 console.log('Version synchronization complete.');
+

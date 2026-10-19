@@ -35,3 +35,4 @@ pgmoat is available on npm (`npx -y pgmoat`), Docker (`ghcr.io/kitalonlabs/pgmoa
 Docs: https://pgmoat.org
 Code: https://github.com/kitalonlabs/pgmoat
 Adversarial corpus (315+ cases): https://github.com/kitalonlabs/pgmoat/tree/main/packages/core/test/corpus
+

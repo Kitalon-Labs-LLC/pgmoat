@@ -25,3 +25,4 @@ rls:
 budgets:
   max_rows: 100
   statement_timeout_ms: 3000
+

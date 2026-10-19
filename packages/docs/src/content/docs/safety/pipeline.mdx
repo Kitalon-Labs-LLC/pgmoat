@@ -12,3 +12,4 @@ Every query passes through a multi-stage validation pipeline before executing ag
 3. **Function Allowlist**: Scans all function calls against an allowlist of safe math, string, aggregate, and date functions. Blocks administrative, file, and network functions.
 4. **Policy Check**: Traverses all referenced relations and columns. Verifies that no target is hidden or in a disallowed schema.
 5. **Execution in Read-Only Transaction**: Runs inside a dedicated read-only transaction (\`SET TRANSACTION READ ONLY\`) with timeout budgets.
+

@@ -14,3 +14,4 @@ INSERT INTO documents (title, content, embedding) VALUES
 ('Vector Search Overview', 'Understanding HNSW and IVFFlat index types in pgvector.', '[0.8, 0.2, 0.1]'),
 ('Audit Logging Architecture', 'Tamper-evident hash chains and structured NDJSON logging.', '[0.1, 0.9, 0.2]'),
 ('Multi-Tenant Access Control', 'Row Level Security and session variables for tenant isolation.', '[0.2, 0.8, 0.3]');
+

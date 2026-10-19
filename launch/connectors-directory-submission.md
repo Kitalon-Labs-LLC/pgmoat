@@ -39,3 +39,4 @@ MIT
 - npm: `pgmoat`
 - Docker: `ghcr.io/kitalonlabs/pgmoat`
 - MCPB: `pgmoat.mcpb`
+
