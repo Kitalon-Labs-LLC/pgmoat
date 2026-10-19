@@ -389,3 +389,74 @@
   sql: SELECT id FROM users ORDER BY created_at DESC, id ASC
   expect:
     allowed: true
+- id: allowed-067
+  group: allowed
+  sql: SELECT u.name, count(o.id) FROM users u LEFT JOIN orders o ON u.id = o.user_id GROUP BY u.name HAVING count(o.id) > 2
+  expect:
+    allowed: true
+- id: allowed-068
+  group: allowed
+  sql: SELECT id, payload->>'key' AS p_val FROM events WHERE payload IS NOT NULL
+  expect:
+    allowed: true
+- id: allowed-069
+  group: allowed
+  sql: SELECT id, upper(name) AS upper_name, lower(email) AS lower_email FROM users
+  expect:
+    allowed: true
+- id: allowed-070
+  group: allowed
+  sql: SELECT id, round(amount::numeric, 2) AS rounded_amt FROM orders
+  expect:
+    allowed: true
+- id: allowed-071
+  group: allowed
+  sql: SELECT id, tier FROM customers WHERE tier IN ('gold', 'silver', 'bronze') ORDER BY id
+  expect:
+    allowed: true
+- id: allowed-072
+  group: allowed
+  sql: SELECT id, created_at, date_trunc('month', created_at) AS month_start FROM orders
+  expect:
+    allowed: true
+- id: allowed-073
+  group: allowed
+  sql: SELECT id FROM users WHERE email LIKE '%@example.com'
+  expect:
+    allowed: true
+- id: allowed-074
+  group: allowed
+  sql: SELECT id, array_agg(status) OVER (PARTITION BY user_id) FROM orders
+  expect:
+    allowed: true
+- id: allowed-075
+  group: allowed
+  sql: SELECT id FROM tickets WHERE title ILIKE '%urgent%' AND status != 'closed'
+  expect:
+    allowed: true
+- id: allowed-076
+  group: allowed
+  sql: SELECT id, user_id, amount FROM orders WHERE amount BETWEEN 50 AND 500
+  expect:
+    allowed: true
+- id: allowed-077
+  group: allowed
+  sql: SELECT id, name, created_at FROM customers WHERE created_at >= NOW() - INTERVAL '30 days'
+  expect:
+    allowed: true
+- id: allowed-078
+  group: allowed
+  sql: SELECT u.id, u.name, o.amount FROM users u FULL OUTER JOIN orders o ON u.id = o.user_id WHERE u.id IS NOT NULL
+  expect:
+    allowed: true
+- id: allowed-079
+  group: allowed
+  sql: SELECT id, event_type FROM events WHERE jsonb_typeof(payload) = 'object'
+  expect:
+    allowed: true
+- id: allowed-080
+  group: allowed
+  sql: SELECT count(DISTINCT user_id) AS distinct_users FROM orders
+  expect:
+    allowed: true
+

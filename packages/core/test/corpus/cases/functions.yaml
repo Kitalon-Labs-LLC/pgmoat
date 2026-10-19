@@ -4,6 +4,7 @@
   expect:
     refused: PGM-205
   note: "pg_sleep causes denial of service by pausing backend execution"
+  bypass_class: "Side-effect functions"
 
 - id: functions-002
   group: functions
@@ -130,6 +131,7 @@
   expect:
     refused: PGM-205
   note: "pg_read_file reads host server files"
+  bypass_class: "File and network functions"
 
 - id: functions-020
   group: functions

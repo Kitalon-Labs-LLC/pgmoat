@@ -5,6 +5,7 @@
   expect:
     refused: PGM-204
   note: "Statement stacking attempting to break out of read-only transaction and drop schema"
+  bypass_class: "Statement stacking"
 
 - id: stacking-002
   group: stacking

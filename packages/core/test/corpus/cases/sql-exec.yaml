@@ -4,6 +4,7 @@
   expect:
     refused: PGM-205
   note: "query_to_xml executes arbitrary dynamic SQL inside the database engine"
+  bypass_class: "SQL-executing functions"
 
 - id: sql-exec-002
   group: sql-exec

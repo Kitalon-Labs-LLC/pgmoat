@@ -4,6 +4,7 @@
   expect:
     refused: PGM-209
   note: EXPLAIN ANALYZE executes the query and is forbidden in read-only mode
+  bypass_class: "EXPLAIN ANALYZE write"
 - id: explain-002
   group: explain
   sql: EXPLAIN (ANALYZE) SELECT id FROM users

@@ -5,6 +5,7 @@
   expect:
     refused: PGM-203
   note: "DELETE statement inside Common Table Expression"
+  bypass_class: "Writing CTE"
 
 - id: cte-002
   group: cte
@@ -93,3 +94,16 @@
   sql: "WITH outer_c AS (WITH inner_c AS (SELECT id FROM users) SELECT id FROM inner_c) SELECT * FROM outer_c"
   expect:
     allowed: true
+
+- id: cte-014
+  group: cte
+  sql: "WITH c1 AS (SELECT id, name FROM users), c2 AS (SELECT user_id, sum(amount) AS tot FROM orders GROUP BY user_id) SELECT c1.name, c2.tot FROM c1 JOIN c2 ON c1.id = c2.user_id"
+  expect:
+    allowed: true
+
+- id: cte-015
+  group: cte
+  sql: "WITH chained AS (SELECT user_id FROM orders WHERE amount > 100), filtered AS (SELECT id, name FROM users WHERE id IN (SELECT user_id FROM chained)) SELECT * FROM filtered"
+  expect:
+    allowed: true
+

@@ -183,6 +183,7 @@
   expect:
     refused: PGM-201
   note: SET statement modifying session parameters is forbidden in read-only mode
+  bypass_class: "Session state abuse"
 - id: statements-028
   group: statements
   sql: RESET work_mem
@@ -253,3 +254,17 @@
   expect:
     refused: PGM-201
   note: Explicit table locking is forbidden in read-only mode
+- id: statements-039
+  group: statements
+  sql: SET ROLE postgres
+  expect:
+    refused: PGM-201
+  note: SET ROLE attempting to elevate privileges and bypass RLS is forbidden
+  bypass_class: "RLS bypass"
+- id: statements-040
+  group: statements
+  sql: CLUSTER users
+  expect:
+    refused: PGM-201
+  note: CLUSTER statement is forbidden in read-only mode
+

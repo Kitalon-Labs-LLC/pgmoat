@@ -36,6 +36,7 @@ export const CorpusCaseSchema = z.object({
   executes: z.boolean().optional(),
   db_blocks: z.boolean().optional(),
   note: z.string().optional(),
+  bypass_class: z.string().optional(),
 });
 
 export type CorpusCase = z.infer<typeof CorpusCaseSchema>;
