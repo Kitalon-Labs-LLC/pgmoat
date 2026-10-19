@@ -11,6 +11,7 @@ import {
   ListTablesResultSchema,
   RowsResultSchema,
 } from '../output/schemas.js';
+import type { McpServer, CallToolResult } from '@modelcontextprotocol/server';
 import type { ToolDeps } from './context.js';
 
 export interface ToolAnnotations {
@@ -29,11 +30,7 @@ export interface ToolRegistrationConfig {
 }
 
 export interface ToolRegistrationTarget {
-  registerTool(
-    name: string,
-    config: ToolRegistrationConfig,
-    handler: (args: unknown, ctx: unknown) => Promise<unknown>,
-  ): unknown;
+  registerTool: McpServer['registerTool'];
 }
 
 /**
@@ -74,7 +71,8 @@ export function registerTools(
         openWorldHint: false,
       },
     },
-    async (args: unknown, ctx: unknown) => describeTableTool(args, ctx, deps),
+    async (args: unknown, ctx: unknown) =>
+      (await describeTableTool(args, ctx, deps)) as unknown as CallToolResult,
   );
 
   // 2. explain
@@ -98,7 +96,8 @@ export function registerTools(
         openWorldHint: false,
       },
     },
-    async (args: unknown, ctx: unknown) => explainTool(args, ctx, deps),
+    async (args: unknown, ctx: unknown) =>
+      (await explainTool(args, ctx, deps)) as unknown as CallToolResult,
   );
 
   // 3. list_tables
@@ -121,7 +120,8 @@ export function registerTools(
         openWorldHint: false,
       },
     },
-    async (args: unknown, ctx: unknown) => listTablesTool(args, ctx, deps),
+    async (args: unknown, ctx: unknown) =>
+      (await listTablesTool(args, ctx, deps)) as unknown as CallToolResult,
   );
 
   // 4. query
@@ -145,7 +145,8 @@ export function registerTools(
         openWorldHint: false,
       },
     },
-    async (args: unknown, ctx: unknown) => queryTool(args, ctx, deps),
+    async (args: unknown, ctx: unknown) =>
+      (await queryTool(args, ctx, deps)) as unknown as CallToolResult,
   );
 
   // 5. sample_table
@@ -176,6 +177,7 @@ export function registerTools(
         openWorldHint: false,
       },
     },
-    async (args: unknown, ctx: unknown) => sampleTableTool(args, ctx, deps),
+    async (args: unknown, ctx: unknown) =>
+      (await sampleTableTool(args, ctx, deps)) as unknown as CallToolResult,
   );
 }

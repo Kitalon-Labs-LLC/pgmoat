@@ -30,3 +30,5 @@ export * from './tools/explain.js';
 export * from './tools/sample-table.js';
 export * from './tools/descriptions.js';
 export * from './tools/register.js';
+export * from './server/instructions.js';
+export * from './server/create.js';
