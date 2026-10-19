@@ -1,0 +1,24 @@
+database:
+  url_env: DATABASE_URL
+
+schemas:
+  expose:
+    - public
+
+hide:
+  columns:
+    public.customers:
+      - credit_card
+
+budgets:
+  max_rows: 50
+  max_sql_chars: 10000
+  statement_timeout_ms: 3000
+
+catalogs:
+  allow: false
+
+audit:
+  destinations:
+    - type: file
+      path: ./support-audit.log

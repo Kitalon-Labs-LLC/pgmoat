@@ -1,0 +1,16 @@
+services:
+  vectordb:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: rag_user
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: rag_db
+    ports:
+      - "54323:5432"
+    volumes:
+      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag_user -d rag_db"]
+      interval: 2s
+      timeout: 2s
+      retries: 10

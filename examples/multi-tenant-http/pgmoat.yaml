@@ -1,0 +1,27 @@
+database:
+  url_env: DATABASE_URL
+
+schemas:
+  expose:
+    - public
+
+http:
+  host: 127.0.0.1
+  port: 8080
+  public_url: http://127.0.0.1:8080
+
+auth:
+  mode: oauth
+  issuer: http://127.0.0.1:9090
+  jwks_url: http://127.0.0.1:9090/jwks.json
+  required_scopes:
+    - pgmoat:read
+
+rls:
+  required: true
+  session_variables:
+    app.current_tenant: token.tenant_id
+
+budgets:
+  max_rows: 100
+  statement_timeout_ms: 3000
