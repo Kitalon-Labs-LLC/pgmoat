@@ -118,3 +118,4 @@ describe('redactEntry', () => {
     expect(redacted.sql_executed).toBe('[REDACTED: unparseable]');
   });
 });
+

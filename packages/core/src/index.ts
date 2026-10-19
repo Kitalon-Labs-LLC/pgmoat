@@ -17,3 +17,5 @@ export * from './audit/pipeline.js';
 export * from './audit/paths.js';
 export * from './audit/destinations/stderr.js';
 export * from './audit/destinations/file.js';
+export * from './audit/destinations/postgres.js';
+export * from './audit/ddl.js';

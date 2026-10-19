@@ -179,3 +179,4 @@ export async function redactEntry(
 ): Promise<AuditEntry> {
   return redactEntrySync(entry, auditConfig);
 }
+

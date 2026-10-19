@@ -75,10 +75,63 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE SCHEMA IF NOT EXISTS pgmoat;
 
 CREATE TABLE IF NOT EXISTS pgmoat.audit (
-  id BIGSERIAL PRIMARY KEY,
-  event TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    -- identity and ordering
+    request_id          TEXT        NOT NULL,
+    instance_id         TEXT        NOT NULL,
+    seq                 BIGINT      NOT NULL,
+    ts                  TIMESTAMPTZ NOT NULL,
+    inserted_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    -- caller
+    transport           TEXT        NOT NULL CHECK (transport IN ('stdio', 'http')),
+    protocol_version    TEXT,
+    client_name         TEXT,
+    client_version      TEXT,
+    principal           TEXT        NOT NULL,
+    trace_id            TEXT,
+
+    -- call
+    tool                TEXT        NOT NULL,
+    params              JSONB       NOT NULL DEFAULT '{}'::jsonb,
+    sql_executed        TEXT,
+    sql_fingerprint     TEXT,
+    rls_context         JSONB,
+
+    -- outcome
+    status              TEXT        NOT NULL CHECK (status IN ('success', 'refused', 'error', 'canceled')),
+    error_code          TEXT,
+    error_message       TEXT,
+    warnings            TEXT[]      NOT NULL DEFAULT '{}',
+    rows_returned       INTEGER,
+    rows_affected       INTEGER,
+    duration_ms         INTEGER     NOT NULL,
+
+    -- budgets
+    budget_max_rows     INTEGER     NOT NULL,
+    budget_max_query_ms INTEGER     NOT NULL,
+    payload_bytes       INTEGER,
+
+    -- integrity
+    prev_hash           TEXT        NOT NULL,
+    entry_hash          TEXT        NOT NULL,
+    dropped_since_last  INTEGER     NOT NULL DEFAULT 0,
+    unsafe_role_override BOOLEAN    NOT NULL DEFAULT false,
+
+    -- provenance
+    pgmoat_version      TEXT        NOT NULL,
+    server_name         TEXT        NOT NULL,
+
+    CONSTRAINT audit_instance_seq_uniq UNIQUE (instance_id, seq)
 );
+
+CREATE INDEX IF NOT EXISTS audit_ts_idx           ON pgmoat.audit (ts DESC);
+CREATE INDEX IF NOT EXISTS audit_tenant_ts_idx    ON pgmoat.audit ((rls_context ->> 'app.tenant_id'), ts DESC);
+CREATE INDEX IF NOT EXISTS audit_principal_ts_idx ON pgmoat.audit (principal, ts DESC);
+CREATE INDEX IF NOT EXISTS audit_not_success_idx  ON pgmoat.audit (status, ts DESC) WHERE status <> 'success';
+CREATE INDEX IF NOT EXISTS audit_error_code_idx   ON pgmoat.audit (error_code) WHERE error_code IS NOT NULL;
+CREATE INDEX IF NOT EXISTS audit_fingerprint_idx  ON pgmoat.audit (sql_fingerprint, ts DESC) WHERE sql_fingerprint IS NOT NULL;
 
 -- View order_totals
 CREATE OR REPLACE VIEW order_totals AS

@@ -180,3 +180,4 @@ describe('Chain and Verify', () => {
     expect(instB?.totalEntries).toBe(15);
   });
 });
+

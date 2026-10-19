@@ -29,3 +29,4 @@ export class StderrDestination implements AuditDestination {
     // No-op for stderr
   }
 }
+

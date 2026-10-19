@@ -38,15 +38,15 @@ export function buildEntry(
     seq: 0,
     ts: ctx.startedAt.toISOString(),
     transport: ctx.transport,
-    protocol_version: ctx.protocolVersion,
-    client_name: ctx.client.name,
-    client_version: ctx.client.version,
+    protocol_version: ctx.protocolVersion ?? null,
+    client_name: ctx.client.name ?? null,
+    client_version: ctx.client.version ?? null,
     principal: ctx.principal.sub,
-    trace_id: ctx.traceId,
+    trace_id: ctx.traceId ?? null,
     tool: ctx.tool,
     params: { ...ctx.params },
-    sql_executed: ctx.sqlExecuted,
-    sql_fingerprint: ctx.sqlFingerprint,
+    sql_executed: ctx.sqlExecuted ?? null,
+    sql_fingerprint: ctx.sqlFingerprint ?? null,
     rls_context: rlsContext,
     status: outcome.status,
     error_code: outcome.errorCode ?? null,
@@ -66,3 +66,4 @@ export function buildEntry(
     server_name: meta.serverName ?? 'pgmoat',
   };
 }
+

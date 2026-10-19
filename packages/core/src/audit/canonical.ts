@@ -48,3 +48,4 @@ export function canonicalJson(val: unknown): string {
 
   return JSON.stringify(val);
 }
+
