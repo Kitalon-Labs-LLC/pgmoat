@@ -284,7 +284,15 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
   }
 
   // 8. Next steps & client config snippets
-  const snippet = [
+  process.stdout.write(renderClientSnippets(serverName, targetYamlPath, rawUrl) + '\n');
+}
+
+export function renderClientSnippets(
+  serverName: string,
+  targetYamlPath: string,
+  rawUrl: string,
+): string {
+  return [
     '',
     'Next steps',
     '  1. Fill in table descriptions in pgmoat.yaml. Your agent reads them.',
@@ -303,6 +311,4 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
     '',
     'https://pgmoat.dev/docs/quickstart',
   ].join('\n');
-
-  process.stdout.write(snippet + '\n');
 }
