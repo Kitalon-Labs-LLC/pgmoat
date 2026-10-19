@@ -17,7 +17,7 @@
     "test:integration": "vitest run --project integration",
     "coverage": "vitest run --coverage",
     "bench": "vitest run --project bench",
-    "build": "echo 'build placeholder' && exit 0",
+    "build": "pnpm --filter pgmoat build",
     "check:licenses": "node tools/check-licenses.mjs",
     "gen:errors": "node tools/gen-errors.mjs",
     "check:errors": "node tools/gen-errors.mjs --check",

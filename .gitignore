@@ -6,3 +6,4 @@ pgmoat-audit/
 tmp/
 .env*
 !.env.example
+*.tgz

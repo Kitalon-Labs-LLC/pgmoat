@@ -65,6 +65,7 @@ export function createProgram(): Command {
     .option('--url-env <VAR>', 'Read the connection URL from an environment variable')
     .option('--json', 'Machine-readable output')
     .option('--no-color', 'Disable colors (NO_COLOR is also honored)')
+    .option('-v, --version', 'Show version')
     .helpOption('-h, --help', 'Show help');
 
   program
@@ -216,6 +217,12 @@ export async function runCli(argv: string[] = process.argv.slice(2)): Promise<vo
     return;
   }
 
+  if (argv.includes('-v') || argv.includes('--version')) {
+    const { versionCommand } = await import('./commands/version.js');
+    await versionCommand();
+    return;
+  }
+
   // Check for zero-config URL pattern
   const zeroConfigUrl = detectZeroConfig(argv);
   if (zeroConfigUrl) {
@@ -235,8 +242,8 @@ export async function runCli(argv: string[] = process.argv.slice(2)): Promise<vo
 // Auto-run if executed directly
 const isDirectRun =
   import.meta.url === `file://${process.argv[1]}` ||
-  (process.argv[1] && process.argv[1].endsWith('/bin.js')) ||
-  (process.argv[1] && process.argv[1].endsWith('/bin.ts'));
+  (process.argv[1] && /\/bin\.(ts|js|mjs)$/.test(process.argv[1])) ||
+  (process.argv[1] && process.argv[1].endsWith('/pgmoat'));
 
 if (isDirectRun) {
   runCli().catch((err: unknown) => {
