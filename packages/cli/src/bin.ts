@@ -184,9 +184,10 @@ export function createProgram(): Command {
   program
     .command('schema-export')
     .description('Write the visible schema as Markdown')
+    .option('--config <path>', 'Config file (default: ./pgmoat.yaml)')
     .option('-o, --output <path>', 'Output file (defaults to stdout)')
+    .option('--include-hidden-count', 'Include count of hidden tables and columns')
     .action(async (opts) => {
-      // Stub for P8.6
       const { schemaExportCommand } = await import('./commands/schema-export.js');
       await schemaExportCommand(opts);
     });
@@ -195,9 +196,9 @@ export function createProgram(): Command {
     .command('test-corpus')
     .description('Run the adversarial safety corpus against a scratch database')
     .option('--url <url>', 'Scratch Postgres database URL')
+    .option('--group <group>', 'Run only specific case group')
     .option('--force', 'Force run even if database has more than 10 tables')
     .action(async (opts) => {
-      // Stub for P8.6
       const { testCorpusCommand } = await import('./commands/test-corpus.js');
       await testCorpusCommand(opts);
     });
