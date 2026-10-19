@@ -28,3 +28,5 @@ export * from './tools/describe-table.js';
 export * from './tools/query.js';
 export * from './tools/explain.js';
 export * from './tools/sample-table.js';
+export * from './tools/descriptions.js';
+export * from './tools/register.js';
