@@ -177,6 +177,7 @@ export async function redactEntry(
   entry: AuditEntry,
   auditConfig?: Partial<AuditConfigT>,
 ): Promise<AuditEntry> {
+  await libpgQuery.loadModule();
   return redactEntrySync(entry, auditConfig);
 }
 

@@ -21,3 +21,5 @@ export * from './audit/destinations/postgres.js';
 export * from './audit/ddl.js';
 export * from './schema/snapshot.js';
 export * from './schema/cache.js';
+export * from './tools/context.js';
+export * from './tools/run-tool.js';
