@@ -11,6 +11,7 @@ import type {
 import type { PgmoatConfigT } from '../config/schema.js';
 import type { AuditPipeline } from '../audit/pipeline.js';
 import type { SchemaCache } from '../schema/cache.js';
+import type { Pools } from '../postgres/pool.js';
 
 const CROCKFORD_BASE32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
@@ -65,6 +66,7 @@ export interface ToolDeps {
   readonly transport?: Transport;
   readonly unsafeRoleOverride?: boolean;
   readonly schemaCache?: SchemaCache;
+  readonly pools?: Pools;
   readonly pool?: unknown;
 }
 
