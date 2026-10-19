@@ -33,7 +33,6 @@ child.stdout.on('data', (data) => {
   }
 });
 
-let msgId = 1;
 function send(req) {
   child.stdin.write(JSON.stringify(req) + '\n');
 }

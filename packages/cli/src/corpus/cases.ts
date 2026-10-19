@@ -2,18 +2,18 @@
 export interface CorpusCase {
   id: string;
   group: string;
-  name: string;
+  name?: string;
   sql: string;
   config?: string;
   expect: {
-    allowed: boolean;
-    code?: string;
     allowed?: boolean;
+    code?: string;
     refused?: string;
   };
   executes?: boolean;
   db_blocks?: boolean;
   note?: string;
+  bypass_class?: string;
 }
 
 export const BUNDLED_CASES: CorpusCase[] = [

@@ -1,10 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { loadAllCases, loadAllCaseFiles } from './runner.js';
+import { loadAllCases } from './runner.js';
 import type { CorpusGroup } from './schema.js';
 
 describe('Corpus Coverage & Minimums (FR-CORPUS-01, FR-CORPUS-04, P12.1)', () => {
   const allCases = loadAllCases();
-  const caseFiles = loadAllCaseFiles();
 
   const GROUP_MINIMUMS: Record<CorpusGroup, number> = {
     allowed: 80,
