@@ -152,11 +152,90 @@ export function checkConfig(
 }
 
 export function checkAgainstSchema(
-  _config: PgmoatConfigT,
-  _snapshot: SchemaSnapshot,
+  config: PgmoatConfigT,
+  snapshot: SchemaSnapshot,
 ): CheckConfigResult {
-  void _config;
-  void _snapshot;
-  // Post-introspection rules are implemented in Phase P6.1
-  throw new Error('checkAgainstSchema is implemented in Phase P6.1');
+  const errors: PgmoatError[] = [];
+  const warnings: PgmoatError[] = [];
+
+  const { knownRelations } = snapshot.policyIndex;
+  const exposedSchemas = config.connection.schemas;
+
+  // Helper to resolve whether a table name exists in known relations
+  const findQualified = (name: string): string | undefined => {
+    if (knownRelations.has(name)) {
+      return name;
+    }
+    for (const s of exposedSchemas) {
+      const q = `${s}.${name}`;
+      if (knownRelations.has(q)) {
+        return q;
+      }
+    }
+    return undefined;
+  };
+
+  // 1. PGM-115: annotate_strict and unannotated tables
+  if (config.schema.annotate_strict) {
+    for (const rel of snapshot.relations) {
+      if (!rel.description || rel.description === 'Unannotated') {
+        errors.push(
+          refuse(
+            'PGM-115',
+            `Table "${rel.qualifiedName}" has no description (schema.annotate_strict is enabled)`,
+          ),
+        );
+      }
+    }
+  }
+
+  // 2. PGM-118: Protected table not found in database
+  for (const table of config.rls.protected_tables) {
+    const qName = findQualified(table);
+    if (!qName) {
+      errors.push(
+        refuse('PGM-118', `Protected table "${table}" not found in database`),
+      );
+    }
+  }
+
+  // 3. Stale annotations warnings
+  for (const [tableName, tableAnn] of Object.entries(config.tables)) {
+    const qName = findQualified(tableName);
+    if (!qName) {
+      warnings.push(
+        new PgmoatError(
+          'PGM-109',
+          `Annotated table "${tableName}" does not exist in database (STALE)`,
+          'error',
+        ),
+      );
+      continue;
+    }
+
+    // Check annotated columns against table's actual columns
+    const rel = snapshot.byQualifiedName.get(qName);
+    const hiddenCols = snapshot.policyIndex.hiddenColumns.get(qName) ?? new Set();
+
+    if (rel && tableAnn.columns) {
+      const existingCols = new Set([
+        ...rel.columns.map((c) => c.name),
+        ...hiddenCols,
+      ]);
+
+      for (const colName of Object.keys(tableAnn.columns)) {
+        if (!existingCols.has(colName)) {
+          warnings.push(
+            new PgmoatError(
+              'PGM-109',
+              `Annotated column "${colName}" in table "${tableName}" does not exist in database (STALE)`,
+              'error',
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  return { errors, warnings };
 }
