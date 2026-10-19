@@ -20,3 +20,4 @@ export * from './audit/destinations/file.js';
 export * from './audit/destinations/postgres.js';
 export * from './audit/ddl.js';
 export * from './schema/snapshot.js';
+export * from './schema/cache.js';
