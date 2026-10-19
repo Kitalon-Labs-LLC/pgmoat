@@ -7,6 +7,9 @@ import {
 } from '@modelcontextprotocol/server';
 import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
 import { createServer } from './create.js';
+import { authenticate, emitAuthFailureAudit } from './auth.js';
+import { buildProtectedResourceMetadata } from './prm.js';
+import { principalStorage } from '../tools/context.js';
 import type { Runtime } from '../runtime.js';
 
 export interface HttpServerHandle {
@@ -201,14 +204,13 @@ export async function startHttp(
       if (pathname === '/.well-known/oauth-protected-resource' && req.method === 'GET') {
         if (runtime.config.auth && runtime.config.auth.mode === 'oauth') {
           const publicUrl = runtime.config.http.public_url ?? `http://${host}:${port}`;
-          const prm = {
-            resource: publicUrl,
-            authorization_servers: [runtime.config.auth.issuer],
-            scopes_supported: runtime.config.auth.required_scopes,
-            bearer_methods_supported: ['header'],
-          };
+          const prm = buildProtectedResourceMetadata(
+            publicUrl,
+            runtime.config.auth.issuer ?? publicUrl,
+            runtime.config.auth.required_scopes,
+          );
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(prm));
+          res.end(JSON.stringify(prm, null, 2));
           return;
         }
         res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -218,6 +220,28 @@ export async function startHttp(
 
       // 5. MCP endpoint
       if (pathname === mcpPath) {
+        // Authenticate request
+        const authResult = await authenticate(req, runtime.config);
+        if (!authResult.ok) {
+          await emitAuthFailureAudit(runtime, authResult, req);
+          res.writeHead(authResult.status, {
+            'Content-Type': 'application/json',
+            'WWW-Authenticate': authResult.wwwAuthenticate,
+          });
+          res.end(
+            JSON.stringify({
+              jsonrpc: '2.0',
+              error: {
+                code: -32000,
+                message: authResult.message,
+                data: { code: authResult.code },
+              },
+              id: null,
+            }),
+          );
+          return;
+        }
+
         let parsedBody: unknown = undefined;
 
         if (req.method === 'POST') {
@@ -239,30 +263,32 @@ export async function startHttp(
           parsedBody = bodyResult.body;
         }
 
-        // Stateless execution: new McpServer and transport per request
-        runtime.incrementInFlight();
+        // Run handling within the authenticated principal context
+        return await principalStorage.run(authResult.principal, async () => {
+          // Stateless execution: new McpServer and transport per request
+          runtime.incrementInFlight();
 
-        const mcpServer = createServer(runtime.toolDeps);
-        const transport = new NodeStreamableHTTPServerTransport({
-          sessionIdGenerator: undefined,
+          const mcpServer = createServer(runtime.toolDeps);
+          const transport = new NodeStreamableHTTPServerTransport({
+            sessionIdGenerator: undefined,
+          });
+
+          let cleanedUp = false;
+          const cleanup = () => {
+            if (!cleanedUp) {
+              cleanedUp = true;
+              runtime.decrementInFlight();
+              void transport.close().catch(() => {});
+              void mcpServer.close().catch(() => {});
+            }
+          };
+
+          res.on('finish', cleanup);
+          res.on('close', cleanup);
+
+          await mcpServer.connect(transport);
+          await transport.handleRequest(req, res, parsedBody);
         });
-
-        let cleanedUp = false;
-        const cleanup = () => {
-          if (!cleanedUp) {
-            cleanedUp = true;
-            runtime.decrementInFlight();
-            void transport.close().catch(() => {});
-            void mcpServer.close().catch(() => {});
-          }
-        };
-
-        res.on('finish', cleanup);
-        res.on('close', cleanup);
-
-        await mcpServer.connect(transport);
-        await transport.handleRequest(req, res, parsedBody);
-        return;
       }
 
       // Everything else: 404

@@ -38,6 +38,8 @@ export * from './logger.js';
 export * from './runtime.js';
 export * from './server/stdio.js';
 export * from './server/http.js';
+export * from './server/prm.js';
+export * from './server/auth.js';
 export * from './zero-config.js';
 export * from './safety/pipeline.js';
 export * from './safety/parse.js';
