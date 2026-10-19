@@ -72,6 +72,7 @@ export const ALLOWED_FUNCTIONS: ReadonlySet<string> = Object.freeze(
     'log10',
     'sign',
     'pi',
+    'random',
     'greatest',
     'least',
     'width_bucket',
