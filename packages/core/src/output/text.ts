@@ -207,7 +207,15 @@ export function renderDescribe(data: DescribeTableResultT): string {
 /**
  * Recursively formats an explain plan tree into an indented string.
  */
-function formatPlanNode(node: Record<string, unknown>, depth: number): string {
+function formatPlanNode(
+  node: Record<string, unknown>,
+  depth: number,
+  state: { count: number } = { count: 0 },
+): string {
+  if (state.count >= 30) {
+    return '';
+  }
+  state.count++;
   const indent = '  '.repeat(depth);
   const nodeType = String(node['Node Type'] ?? 'Plan');
   const cost =
@@ -221,7 +229,15 @@ function formatPlanNode(node: Record<string, unknown>, depth: number): string {
   if (Array.isArray(plans)) {
     for (const child of plans) {
       if (typeof child === 'object' && child !== null) {
-        out += `\n${formatPlanNode(child as Record<string, unknown>, depth + 1)}`;
+        if (state.count < 30) {
+          const childText = formatPlanNode(child as Record<string, unknown>, depth + 1, state);
+          if (childText) {
+            out += `\n${childText}`;
+          }
+        } else {
+          out += `\n${'  '.repeat(depth + 1)}... (truncated at 30 nodes)`;
+          break;
+        }
       }
     }
   }

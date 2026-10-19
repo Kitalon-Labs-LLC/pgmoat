@@ -26,3 +26,4 @@ export * from './tools/run-tool.js';
 export * from './tools/list-tables.js';
 export * from './tools/describe-table.js';
 export * from './tools/query.js';
+export * from './tools/explain.js';
