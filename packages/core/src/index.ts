@@ -23,3 +23,5 @@ export * from './schema/snapshot.js';
 export * from './schema/cache.js';
 export * from './tools/context.js';
 export * from './tools/run-tool.js';
+export * from './tools/list-tables.js';
+export * from './tools/describe-table.js';

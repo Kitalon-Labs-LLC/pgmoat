@@ -501,3 +501,42 @@ export function checkColumns(
 
   return { ok: true };
 }
+
+/**
+ * Resolves a qualified or unqualified relation name against the policy index.
+ * Returns the qualified relation name if visible, or null if hidden/unknown.
+ */
+export function resolveRelationFromIndex(
+  tableName: string,
+  index: PolicyIndex,
+): string | null {
+  const trimmed = tableName.trim();
+  const dotIndex = trimmed.indexOf('.');
+  if (dotIndex !== -1) {
+    const schema = trimmed.slice(0, dotIndex);
+    const relname = trimmed.slice(dotIndex + 1);
+    if (!index.exposedSchemas.includes(schema)) {
+      return null;
+    }
+    const qualified = `${schema}.${relname}`;
+    if (
+      !index.knownRelations.has(qualified) ||
+      index.hiddenRelations.has(qualified)
+    ) {
+      return null;
+    }
+    return qualified;
+  }
+
+  for (const schema of index.exposedSchemas) {
+    const qualified = `${schema}.${trimmed}`;
+    if (index.knownRelations.has(qualified)) {
+      if (index.hiddenRelations.has(qualified)) {
+        return null;
+      }
+      return qualified;
+    }
+  }
+
+  return null;
+}
