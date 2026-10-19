@@ -61,7 +61,7 @@ export function createProgram(): Command {
   program.helpInformation = () => HELP_TEXT + '\n';
 
   program
-    .option('--config <path>', 'Config file (default: ./pgmoat.yaml)', './pgmoat.yaml')
+    .option('--config <path>', 'Config file (default: ./pgmoat.yaml)')
     .option('--url-env <VAR>', 'Read the connection URL from an environment variable')
     .option('--json', 'Machine-readable output')
     .option('--no-color', 'Disable colors (NO_COLOR is also honored)')
@@ -93,10 +93,10 @@ export function createProgram(): Command {
     .option('--url-env <VAR>', 'Environment variable containing connection URL')
     .option('--allow-unsafe-role', 'Allow unsafe role on doctor findings')
     .option('--log-level <level>', 'Logging level (debug, info, warn, error)')
-    .action(async (url, opts) => {
-      // Stub for P8.2
+    .action(async (url, opts, cmd) => {
+      const mergedOpts = cmd.optsWithGlobals ? cmd.optsWithGlobals() : { ...program.opts(), ...opts };
       const { startCommand } = await import('./commands/start.js');
-      await startCommand(url, opts);
+      await startCommand(url, mergedOpts);
     });
 
   program

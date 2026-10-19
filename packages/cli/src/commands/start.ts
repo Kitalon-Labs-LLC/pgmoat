@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import {
   PGMOAT_VERSION,
@@ -153,9 +154,22 @@ export async function startCommand(
   let resolvedConfigPath: string;
 
   if (isZero && urlOrConfig) {
-    // Zero-config start
+    // Zero-config start from positional argument
     resolvedConfigPath = 'zero-config';
     config = buildZeroConfig(urlOrConfig);
+  } else if (
+    options.urlEnv &&
+    !options.config &&
+    (!urlOrConfig || urlOrConfig.startsWith('-')) &&
+    !fs.existsSync(path.resolve(process.cwd(), './pgmoat.yaml'))
+  ) {
+    // Zero-config start from --url-env when no config file is present
+    const urlVal = process.env[options.urlEnv];
+    if (!urlVal) {
+      throw refuse('PGM-109', 'Environment variable ' + options.urlEnv + ' is not defined');
+    }
+    resolvedConfigPath = 'zero-config';
+    config = buildZeroConfig(urlVal);
   } else {
     // Config-file start
     const cfgPath = options.config ?? (urlOrConfig && !urlOrConfig.startsWith('-') ? urlOrConfig : './pgmoat.yaml');
