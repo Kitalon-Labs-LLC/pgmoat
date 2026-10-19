@@ -1,0 +1,40 @@
+name: Performance Benchmarks
+
+on:
+  pull_request:
+    paths:
+      - 'packages/**'
+      - '.github/workflows/bench.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    name: NFR Performance Regression Guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Run performance benchmark suite
+        run: ./node_modules/.bin/vitest run packages/core/bench/ --fileParallelism=false
+        env:
+          CI: 'true'
