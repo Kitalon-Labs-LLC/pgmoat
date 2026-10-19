@@ -31,6 +31,7 @@ export interface Runtime {
   readonly allowUnsafeRole: boolean;
   readonly doctorFindings: readonly DoctorFinding[];
   readonly toolDeps: ToolDeps;
+  readonly currentUser: string;
   readonly inFlightCount: number;
   readonly isShuttingDown: boolean;
   incrementInFlight(): void;
@@ -263,6 +264,7 @@ export async function createRuntime(
     allowUnsafeRole,
     doctorFindings,
     toolDeps,
+    currentUser: initialIntrospection.currentUser,
     get inFlightCount() {
       return inFlight;
     },
