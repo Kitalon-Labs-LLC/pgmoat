@@ -1,8 +1,6 @@
 /* eslint-disable security/detect-object-injection */
-import { AsyncLocalStorage } from 'node:async_hooks';
 import crypto from 'node:crypto';
 import type {
-  Principal,
   RequestContext,
   ToolName,
   Transport,
@@ -54,10 +52,8 @@ export function parseTraceId(traceparent: unknown): string | null {
   return traceId;
 }
 
-/**
- * AsyncLocalStorage for request principal (used in HTTP auth).
- */
-export const principalStorage = new AsyncLocalStorage<Principal>();
+import { principalStorage } from '../server/principal-context.js';
+export { principalStorage };
 
 export interface ToolDeps {
   readonly config: PgmoatConfigT;

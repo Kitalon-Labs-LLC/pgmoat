@@ -180,7 +180,7 @@ export async function createRuntime(
     config,
     audit,
     instanceId,
-    transport: options?.transport ?? 'stdio',
+    transport: options?.transport ?? (config.transport as Transport) ?? 'stdio',
     unsafeRoleOverride: allowUnsafeRole,
     schemaCache,
     pools,

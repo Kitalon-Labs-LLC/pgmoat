@@ -31,3 +31,4 @@ export function buildProtectedResourceMetadata(
 export function getPrmUrl(publicUrl: string): string {
   return new URL('/.well-known/oauth-protected-resource', publicUrl).toString();
 }
+

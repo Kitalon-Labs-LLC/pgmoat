@@ -268,7 +268,7 @@ export async function startHttp(
           // Stateless execution: new McpServer and transport per request
           runtime.incrementInFlight();
 
-          const mcpServer = createServer(runtime.toolDeps);
+          const mcpServer = createServer({ ...runtime.toolDeps, transport: 'http' });
           const transport = new NodeStreamableHTTPServerTransport({
             sessionIdGenerator: undefined,
           });

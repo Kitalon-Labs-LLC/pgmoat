@@ -164,8 +164,8 @@ export async function runDoctor(
     }
 
     // 3. PGM-703: Role owns protected table without FORCE ROW LEVEL SECURITY
-    // 4. PGM-704: Protected table has RLS disabled
-    for (const tableName of config.rls.protected_tables) {
+    const protectedTables = config.rls.protected_tables ?? [];
+    for (const tableName of protectedTables) {
       const rel = introspection.relations.find(
         (r) =>
           r.name === tableName ||
