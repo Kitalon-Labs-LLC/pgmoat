@@ -1,0 +1,18 @@
+---
+title: "Allowed Functions"
+description: "Safe function allowlist in pgmoat"
+---
+
+# Allowed Functions
+
+pgmoat enforces a strict function whitelist to prevent server-side exfiltration or execution attacks:
+
+## Safe Functions Allowed
+- **Aggregates**: \`count\`, \`sum\`, \`avg\`, \`min\`, \`max\`, \`string_agg\`, \`array_agg\`
+- **Mathematical**: \`abs\`, \`ceil\`, \`floor\`, \`round\`, \`sqrt\`, \`power\`, \`mod\`
+- **String & Formatting**: \`length\`, \`lower\`, \`upper\`, \`substr\`, \`concat\`, \`trim\`, \`to_char\`
+- **Date & Time**: \`now\`, \`current_timestamp\`, \`date_trunc\`, \`age\`, \`extract\`
+- **JSON**: \`jsonb_extract_path\`, \`jsonb_typeof\`, \`json_array_length\`
+
+## Prohibited Functions
+Functions that interact with the host system or server state (e.g. \`pg_read_file\`, \`pg_sleep\`, \`dblink\`, \`query_to_xml\`, administrative functions) are blocked with \`PGM-205\`.

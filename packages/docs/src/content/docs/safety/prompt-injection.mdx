@@ -1,0 +1,14 @@
+---
+title: "Prompt Injection Defense"
+description: "Mitigating indirect prompt injection via database contents"
+---
+
+# Prompt Injection Defense
+
+When an AI agent reads data from a database that contains user-submitted content (e.g. support tickets, reviews), malicious actors may attempt **indirect prompt injection** to hijack the agent.
+
+## How pgmoat Helps
+
+1. **Untrusted Content Flagging**: Columns marked \`untrusted: true\` are highlighted in results so the agent's system prompt can fence user text.
+2. **Read-Only Containment**: Even if an agent's reasoning is compromised by injected text, pgmoat makes it impossible for the agent to execute any write or drop queries against the database.
+3. **No External Tools Combined with Sensitive Roles**: pgmoat recommends isolating database query agents from agents equipped with outbound email, Slack, or webhook execution tools.

@@ -1,0 +1,19 @@
+---
+title: "Safety Guarantees & Boundaries"
+description: "How pgmoat guarantees read-only access and data protection"
+---
+
+# Safety Guarantees & Boundaries
+
+## What pgmoat Guarantees
+
+| Guarantee | Enforcement Mechanism |
+|---|---|
+| **Zero Writes** | AST validation rejects DML, DDL, write CTEs, COPY; Postgres session is SET TRANSACTION READ ONLY. |
+| **Hidden Data Protection** | Tables and columns designated hidden in config are rejected if referenced in SQL (including SELECT *, wildcards, subqueries, and whole-row references). |
+| **No Cross-Tenant Leaks** | Authenticated claims set local session variables; missing required claims abort before query execution. |
+| **Tamper-Evident Audit** | Every query (successful or refused) is hashed into an append-only SHA-256 chain. |
+
+## Residual Boundaries
+- Custom PL/pgSQL functions marked IMMUTABLE or STABLE that internally modify data outside the transaction are blocked by the function whitelist.
+- Physical database denial of service: mitigated by timeout deadlines and row limits.

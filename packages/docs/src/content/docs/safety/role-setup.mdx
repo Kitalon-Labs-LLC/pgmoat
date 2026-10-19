@@ -1,0 +1,25 @@
+---
+title: "Database Role Setup"
+description: "Creating a hardened, least-privilege PostgreSQL user"
+---
+
+# Database Role Setup
+
+Run \`pgmoat doctor\` to audit your PostgreSQL role. Here is the recommended least-privilege setup:
+
+\`\`\`sql
+-- 1. Create dedicated agent role without superuser privileges
+CREATE ROLE readonly_agent WITH LOGIN PASSWORD 'strong_password_here' NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+
+-- 2. Grant connection and schema usage
+GRANT CONNECT ON DATABASE app_db TO readonly_agent;
+GRANT USAGE ON SCHEMA public TO readonly_agent;
+
+-- 3. Grant SELECT only on visible tables
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO readonly_agent;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO readonly_agent;
+
+-- 4. Revoke access to sensitive tables
+REVOKE ALL ON public.secrets FROM readonly_agent;
+REVOKE ALL ON public.password_hashes FROM readonly_agent;
+\`\`\`

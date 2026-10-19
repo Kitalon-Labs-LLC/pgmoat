@@ -21,7 +21,7 @@
     "check:licenses": "node tools/check-licenses.mjs",
     "gen:errors": "node tools/gen-errors.mjs",
     "check:errors": "node tools/gen-errors.mjs --check",
-    "check:docs": "echo 'check:docs placeholder' && exit 0"
+    "check:docs": "node tools/gen-docs.mjs --check"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",

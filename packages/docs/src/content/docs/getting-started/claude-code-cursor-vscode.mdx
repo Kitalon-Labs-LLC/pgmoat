@@ -1,0 +1,45 @@
+---
+title: "Claude Code, Cursor, and VS Code"
+description: "Configure pgmoat with developer tools"
+---
+
+# Developer Tool Setup
+
+## Cursor (.cursor/mcp.json)
+
+\`\`\`json
+{
+  "mcpServers": {
+    "pgmoat": {
+      "command": "npx",
+      "args": ["-y", "pgmoat", "start", "--url-env", "PGMOAT_DATABASE_URL"],
+      "env": {
+        "PGMOAT_DATABASE_URL": "postgresql://readonly@localhost:5432/app"
+      }
+    }
+  }
+}
+\`\`\`
+
+## Claude Code CLI
+
+Add pgmoat to your project:
+
+\`\`\`bash
+claude mcp add pgmoat npx -y pgmoat start --url-env PGMOAT_DATABASE_URL
+\`\`\`
+
+## VS Code
+
+In \`.vscode/settings.json\` or your MCP extensions settings:
+
+\`\`\`json
+{
+  "mcp.servers": {
+    "pgmoat": {
+      "command": "npx",
+      "args": ["-y", "pgmoat", "start", "--url-env", "PGMOAT_DATABASE_URL"]
+    }
+  }
+}
+\`\`\`

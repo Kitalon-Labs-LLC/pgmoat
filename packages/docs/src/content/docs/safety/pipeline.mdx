@@ -1,0 +1,14 @@
+---
+title: "The Safety Pipeline"
+description: "How SQL queries are verified before execution"
+---
+
+# The Safety Pipeline
+
+Every query passes through a multi-stage validation pipeline before executing against Postgres:
+
+1. **SQL Parse (libpg-query)**: The exact Postgres parser parses the query into a syntax AST. Multi-statements, comments hiding syntax, and invalid SQL fail immediately.
+2. **Statement Classifier**: Confirms the root node is a pure \`SelectStmt\`. Rejects INSERT, UPDATE, DELETE, MERGE, DROP, ALTER, CREATE, COPY, and data-modifying CTEs.
+3. **Function Allowlist**: Scans all function calls against an allowlist of safe math, string, aggregate, and date functions. Blocks administrative, file, and network functions.
+4. **Policy Check**: Traverses all referenced relations and columns. Verifies that no target is hidden or in a disallowed schema.
+5. **Execution in Read-Only Transaction**: Runs inside a dedicated read-only transaction (\`SET TRANSACTION READ ONLY\`) with timeout budgets.

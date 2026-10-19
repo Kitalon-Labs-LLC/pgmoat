@@ -1,0 +1,18 @@
+---
+title: "Threat Model"
+description: "Security architecture and trust boundaries in pgmoat"
+---
+
+# Threat Model
+
+## Assumptions & Boundaries
+
+- **The LLM is untrusted**: The model may generate malicious, malformed, or hallucinated SQL.
+- **The Database Network is trusted or TLS-encrypted**: pgmoat connects directly to PostgreSQL using standard connection pools with SSL support.
+- **The Client Identity is authenticated**: When running in HTTP mode, tokens are verified via cryptographic JWKS before principal extraction.
+
+## Adversarial Attacks Mitigated
+- Multi-query smuggling (\`SELECT 1; DROP TABLE users\`) -> Rejected by libpg-query parser.
+- Write CTEs (\`WITH deleted AS (DELETE FROM ...) SELECT ...\`) -> Rejected by statement classifier.
+- Catalog snooping (\`SELECT * FROM pg_shadow\`) -> Catalog queries disabled by default.
+- Cross-tenant data exfiltration -> RLS policy enforcement.

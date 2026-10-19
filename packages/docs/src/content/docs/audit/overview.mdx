@@ -1,0 +1,25 @@
+---
+title: "Audit Trail & Verification"
+description: "Tamper-evident cryptographic auditing in pgmoat"
+---
+
+# Audit Trail & Verification
+
+pgmoat records every tool invocation, SQL statement, parameters, tenant context, and execution status.
+
+## Tamper-Evident Hash Chain
+
+Each audit entry is sealed with a SHA-256 hash chaining the previous entry's hash:
+
+\`\`\`
+Entry 0: hash = SHA256("01JAB..." + 0 + payload)
+Entry 1: hash = SHA256(hash_0 + 1 + payload)
+\`\`\`
+
+To verify log integrity at any time:
+
+\`\`\`bash
+pgmoat audit verify --path ./pgmoat-audit
+\`\`\`
+
+If any record is modified, deleted, or inserted, verification fails and pinpoints the corrupted sequence number.

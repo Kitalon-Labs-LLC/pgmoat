@@ -1,0 +1,28 @@
+---
+title: "Row-Level Security (RLS)"
+description: "Propagating tenant context into native PostgreSQL RLS"
+---
+
+# Row-Level Security
+
+pgmoat propagates principal context into PostgreSQL session variables inside the transaction before executing queries:
+
+\`\`\`yaml
+rls:
+  required: true
+  session_variables:
+    app.tenant_id: "token.tenant_id"
+    app.user_id: "token.sub"
+\`\`\`
+
+## Postgres Policy Example
+
+\`\`\`sql
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation_policy ON orders
+  FOR SELECT
+  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+\`\`\`
+
+When a query runs, pgmoat executes \`SET LOCAL app.tenant_id = '...'\` inside the read-only transaction, ensuring complete cryptographic tenant isolation.
