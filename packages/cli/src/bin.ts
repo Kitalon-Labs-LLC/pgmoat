@@ -118,15 +118,67 @@ export function createProgram(): Command {
       await doctorCommand(opts);
     });
 
-  program
+  const audit = program
     .command('audit')
-    .description('tail | query | verify | prune audit logs')
-    .argument('<subcommand>', 'tail | query | verify | prune')
-    .allowUnknownOption(true)
-    .action(async (subcommand, _opts, cmd) => {
-      // Stub for P8.5
+    .description('tail | query | verify | prune audit logs');
+
+  audit
+    .command('tail')
+    .description('Tail audit logs')
+    .option('--since <since>', 'Since time')
+    .option('--until <until>', 'Until time')
+    .option('--tool <tool>', 'Filter by tool')
+    .option('--status <status>', 'Filter by status')
+    .option('--tenant <tenant>', 'Filter by tenant')
+    .option('--principal <principal>', 'Filter by principal')
+    .option('--format <format>', 'Output format: table, csv, ndjson', 'table')
+    .option('--path <path>', 'Audit directory path')
+    .option('--postgres', 'Query Postgres audit table')
+    .option('--url <url>', 'Postgres connection URL')
+    .option('--follow', 'Follow newest entries')
+    .action(async (opts) => {
       const { auditCommand } = await import('./commands/audit.js');
-      await auditCommand(subcommand, cmd.args.slice(1));
+      await auditCommand('tail', opts);
+    });
+
+  audit
+    .command('query')
+    .description('Query audit logs')
+    .option('--since <since>', 'Since time')
+    .option('--until <until>', 'Until time')
+    .option('--tool <tool>', 'Filter by tool')
+    .option('--status <status>', 'Filter by status')
+    .option('--tenant <tenant>', 'Filter by tenant')
+    .option('--principal <principal>', 'Filter by principal')
+    .option('--format <format>', 'Output format: table, csv, ndjson', 'table')
+    .option('--path <path>', 'Audit directory path')
+    .option('--postgres', 'Query Postgres audit table')
+    .option('--url <url>', 'Postgres connection URL')
+    .action(async (opts) => {
+      const { auditCommand } = await import('./commands/audit.js');
+      await auditCommand('query', opts);
+    });
+
+  audit
+    .command('verify')
+    .description('Verify tamper-evident hash chain')
+    .option('--path <path>', 'Audit directory path')
+    .option('--postgres', 'Verify Postgres audit table')
+    .option('--url <url>', 'Postgres connection URL')
+    .action(async (opts) => {
+      const { auditCommand } = await import('./commands/audit.js');
+      await auditCommand('verify', opts);
+    });
+
+  audit
+    .command('prune')
+    .description('Prune old audit files')
+    .option('--path <path>', 'Audit directory path')
+    .option('--older-than <duration>', 'Prune files older than duration', '30d')
+    .option('--dry-run', 'List files without deleting')
+    .action(async (opts) => {
+      const { auditCommand } = await import('./commands/audit.js');
+      await auditCommand('prune', opts);
     });
 
   program

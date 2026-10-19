@@ -3,6 +3,7 @@ export * from './errors.js';
 export * from './types.js';
 export * from './config/index.js';
 export * from './postgres/index.js';
+export { default as pg } from 'pg';
 export * from './rls/index.js';
 export * from './output/values.js';
 export * from './output/schemas.js';
