@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import {
   PGMOAT_VERSION,
@@ -5,6 +6,7 @@ import {
   loadConfig,
   createRuntime,
   startStdio,
+  startHttp,
   refuse,
   type PgmoatConfigT,
   DoctorEnforceError,
@@ -47,8 +49,19 @@ export function formatStartBanner(
   // Config line
   lines.push(`config     ${configPath}`);
 
-  // Transport
-  lines.push(`transport  stdio  (MCP 2026-07-28 and 2025-11-25)`);
+  // Transport & Auth lines
+  if (config.transport === 'http') {
+    const pubUrlStr = config.http.public_url ? `  public url ${config.http.public_url}` : '';
+    lines.push(`transport  http  listening on ${config.http.host}:${config.http.port}${config.http.path}${pubUrlStr}`);
+    if (config.auth && config.auth.mode === 'oauth') {
+      const issuerStr = config.auth.issuer ? `issuer ${config.auth.issuer}  ` : '';
+      lines.push(`auth       oauth  ${issuerStr}scopes ${config.auth.required_scopes.join(' ')}`);
+    } else {
+      lines.push(`auth       none`);
+    }
+  } else {
+    lines.push(`transport  stdio  (MCP 2026-07-28 and 2025-11-25)`);
+  }
 
   // Database line
   const host = runtime.dbHost ?? 'localhost';
@@ -144,6 +157,19 @@ export async function startCommand(
     // Zero-config start
     resolvedConfigPath = 'zero-config';
     config = buildZeroConfig(urlOrConfig);
+  } else if (
+    options.urlEnv &&
+    !options.config &&
+    (!urlOrConfig || urlOrConfig.startsWith('-')) &&
+    !fs.existsSync(path.resolve(process.cwd(), './pgmoat.yaml'))
+  ) {
+    // Zero-config start from --url-env when no config file is present
+    const urlVal = process.env[options.urlEnv];
+    if (!urlVal) {
+      throw refuse('PGM-109', 'Environment variable ' + options.urlEnv + ' is not defined');
+    }
+    resolvedConfigPath = 'zero-config';
+    config = buildZeroConfig(urlVal);
   } else {
     // Config-file start
     const cfgPath = options.config ?? (urlOrConfig && !urlOrConfig.startsWith('-') ? urlOrConfig : './pgmoat.yaml');
@@ -175,10 +201,7 @@ export async function startCommand(
     };
   }
 
-  if (config.transport === 'http') {
-    process.stderr.write('HTTP transport arrives in P9\n');
-    process.exit(1);
-  }
+
 
   let runtime: Awaited<ReturnType<typeof createRuntime>>;
   try {
@@ -238,11 +261,15 @@ export async function startCommand(
     process.stderr.write(banner + '\n');
   }
 
-  // Start stdio transport
-  startStdio(runtime, {
-    isZeroConfig: isZero,
-    fromArgvPassword,
-  });
+  // Start transport
+  if (config.transport === 'http') {
+    await startHttp(runtime);
+  } else {
+    startStdio(runtime, {
+      isZeroConfig: isZero,
+      fromArgvPassword,
+    });
+  }
 
   // Watch mode if requested
   if (options.watch && !isZero) {

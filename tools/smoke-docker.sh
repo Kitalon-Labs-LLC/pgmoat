@@ -57,8 +57,8 @@ const child = spawn("docker", [
 let stdout = "";
 child.stdout.on("data", (chunk) => {
   stdout += chunk.toString();
-  if (stdout.includes("tools")) {
-    child.kill();
+  if (/describe_table/.test(stdout)) {
+    setTimeout(() => child.kill(), 100);
   }
 });
 
