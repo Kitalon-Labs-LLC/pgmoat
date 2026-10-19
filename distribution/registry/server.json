@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.kitalonlabs/pgmoat",
+  "description": "Governed, read-only Postgres access for AI agents: layered SQL safety, RLS, budgets, tamper-evident audit.",
+  "repository": {
+    "url": "https://github.com/kitalonlabs/pgmoat",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "pgmoat",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "PGMOAT_DATABASE_URL",
+          "description": "Postgres connection URL (use a read-only role)",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
