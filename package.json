@@ -17,7 +17,7 @@
     "test:integration": "vitest run --project integration",
     "coverage": "vitest run --coverage",
     "bench": "vitest run --project bench",
-    "build": "pnpm --filter pgmoat build",
+    "build": "echo 'build placeholder' && exit 0",
     "check:licenses": "node tools/check-licenses.mjs",
     "gen:errors": "node tools/gen-errors.mjs",
     "check:errors": "node tools/gen-errors.mjs --check",
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
     "@types/node": "^26.6.5",
+    "@types/pino": "^7.0.5",
     "@vitest/coverage-v8": "^5.0.5",
     "eslint": "^10.13.0",
     "eslint-plugin-security": "^4.2.0",

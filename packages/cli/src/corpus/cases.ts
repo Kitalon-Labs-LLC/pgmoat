@@ -2,9 +2,12 @@
 export interface CorpusCase {
   id: string;
   group: string;
+  name: string;
   sql: string;
   config?: string;
   expect: {
+    allowed: boolean;
+    code?: string;
     allowed?: boolean;
     refused?: string;
   };

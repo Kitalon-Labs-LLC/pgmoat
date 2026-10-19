@@ -118,3 +118,4 @@ export function renderYaml(options: RenderYamlOptions): string {
 
   return lines.join('\n') + '\n';
 }
+

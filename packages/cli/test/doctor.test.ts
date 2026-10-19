@@ -92,3 +92,4 @@ Result: 0 failures, 1 warning.`;
     expect(report.warningsCount).toBe(0);
   });
 });
+

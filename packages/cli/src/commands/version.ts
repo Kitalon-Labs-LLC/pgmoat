@@ -30,3 +30,4 @@ export async function versionCommand(): Promise<void> {
     );
   }
 }
+

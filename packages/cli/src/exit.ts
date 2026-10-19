@@ -45,3 +45,4 @@ export function exitWithError(
   const code = getExitCode(error);
   process.exit(code);
 }
+
