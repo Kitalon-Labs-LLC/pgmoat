@@ -110,3 +110,4 @@ Expected output:
   - `sha256_hash` computed over canonical record fields
   - `prev_hash` linking to the previous entry
   - `tool_name`, `sql_sha256`, and redacted parameter values
+

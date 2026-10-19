@@ -32,3 +32,4 @@ This example demonstrates deploying `pgmoat` alongside `pgvector` for Retrieval-
    ```bash
    docker compose down -v
    ```
+

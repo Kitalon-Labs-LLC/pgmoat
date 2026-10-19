@@ -24,3 +24,4 @@ INSERT INTO daily_metrics (metric_date, active_users, total_events, revenue) VAL
 (CURRENT_DATE - 3, 450, 12400, 34200.50),
 (CURRENT_DATE - 2, 480, 13150, 38900.00),
 (CURRENT_DATE - 1, 510, 14200, 41250.75);
+

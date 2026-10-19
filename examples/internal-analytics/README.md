@@ -32,3 +32,4 @@ This example demonstrates deploying `pgmoat` against a read replica or analytics
    ```bash
    docker compose down -v
    ```
+

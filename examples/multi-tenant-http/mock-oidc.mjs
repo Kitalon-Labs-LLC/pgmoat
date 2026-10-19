@@ -56,3 +56,4 @@ const server = http.createServer((req, res) => {
 server.listen(9090, '127.0.0.1', () => {
   console.log('Mock OIDC Identity Provider listening on http://127.0.0.1:9090');
 });
+

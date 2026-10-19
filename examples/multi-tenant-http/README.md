@@ -33,3 +33,4 @@ This example demonstrates running `pgmoat` as a centralized, multi-tenant Stream
    ```bash
    docker compose down -v
    ```
+

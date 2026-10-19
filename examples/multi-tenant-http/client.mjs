@@ -71,3 +71,4 @@ try {
   pgmoatProc.kill();
   oidcProc.kill();
 }
+

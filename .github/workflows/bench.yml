@@ -38,3 +38,4 @@ jobs:
         run: ./node_modules/.bin/vitest run packages/core/bench/ --fileParallelism=false
         env:
           CI: 'true'
+

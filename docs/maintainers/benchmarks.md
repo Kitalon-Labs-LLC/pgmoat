@@ -50,3 +50,4 @@ To run a specific benchmark:
 ## CI Integration
 
 The benchmark suite runs automatically on every pull request that touches core packages via `.github/workflows/bench.yml`. If any metric degrades beyond its target threshold, the workflow fails, preventing performance regressions from landing in release branches.
+

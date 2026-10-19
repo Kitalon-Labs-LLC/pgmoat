@@ -128,3 +128,4 @@ jobs:
             chmod +x /tmp/mcp-publisher
             /tmp/mcp-publisher publish --manifest distribution/registry/server.json || echo "mcp-publisher output logged"
           fi
+

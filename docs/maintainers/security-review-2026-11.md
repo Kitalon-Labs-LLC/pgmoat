@@ -67,3 +67,4 @@ This document records the comprehensive security self-review of `pgmoat` v1.0.0,
 | **ASI-05 Improper Resource Consumption** | Statement timeout (`statement_timeout_ms`) and SQL size limits prevent denial of service. |
 | **ASI-07 Data Exposure** | Column masking, schema allow-listing, and RLS session parameter binding prevent horizontal and vertical privilege escalation. |
 | **ASI-08 Insecure Plugin / Tool Integration** | Standard MCP protocol integration with RFC 9728 Protected Resource Metadata and DNS rebinding protections. |
+

@@ -16,3 +16,4 @@ INSERT INTO tenant_documents (tenant_id, title, secret_data) VALUES
 ('tenant_alpha', 'Alpha Financials', 'Alpha budget details'),
 ('tenant_beta', 'Beta Operations', 'Confidential beta infrastructure key'),
 ('tenant_beta', 'Beta Customer List', 'Beta client directory');
+
