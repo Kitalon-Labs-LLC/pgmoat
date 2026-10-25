@@ -231,6 +231,7 @@ footer{border-top:1px solid var(--line);background:var(--card)}
     <a class="brand" href="/">Kitalon Labs</a>
     <span class="brand-sub">/ <a href="#top">pgmoat</a></span>
     <nav class="bar-links" aria-label="Page">
+      <a href="#install">Install</a>
       <a href="#quickstart">Quickstart</a>
       <a href="#safety">Safety</a>
       <a href="#errors">Errors</a>
@@ -242,12 +243,13 @@ footer{border-top:1px solid var(--line);background:var(--card)}
 <div class="hero" id="top">
   <div class="hero-in gutter">
     <div>
-      <div class="eyebrow">Open source &middot; MIT &middot; MCP server for Postgres</div>
+      <div class="eyebrow">Open source &middot; MIT &middot; MCP server for Postgres &middot; v0.1.1</div>
       <h1>Governed Postgres access for AI agents.</h1>
       <p class="sub">pgmoat lets Claude and other MCP clients query your database with read-only access enforced in layers, hidden columns that stay hidden, rows scoped to the right tenant, and an audit log you can verify.</p>
       <div class="cta">
         <a class="btn primary" href="#quickstart">Quickstart</a>
-        <a class="btn" href="#how">How queries are checked</a>
+        <a class="btn" href="https://github.com/Kitalon-Labs-LLC/pgmoat" rel="noopener">GitHub</a>
+        <a class="btn" href="https://www.npmjs.com/package/pgmoat" rel="noopener">npm</a>
       </div>
       <figure class="code" data-copy>
         <figcaption><span>one command, safe defaults</span><button class="copy" type="button">Copy</button></figcaption>
@@ -255,7 +257,7 @@ footer{border-top:1px solid var(--line);background:var(--card)}
       </figure>
       <ul class="facts">
         <li><b>5</b> read tools</li>
-        <li><b>315</b> public safety test cases</li>
+        <li><b>321</b> public safety test cases</li>
         <li><b>68</b> documented error codes</li>
         <li><b>MIT</b> licensed</li>
       </ul>
@@ -263,8 +265,8 @@ footer{border-top:1px solid var(--line);background:var(--card)}
     <div class="tx" role="group" aria-label="Three example tool calls and how pgmoat answers them">
       <div class="tx-bar"><span>agent &rarr; pgmoat</span><span>real output from the safety pipeline</span></div>
       <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>SELECT id, name FROM customers WHERE tier = 'enterprise'</code></div><div class="tx-res"><span class="st ok">allowed</span><span class="l1">runs as: SELECT id, name FROM customers WHERE tier = 'enterprise' LIMIT 201</span></div></div>
-      <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>COMMIT; DROP SCHEMA public CASCADE</code></div><div class="tx-res"><span class="st no">refused PGM-204</span><span class="l1">Expected exactly 1 statement, got 2</span><span>Send one statement per call</span><br><span>https://kitalonlabs.com/pgmoat/#PGM-204</span></div></div>
-      <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>SELECT password_hash FROM users</code></div><div class="tx-res"><span class="st no">refused PGM-208</span><span class="l1">Column access not allowed. Unqualified column &quot;password_hash&quot; matches a hidden column. Qualify the column or use list_tables to see available columns. Allowed columns for public.users: id, name, email, created_at, updated_at, tenant_id, role</span><span>https://kitalonlabs.com/pgmoat/#PGM-208</span></div></div>
+      <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>COMMIT; DROP SCHEMA public CASCADE</code></div><div class="tx-res"><span class="st no">refused PGM-204</span><span class="l1">Expected exactly 1 statement, got 2</span><span>Send one statement per call</span><br><span>https://kitalonlabs.com/pgmoat/docs/errors/PGM-204</span></div></div>
+      <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>SELECT password_hash FROM users</code></div><div class="tx-res"><span class="st no">refused PGM-506</span><span class="l1">column &quot;password_hash&quot; does not exist</span><span>Hidden columns look exactly like missing ones.</span><br><span>https://kitalonlabs.com/pgmoat/docs/errors/PGM-506</span></div></div>
     </div>
   </div>
 </div>
@@ -276,6 +278,7 @@ footer{border-top:1px solid var(--line);background:var(--card)}
       <li><a href="#why">The problem</a></li>
       <li><a href="#guarantees">Guarantees</a></li>
       <li><a href="#how">How queries are checked</a></li>
+      <li><a href="#install">Install and download</a></li>
       <li><a href="#quickstart">Quickstart</a></li>
       <li><a href="#migrate">Migrating from server-postgres</a></li>
       <li><a href="#tools">The five tools</a></li>
@@ -301,6 +304,7 @@ footer{border-top:1px solid var(--line);background:var(--card)}
         <li><a href="#why">The problem</a></li>
         <li><a href="#guarantees">Guarantees</a></li>
         <li><a href="#how">How queries are checked</a></li>
+        <li><a href="#install">Install and download</a></li>
         <li><a href="#quickstart">Quickstart</a></li>
         <li><a href="#migrate">Migrating from server-postgres</a></li>
         <li><a href="#tools">The five tools</a></li>
@@ -337,7 +341,7 @@ footer{border-top:1px solid var(--line);background:var(--card)}
       <p class="lede">Six behaviors, each backed by a test in the public corpus. Section <a href="#safety">Safety model and limits</a> says plainly where each one stops.</p>
       <ul class="six">
         <li><h3>Read-only, in layers</h3><p>SQL is parsed with the real Postgres parser and checked against an allow-list. It then runs as one statement inside a <code>READ ONLY</code> transaction.</p></li>
-        <li><h3>Hidden means refused</h3><p>Tables and columns you mark hidden are refused in queries, including <code>SELECT *</code>, whole-row references and catalog lookups. They also never appear in tool output.</p></li>
+        <li><h3>Hidden means invisible</h3><p>Tables and columns you mark hidden are refused in queries, including <code>SELECT *</code>, whole-row references and catalog lookups. They never appear in tool output, and the error for a hidden table or column is the same as for one that does not exist.</p></li>
         <li><h3>Results sized for agents</h3><p>Limits on rows, time, columns, cell length and total bytes keep a result inside what a model can use.</p></li>
         <li><h3>Tenant from a verified identity</h3><p>A verified token claim, an environment value or a fixed value becomes a Postgres session setting, so your row-level security policies decide which rows are visible.</p></li>
         <li><h3>An annotated schema</h3><p>One YAML file holds short descriptions, sensitivity labels and hidden flags. The agent reads those instead of raw catalog dumps.</p></li>
@@ -351,7 +355,7 @@ footer{border-top:1px solid var(--line);background:var(--card)}
       <ol class="layers">
         <li><span class="n">1</span><h3>Parse</h3><p>The SQL is parsed with the real Postgres 18 grammar (<code>libpg-query</code>). SQL that cannot be parsed, is empty, or is too long is refused.</p><div class="codes"><a class="chip no" href="#PGM-206">PGM-206</a></div></li>
         <li><span class="n">2</span><h3>Classify</h3><p>Exactly one statement. Only <code>SELECT</code>, <code>SHOW</code> and plan-only <code>EXPLAIN</code> are allowed. A write is refused anywhere in the statement, including inside a <code>WITH</code> clause. <code>SELECT INTO</code> and locking clauses are refused. Every function must be on the allow-list.</p><div class="codes"><a class="chip no" href="#PGM-201">PGM-201</a><a class="chip no" href="#PGM-202">PGM-202</a><a class="chip no" href="#PGM-203">PGM-203</a><a class="chip no" href="#PGM-204">PGM-204</a><a class="chip no" href="#PGM-205">PGM-205</a><a class="chip no" href="#PGM-209">PGM-209</a></div></li>
-        <li><span class="n">3</span><h3>Access policy</h3><p>Every table must be visible to the agent. Hidden tables, unknown tables, tables outside the exposed schemas and system catalogs are refused with the same message, so the answer never reveals whether a hidden table exists. Hidden columns, whole-row references and <code>*</code> over hidden columns are refused, and the message lists the columns the agent may use.</p><div class="codes"><a class="chip no" href="#PGM-207">PGM-207</a><a class="chip no" href="#PGM-208">PGM-208</a></div></li>
+        <li><span class="n">3</span><h3>Access policy</h3><p>Every table must be visible to the agent. Hidden tables, unknown tables, tables outside the exposed schemas and system catalogs are refused with the same message, so the answer never reveals whether a hidden table exists. A hidden column gets the exact error Postgres gives for a column that does not exist, so guessing names reveals nothing. <code>*</code>, whole-row references, column alias lists and <code>NATURAL JOIN</code> on a table with hidden columns are refused, and the message lists the columns the agent may use.</p><div class="codes"><a class="chip no" href="#PGM-207">PGM-207</a><a class="chip no" href="#PGM-208">PGM-208</a><a class="chip no" href="#PGM-506">PGM-506</a></div></li>
         <li><span class="n">4</span><h3>Rewrite and re-check</h3><p>If the query has no <code>LIMIT</code>, pgmoat adds one by editing the syntax tree and regenerating the SQL. It then parses the new SQL and runs steps 2 and 3 again. If the result differs in any way except the limit, the query is refused and not run.</p><div class="codes"><a class="chip no" href="#PGM-302">PGM-302</a><a class="chip no" href="#PGM-210">PGM-210</a></div></li>
         <li><span class="n">5</span><h3>Execute</h3><p>The query runs as a single statement through the extended query protocol, inside <code>BEGIN READ ONLY</code>. Timeouts and tenant settings are set for that transaction only, as bound parameters. At most <code>max_rows + 1</code> rows are read, whatever the SQL says. A connection that errors is destroyed, not reused.</p><div class="codes"><a class="chip warn" href="#PGM-301">PGM-301</a><a class="chip no" href="#PGM-303">PGM-303</a></div></li>
         <li><span class="n">6</span><h3>Check the role</h3><p>Before the server starts, <code>pgmoat doctor</code> checks the database role for the mistakes that defeat everything above: superuser, <code>BYPASSRLS</code>, write grants and readable hidden columns.</p><div class="codes"><a class="chip info" href="#PGM-701">PGM-701 to PGM-707</a></div></li>
@@ -373,7 +377,8 @@ footer{border-top:1px solid var(--line);background:var(--card)}
             <tr><td><span class="muted small">Locking read</span><code class="sqlc">SELECT id FROM orders FOR UPDATE</code></td><td><span class="chip no">Refused</span> <a href="#PGM-202" class="chip info">PGM-202</a><span class="said">Row locking clauses (FOR UPDATE/SHARE) are not allowed in read-only mode</span></td></tr>
             <tr><td><span class="muted small">EXPLAIN that would execute</span><code class="sqlc">EXPLAIN ANALYZE SELECT id FROM orders</code></td><td><span class="chip no">Refused</span> <a href="#PGM-209" class="chip info">PGM-209</a><span class="said">EXPLAIN ANALYZE is not allowed because it executes the statement</span></td></tr>
             <tr><td><span class="muted small">Hidden table</span><code class="sqlc">SELECT * FROM internal_audit</code></td><td><span class="chip no">Refused</span> <a href="#PGM-207" class="chip info">PGM-207</a><span class="said">Table not available. Use list_tables to see the tables you can query.</span></td></tr>
-            <tr><td><span class="muted small">Hidden column</span><code class="sqlc">SELECT password_hash FROM users</code></td><td><span class="chip no">Refused</span> <a href="#PGM-208" class="chip info">PGM-208</a><span class="said">Column access not allowed. Unqualified column &quot;password_hash&quot; matches a hidden column. Qualify the column or use list_tables to see available columns. Allowed columns for public.users: id, name, email, created_at, updated_at, tenant_id, role</span></td></tr>
+            <tr><td><span class="muted small">Hidden column</span><code class="sqlc">SELECT password_hash FROM users</code></td><td><span class="chip no">Refused</span> <a href="#PGM-506" class="chip info">PGM-506</a><span class="said">column &quot;password_hash&quot; does not exist</span></td></tr>
+            <tr><td><span class="muted small">Column that does not exist</span><code class="sqlc">SELECT no_such_col FROM users</code></td><td><span class="chip no">Error</span> <a href="#PGM-506" class="chip info">PGM-506</a><span class="said">column &quot;no_such_col&quot; does not exist</span><span class="muted small">Same answer as a hidden column, so the agent cannot tell them apart.</span></td></tr>
             <tr><td><span class="muted small">Star over a hidden column</span><code class="sqlc">SELECT * FROM users</code></td><td><span class="chip no">Refused</span> <a href="#PGM-208" class="chip info">PGM-208</a><span class="said">Column access not allowed. Wildcard &quot;*&quot; on table with hidden columns. Allowed columns for public.users: id, name, email, created_at, updated_at, tenant_id, role</span></td></tr>
             <tr><td><span class="muted small">Whole-row reference</span><code class="sqlc">SELECT to_jsonb(u) FROM users u</code></td><td><span class="chip no">Refused</span> <a href="#PGM-208" class="chip info">PGM-208</a><span class="said">Column access not allowed. Whole-row reference to &quot;u&quot; exposes hidden columns. Allowed columns for public.users: id, name, email, created_at, updated_at, tenant_id, role</span></td></tr>
             <tr><td><span class="muted small">System catalog</span><code class="sqlc">SELECT * FROM pg_catalog.pg_class</code></td><td><span class="chip no">Refused</span> <a href="#PGM-207" class="chip info">PGM-207</a><span class="said">Table not available. Use list_tables to see the tables you can query.</span></td></tr>
@@ -381,6 +386,35 @@ footer{border-top:1px solid var(--line);background:var(--card)}
           </tbody>
         </table>
       </div>
+    </section>
+
+    <section class="sec" id="install">
+      <h2>Install and download</h2>
+      <p class="lede">pgmoat runs next to your AI client. The client starts it, sends it tool calls over MCP, and pgmoat checks each one before anything reaches Postgres.</p>
+      <figure class="code">
+        <figcaption><span>where pgmoat sits</span></figcaption>
+<pre><code>AI client (Claude, Cursor, VS Code)
+    |  MCP tool calls: list_tables, describe_table, query, ...
+    v
+pgmoat  -- parse, check, rewrite, audit
+    |  one read-only statement, as your read-only role
+    v
+Postgres 15 to 18</code></pre>
+      </figure>
+      <p>Current version: <b>v0.1.1</b>. Every channel below ships the same release.</p>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Get it from</th><th>Use it when</th><th>Command or link</th></tr></thead>
+          <tbody>
+            <tr><td class="k">npm</td><td>Most setups. Your MCP client runs it with <code>npx</code>, so there is nothing to install first.</td><td><code>npx -y pgmoat &lt;postgres-url&gt;</code><br><a href="https://www.npmjs.com/package/pgmoat" rel="noopener">npmjs.com/package/pgmoat</a></td></tr>
+            <tr><td class="k">Docker</td><td>Servers, containers and Kubernetes. Multi-architecture (amd64, arm64), non-root.</td><td><code>docker pull ghcr.io/kitalon-labs-llc/pgmoat:0.1.1</code><br>Tags: <code>0.1.1</code>, <code>0.1</code>, <code>latest</code></td></tr>
+            <tr><td class="k">Claude Desktop extension</td><td>Claude Desktop without a terminal. Download the <code>.mcpb</code> file and open it.</td><td><a href="https://github.com/Kitalon-Labs-LLC/pgmoat/releases/latest" rel="noopener">GitHub Releases</a> (<code>pgmoat-0.1.1.mcpb</code>)</td></tr>
+            <tr><td class="k">MCP Registry</td><td>Clients that install servers from the official registry.</td><td><code>io.github.Kitalon-Labs-LLC/pgmoat</code><br><a href="https://registry.modelcontextprotocol.io/v0/servers?search=pgmoat" rel="noopener">registry entry</a></td></tr>
+            <tr><td class="k">Source</td><td>Reading the code, running the tests or contributing.</td><td><a href="https://github.com/Kitalon-Labs-LLC/pgmoat" rel="noopener">github.com/Kitalon-Labs-LLC/pgmoat</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">npm releases are published from GitHub Actions with provenance, so you can check that a version was built from this repository: run <code>npm audit signatures</code> after installing.</p>
     </section>
 
     <section class="sec" id="quickstart">
@@ -432,9 +466,9 @@ GRANT SELECT (id, name, email, created_at) ON public.users TO pgmoat_reader;</co
             <figure class="code" data-copy>
         <figcaption><span>terminal</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>docker run --rm -i -e PGMOAT_DATABASE_URL=postgresql://pgmoat_reader@host:5432/app \
-  ghcr.io/kitalonlabs/pgmoat</code></pre>
+  ghcr.io/kitalon-labs-llc/pgmoat</code></pre>
       </figure>
-      <p class="small muted">A Claude Desktop extension (<code>.mcpb</code> bundle) is included in distribution releases. It prompts for the connection URL in a settings form and stores it as a sensitive credential.</p>
+      <p class="small muted">The image runs as a non-root user. For Claude Desktop you can also install the extension file (<code>.mcpb</code>) from <a href="#install">Install and download</a>; it asks for the connection URL in a settings form and stores it as a sensitive credential.</p>
 
       <h3>3. Ask a question</h3>
       <p>The agent starts with <code>list_tables</code>, then <code>describe_table</code>, then <code>query</code>. Every call is recorded in the audit log. Write something like "How many customers are on the enterprise tier?" and watch the tool calls.</p>
@@ -592,7 +626,7 @@ audit:
         </table>
       </div>
       <h3>Settings that are refused at startup</h3>
-      <p>Some combinations are unsafe, so pgmoat refuses to start with them instead of warning. Examples: audit to <code>stdout</code> over stdio (<a href="#PGM-111">PGM-111</a>), a tenant value taken from request metadata over HTTP (<a href="#PGM-112">PGM-112</a>), a token claim without HTTP and OAuth (<a href="#PGM-113">PGM-113</a>), and a public HTTP address without authentication (<a href="#PGM-114">PGM-114</a>). <code>mode: scoped-write</code> is refused in v1.0 (<a href="#PGM-102">PGM-102</a>).</p>
+      <p>Some combinations are unsafe, so pgmoat refuses to start with them instead of warning. Examples: audit to <code>stdout</code> over stdio (<a href="#PGM-111">PGM-111</a>), a tenant value taken from request metadata over HTTP (<a href="#PGM-112">PGM-112</a>), a token claim without HTTP and OAuth (<a href="#PGM-113">PGM-113</a>), and a public HTTP address without authentication (<a href="#PGM-114">PGM-114</a>). <code>mode: scoped-write</code> is refused until scoped writes ship (<a href="#PGM-102">PGM-102</a>).</p>
     </section>
 
     <section class="sec" id="rls">
@@ -765,7 +799,7 @@ ORDER BY ts;</code></pre>
       <h3>Known limits</h3>
       <ul>
         <li>The parser uses the Postgres 18 grammar. Syntax added in later versions is refused, not guessed.</li>
-        <li>An unqualified column name that matches a hidden column anywhere in scope is refused, even if another table has a harmless column of that name. Qualify the column with its table.</li>
+        <li>An unqualified column name that matches a hidden column anywhere in scope is answered as if the column does not exist, even if another table has a harmless column of that name. Qualify the column with its table.</li>
         <li>Custom operators backed by functions with side effects are not checked by name. <code>READ ONLY</code> and the role check are the protection.</li>
       </ul>
 
@@ -852,7 +886,7 @@ ORDER BY ts;</code></pre>
             <tr id="PGM-205"><td class="k"><a href="#PGM-205">PGM-205</a></td><td><span class="chip no">refused</span></td><td>Function not allowed</td><td>Use an allowed function; see docs/safety#functions</td></tr>
             <tr id="PGM-206"><td class="k"><a href="#PGM-206">PGM-206</a></td><td><span class="chip no">refused</span></td><td>SQL could not be parsed, is empty, or is too long</td><td>Fix the syntax; Postgres 18 grammar</td></tr>
             <tr id="PGM-207"><td class="k"><a href="#PGM-207">PGM-207</a></td><td><span class="chip no">refused</span></td><td>Relation not allowed: hidden, unknown, outside exposed schemas, or a system catalog</td><td>Use list_tables to see available tables</td></tr>
-            <tr id="PGM-208"><td class="k"><a href="#PGM-208">PGM-208</a></td><td><span class="chip no">refused</span></td><td>Column not allowed: hidden column, whole-row reference, or <code>*</code> on a table with hidden columns</td><td>Select the allowed columns listed in the message</td></tr>
+            <tr id="PGM-208"><td class="k"><a href="#PGM-208">PGM-208</a></td><td><span class="chip no">refused</span></td><td>Column not allowed: <code>*</code>, whole-row reference, column alias list, or <code>NATURAL JOIN</code> on a table with hidden columns. A hidden column named directly gets <a href="#PGM-506">PGM-506</a>, like a missing column.</td><td>Use describe_table to see the columns you can select</td></tr>
             <tr id="PGM-209"><td class="k"><a href="#PGM-209">PGM-209</a></td><td><span class="chip no">refused</span></td><td><code>EXPLAIN ANALYZE</code> would execute the statement</td><td>Use the explain tool for plans</td></tr>
             <tr id="PGM-210"><td class="k"><a href="#PGM-210">PGM-210</a></td><td><span class="chip no">refused</span></td><td>Internal safety invariant failed after rewrite</td><td>Report a bug; the query was not run</td></tr>
           </tbody>
@@ -913,7 +947,7 @@ ORDER BY ts;</code></pre>
             <tr id="PGM-503"><td class="k"><a href="#PGM-503">PGM-503</a></td><td><span class="chip no">error</span></td><td>Timed out waiting for a database connection</td><td>Raise <code>pool.max</code> or reduce concurrency</td></tr>
             <tr id="PGM-504"><td class="k"><a href="#PGM-504">PGM-504</a></td><td><span class="chip no">error</span></td><td>Database connection lost</td><td>Retry; check database health</td></tr>
             <tr id="PGM-505"><td class="k"><a href="#PGM-505">PGM-505</a></td><td><span class="chip info">canceled</span></td><td>Client canceled the request; query canceled</td><td>None</td></tr>
-            <tr id="PGM-506"><td class="k"><a href="#PGM-506">PGM-506</a></td><td><span class="chip no">error</span></td><td>Internal error</td><td>Report a bug with the request_id</td></tr>
+            <tr id="PGM-506"><td class="k"><a href="#PGM-506">PGM-506</a></td><td><span class="chip no">error</span></td><td>Error reported by Postgres, for example <code>column &quot;x&quot; does not exist</code>, or an internal error</td><td>Fix the query using the message; if it looks like a pgmoat bug, report it with the request_id</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -966,6 +1000,7 @@ ORDER BY ts;</code></pre>
       <h2>Reporting a security problem</h2>
       <p class="lede">If you think you found a way around a pgmoat guarantee, please tell us privately first.</p>
       <dl class="defs">
+        <dt>Private report</dt><dd><a href="https://github.com/Kitalon-Labs-LLC/pgmoat/security/advisories/new" rel="noopener">GitHub Security Advisories</a> (preferred)</dd>
         <dt>Email</dt><dd><a href="mailto:security@kitalonlabs.com">security@kitalonlabs.com</a></dd>
         <dt>Please do not</dt><dd>Open a public issue for a vulnerability.</dd>
         <dt>Acknowledgment</dt><dd>Within 72 hours.</dd>
@@ -976,13 +1011,14 @@ ORDER BY ts;</code></pre>
 
     <section class="sec" id="status">
       <h2>Status and roadmap</h2>
-      <p>pgmoat v0.1.0 is available now. The complete read-only core is built and verified: the safety checker, the Postgres execution path, row-level security settings, the audit log, the five tools, stdio and HTTP transports, and the CLI. Scoped writes with human confirmation and additional audit sinks are scheduled for v1.1.</p>
+      <p>pgmoat <b>v0.1.1</b> is the current release, published 25 October 2026. The complete read-only core is built and tested: the safety checker, the Postgres execution path, row-level security settings, the audit log, the five tools, stdio and HTTP transports, and the CLI. See the <a href="https://github.com/Kitalon-Labs-LLC/pgmoat/blob/main/CHANGELOG.md" rel="noopener">changelog</a> for every change.</p>
       <div class="tbl">
         <table>
           <thead><tr><th>Release</th><th>Contents</th></tr></thead>
           <tbody>
-            <tr><td class="k">v1.0</td><td>Read-only mode, five tools, stdio and HTTP with OAuth, budgets, row-level security settings, audit to file, stderr and Postgres, <code>doctor</code>, the public corpus, npm package, Docker image, Claude Desktop extension, MCP Registry listing.</td></tr>
-            <tr><td class="k">v1.1</td><td>Scoped writes on named tables and columns, each confirmed by a person. More audit destinations (Datadog, S3, OpenTelemetry), metrics and tracing, single-file binaries.</td></tr>
+            <tr><td class="k">v0.1.1 (current)</td><td>Hidden columns return the same error as missing columns, so their names cannot be confirmed by guessing. pgmoat exits cleanly on Ctrl+C, <code>docker stop</code> and client shutdown.</td></tr>
+            <tr><td class="k">v0.1.0</td><td>First public release: read-only mode, five tools, stdio and HTTP with OAuth, budgets, row-level security settings, audit to file, stderr and Postgres, <code>doctor</code>, the public corpus, npm package, Docker image, Claude Desktop extension, MCP Registry listing.</td></tr>
+            <tr><td class="k">Planned</td><td>Scoped writes on named tables and columns, each confirmed by a person. More audit destinations (Datadog, S3, OpenTelemetry), metrics and tracing, single-file binaries.</td></tr>
           </tbody>
         </table>
       </div>
@@ -991,9 +1027,9 @@ ORDER BY ts;</code></pre>
     <section class="sec" id="faq">
       <h2>Questions</h2>
       <details class="faq"><summary>Does pgmoat send my data anywhere?</summary><p>pgmoat talks to the Postgres database you configure, to your MCP client, and to the audit destination you configure. Telemetry is off by default and nothing is sent unless you turn it on.</p></details>
-      <details class="faq"><summary>Which Postgres versions and MCP clients work?</summary><p>Postgres 15, 16, 17 and 18. Any client that speaks MCP 2026-07-28 or 2025-11-25. Claude Desktop, Claude Code, Cursor, VS Code and the MCP Inspector are the clients it is being tested with.</p></details>
-      <details class="faq"><summary>Can the agent write data?</summary><p>Not in v1.0. Every write is refused at the parser and again by the read-only transaction. Scoped writes with human confirmation are planned for v1.1.</p></details>
-      <details class="faq"><summary>Does it work with Supabase, Neon or RDS?</summary><p>It connects to any Postgres. Use a dedicated role there, not the default service role, because roles that bypass row-level security defeat the isolation. Checking <code>doctor</code> output on each hosted provider is part of the pre-launch checklist.</p></details>
+      <details class="faq"><summary>Which Postgres versions and MCP clients work?</summary><p>Postgres 15, 16, 17 and 18, tested in CI on each. Any client that speaks MCP 2026-07-28 or 2025-11-25, such as Claude Desktop, Claude Code, Cursor and VS Code. Node.js 22.12 or later.</p></details>
+      <details class="faq"><summary>Can the agent write data?</summary><p>No. Every write is refused at the parser and again by the read-only transaction. Scoped writes with human confirmation are planned for a later release.</p></details>
+      <details class="faq"><summary>Does it work with Supabase, Neon or RDS?</summary><p>It connects to any Postgres. Use a dedicated role there, not the default service role, because roles that bypass row-level security defeat the isolation. Run <code>pgmoat doctor</code> against the provider to check the role before you connect an agent.</p></details>
       <details class="faq"><summary>Is pgmoat an OAuth server?</summary><p>No. It validates tokens issued by your identity provider and never issues, stores or forwards them.</p></details>
       <details class="faq"><summary>Can I run it behind PgBouncer?</summary><p>Yes in transaction mode. Statement mode is not supported, because pgmoat relies on transaction-local settings.</p></details>
       <details class="faq"><summary>What does it cost?</summary><p>Nothing. pgmoat is MIT licensed, with no features held back for a paid edition.</p></details>
@@ -1007,7 +1043,7 @@ ORDER BY ts;</code></pre>
       <h2>pgmoat</h2>
       <p>Governed Postgres access for AI agents. Built by <a href="/">Kitalon Labs</a>, an applied AI studio in Dhaka, Bangladesh.</p>
       <p>MIT licensed. Copyright 2026 Kitalon Labs.</p>
-            <p class="small muted">Last updated 24 October 2026.</p>
+            <p class="small muted">Last updated 25 October 2026 for v0.1.1.</p>
     </div>
     <div>
       <h2>Links</h2>
@@ -1016,7 +1052,10 @@ ORDER BY ts;</code></pre>
         <li><a href="#safety">Safety model</a></li>
         <li><a href="#errors">Error codes</a></li>
         <li><a href="mailto:security@kitalonlabs.com">security@kitalonlabs.com</a></li>
-                <li>Source: <a href="https://github.com/Kitalon-Labs-LLC/pgmoat" rel="noopener">github.com/Kitalon-Labs-LLC/pgmoat</a></li>
+        <li><a href="#install">Install and download</a></li>
+        <li>Source: <a href="https://github.com/Kitalon-Labs-LLC/pgmoat" rel="noopener">github.com/Kitalon-Labs-LLC/pgmoat</a></li>
+        <li>npm: <a href="https://www.npmjs.com/package/pgmoat" rel="noopener">npmjs.com/package/pgmoat</a></li>
+        <li><a href="https://github.com/Kitalon-Labs-LLC/pgmoat/releases" rel="noopener">Releases and changelog</a></li>
       </ul>
     </div>
   </div>
