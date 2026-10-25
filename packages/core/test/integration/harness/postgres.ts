@@ -31,6 +31,24 @@ let activeContainer: StartedPostgreSqlContainer | null = null;
 let activePgVersion: string | null = null;
 let activeStartingPromise: Promise<StartedPostgreSqlContainer> | null = null;
 
+// Set PGMOAT_TEST_DATABASE_URL to a superuser URL to run against an existing
+// server instead of a Docker testcontainer. Roles are created cluster-wide.
+const externalUrl = process.env.PGMOAT_TEST_DATABASE_URL;
+let externalReady = false;
+
+async function initDatabase(superuserUrl: string): Promise<void> {
+  const client = new pg.Client({ connectionString: superuserUrl });
+  await client.connect();
+
+  try {
+    await client.query(seedSql);
+    await client.query(rolesSql);
+    await client.query(rlsSql);
+  } finally {
+    await client.end();
+  }
+}
+
 const seedSql = readFileSync(join(__dirname, 'seed.sql'), 'utf-8');
 const rolesSql = readFileSync(join(__dirname, 'roles.sql'), 'utf-8');
 const rlsSql = readFileSync(join(__dirname, 'rls.sql'), 'utf-8');
@@ -41,7 +59,15 @@ const rlsSql = readFileSync(join(__dirname, 'rls.sql'), 'utf-8');
  */
 export async function startPostgres(
   versionOverride?: string,
-): Promise<StartedPostgreSqlContainer> {
+): Promise<StartedPostgreSqlContainer | null> {
+  if (externalUrl) {
+    if (!externalReady) {
+      await initDatabase(externalUrl);
+      externalReady = true;
+    }
+    return null;
+  }
+
   const targetVersion =
     versionOverride ?? process.env.PGMOAT_TEST_PG ?? '17';
 
@@ -70,17 +96,7 @@ export async function startPostgres(
     activePgVersion = targetVersion;
 
     // Execute initialization scripts as superuser
-    const superuserUrl = container.getConnectionUri();
-    const client = new pg.Client({ connectionString: superuserUrl });
-    await client.connect();
-
-    try {
-      await client.query(seedSql);
-      await client.query(rolesSql);
-      await client.query(rlsSql);
-    } finally {
-      await client.end();
-    }
+    await initDatabase(container.getConnectionUri());
 
     return container;
   })();
@@ -96,6 +112,14 @@ export async function startPostgres(
  * Returns connection URL for a specific role against the running container.
  */
 export function connectionUrl(role: TestRole = 'postgres'): string {
+  if (externalUrl) {
+    if (role === 'postgres') return externalUrl;
+    const url = new URL(externalUrl);
+    url.username = role;
+    url.password = ROLE_PASSWORDS[role];
+    return url.toString();
+  }
+
   if (!activeContainer) {
     throw new Error(
       'PostgreSQL testcontainer is not running. Call startPostgres() first.',
@@ -113,24 +137,14 @@ export function connectionUrl(role: TestRole = 'postgres'): string {
  * Resets all seeded tables back to initial test data.
  */
 export async function resetData(): Promise<void> {
-  if (!activeContainer) {
+  if (!activeContainer && !externalReady) {
     throw new Error(
       'PostgreSQL testcontainer is not running. Call startPostgres() first.',
     );
   }
 
-  const superuserUrl = connectionUrl('postgres');
-  const client = new pg.Client({ connectionString: superuserUrl });
-  await client.connect();
-
-  try {
-    await client.query(seedSql);
-    // Ensure ownership and permissions remain intact
-    await client.query(rolesSql);
-    await client.query(rlsSql);
-  } finally {
-    await client.end();
-  }
+  // Re-applies roles and RLS too, so ownership and permissions stay intact
+  await initDatabase(connectionUrl('postgres'));
 }
 
 /**

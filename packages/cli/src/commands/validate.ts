@@ -39,7 +39,7 @@ export async function validateCommand(options: ValidateOptions = {}): Promise<vo
   }
 
   if (loaded.kind === 'none') {
-    exitWithError(refuse('PGM-109', `Config file not found at: ${resolvedPath}`));
+    exitWithError(refuse('PGM-109', `Config file not found at: ${resolvedPath}. Run 'pgmoat init' to create one, or start with 'pgmoat <postgres-url>'.`));
   }
 
   const { config } = loaded;

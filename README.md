@@ -1,64 +1,100 @@
 # pgmoat
 
-> Governed Postgres access for AI agents.
-> Governed PostgreSQL Model Context Protocol (MCP) server for AI agents.
-
-An open-source Model Context Protocol (MCP) server that provides AI agents with secure, read-only access to PostgreSQL databases through multi-layered SQL safety, least-privilege visibility, identity-bound Row-Level Security (RLS), context budgets, and tamper-evident audit logging.
-[![CI](https://github.com/kitalonlabs/pgmoat/actions/workflows/ci.yml/badge.svg)](https://github.com/kitalonlabs/pgmoat/actions/workflows/ci.yml)
+[![CI](https://github.com/Kitalon-Labs-LLC/pgmoat/actions/workflows/ci.yml/badge.svg)](https://github.com/Kitalon-Labs-LLC/pgmoat/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/pgmoat.svg)](https://www.npmjs.com/package/pgmoat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Installation
-`pgmoat` provides autonomous AI agents with secure, read-only PostgreSQL access. It combines AST-level SQL validation, schema masking, identity-bound Row-Level Security (RLS), context budgets, and tamper-evident audit logging.
+> Governed Postgres access for AI agents.
 
----
+pgmoat is an open-source MCP server that gives AI agents read-only access to Postgres. It checks every query with the real Postgres parser, hides the tables and columns you mark hidden, applies row limits and timeouts, binds Row-Level Security to the caller's identity, and writes a tamper-evident audit log.
 
-## Key Capabilities
-
-- **Zero-Config Drop-in Compatibility**: Replace archived `@modelcontextprotocol/server-postgres` commands with `pgmoat` directly.
-- **Fail-Closed Safety Pipeline**: Validates queries using the native PostgreSQL parser (`libpg-query`). Strictly forbids writes, multi-statements, administrative operations, and unauthorized catalog inspection.
-- **Defense in Depth**: Every query executes within single-transaction read-only sessions (`SET TRANSACTION READ ONLY`) with strict statement timeouts.
-- **Column and Relation Masking**: Hide sensitive credentials, tokens, or tables; queries referencing masked elements fail closed with identical errors as non-existent relations.
-- **Identity-Bound RLS**: Maps verified OAuth 2.0 JWT claims to PostgreSQL session parameters (`SET LOCAL`) on every connection.
-- **Cryptographic Audit Log**: Emits structured NDJSON audit logs with SHA-256 hash chaining to detect tampering or record omission.
-
----
+Requires Node.js 22.12 or newer and Postgres 15 to 18.
 
 ## Quickstart
 
-Run directly using `npx`:
+Run it against your database with safe defaults, no config file needed:
 
 ```bash
-npx -y pgmoat postgresql://user:password@localhost:5432/mydb
 npx -y pgmoat postgresql://readonly_user:password@localhost:5432/mydb
 ```
 
-Or add to Claude Code:
-Or configure in Claude Desktop (`claude_desktop_config.json`):
+Add it to Claude Code:
+
+```bash
+claude mcp add pgmoat -- npx -y pgmoat postgresql://readonly_user:password@localhost:5432/mydb
+```
+
+Or to Claude Desktop (`claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
-    "postgres": {
+    "pgmoat": {
       "command": "npx",
-      "args": ["-y", "pgmoat", "postgresql://readonly_user:password@localhost:5432/mydb"]
+      "args": ["-y", "pgmoat", "--url-env", "PGMOAT_DATABASE_URL"],
+      "env": { "PGMOAT_DATABASE_URL": "postgresql://readonly_user:password@localhost:5432/mydb" }
     }
   }
 }
 ```
 
-Or connect in Claude Code:
+Passing the URL through `--url-env` keeps the password out of process listings.
+
+Use a dedicated read-only role. pgmoat warns at startup if the role is a superuser or can write.
+
+## Add descriptions and hide sensitive data
 
 ```bash
-claude mcp add pgmoat -- npx -y pgmoat postgresql://user:password@localhost:5432/mydb
-claude mcp add pgmoat -- npx -y pgmoat postgresql://readonly_user:password@localhost:5432/mydb
+export PGMOAT_DATABASE_URL=postgresql://readonly_user:password@localhost:5432/mydb
+npx pgmoat init          # writes pgmoat.yaml; auto-hides columns like password_hash and token_hash
+npx pgmoat validate      # checks the file against the schema and the database
+npx pgmoat doctor        # checks the role for unsafe privileges
+npx pgmoat start         # starts the server with ./pgmoat.yaml
 ```
 
----
+A `pgmoat.yaml` looks like this:
 
-## Docker Deployment
+```yaml
+version: 1
+server:
+  name: mydb
+connection:
+  url: ${PGMOAT_DATABASE_URL}
+  schemas: [public]
+mode: read-only
+budgets:
+  max_rows: 200
+  max_query_ms: 5000
+tables:
+  users:
+    description: "One row per login account"
+    columns:
+      password_hash: { hidden: true }
+      email:         { sensitive: high }
+```
 
-`pgmoat` publishes official multi-architecture images (`linux/amd64`, `linux/arm64`) running as non-root user `node` (UID 1000):
+## Commands
+
+| Command | What it does |
+|---|---|
+| `pgmoat <postgres-url>` | Start with safe defaults (no config file) |
+| `pgmoat init` | Create `pgmoat.yaml` from your database |
+| `pgmoat start` | Start the MCP server from `pgmoat.yaml` |
+| `pgmoat validate` | Check `pgmoat.yaml` against the schema and the database |
+| `pgmoat doctor` | Check the database role for unsafe privileges |
+| `pgmoat audit verify` | Verify the audit log hash chain |
+| `pgmoat schema-export` | Write the visible schema as Markdown |
+
+Run `pgmoat --help` for all options.
+
+## What pgmoat does not do
+
+- **It does not stop prompt injection.** It removes the write path, hides what you mark hidden, and labels returned data as untrusted, but an agent with other tools (web access, email) can still be tricked into sending readable data elsewhere.
+- **It does not replace Postgres permissions.** The strongest control is a dedicated role with only the grants it needs.
+- **It does not make RLS policies correct.** It sets the session variables your policies read. A flawed policy stays flawed.
+- **It does not guarantee audit delivery to a remote destination during an outage.** It buffers, alarms, and records drops.
+
+## Docker
 
 ```bash
 docker run -i --rm \
@@ -66,83 +102,16 @@ docker run -i --rm \
   ghcr.io/kitalonlabs/pgmoat:latest
 ```
 
----
+## Contributing
 
-## Configuration Example
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 
-For advanced deployments, define a `pgmoat.yaml` configuration file:
+## Links
 
-```yaml
-database:
-  url_env: DATABASE_URL
-
-schemas:
-  expose:
-    - public
-
-hide:
-  columns:
-    public.users:
-      - password_hash
-      - mfa_secret
-
-budgets:
-  max_rows: 200
-  max_sql_chars: 16384
-  statement_timeout_ms: 3000
-
-catalogs:
-  allow: false
-
-audit:
-  destinations:
-    - type: file
-      path: ./audit.log
-```
-
-Start with explicit configuration:
-
-```bash
-pgmoat start --config ./pgmoat.yaml
-```
-
----
-
-## What pgmoat will not do
-
-- **It does not stop prompt injection.** It removes the write path, hides what you mark hidden, and labels returned data as untrusted, but an agent with other tools (web access, email) can still be tricked into sending readable data elsewhere.
-- **It does not replace Postgres permissions.** The strongest control is a dedicated Postgres role with only the grants it needs. pgmoat checks for this and warns if over-privileged, but the operator owns database role configuration.
-- **It does not make RLS policies correct.** It sets the session variables your policies read from trusted identity claims. If a policy is logically flawed, pgmoat cannot fix it.
-- **It does not see triggers, views with side effects, or functions it does not know.** It denies unknown functions by default.
-- **It does not guarantee audit delivery to a remote destination during an outage.** It buffers, alarms, and records drops.
-- **Prompt Injection Neutralization**: `pgmoat` eliminates database write paths and hides restricted tables, but an agent with separate network tools (e.g. web browsing, email dispatch) may still leak readable data if prompted adversarially.
-- **Database Role Ownership**: `pgmoat` enforces least privilege at the application boundary, but operators must still configure restricted PostgreSQL credentials with read-only database grants.
-- **Logical RLS Soundness**: `pgmoat` reliably maps identity claims to session settings; operators remain responsible for authoring correct PostgreSQL RLS policy expressions.
-
-## Quickstart
----
-
-*Coming soon.* See [spec/08-pgmoat-implementation-plan.md](spec/08-pgmoat-implementation-plan.md) for roadmap and milestones.
-## Documentation
-
-## Safety Model
-Full guides and references are available in the [documentation site](packages/docs/):
-- [Getting Started Guide](packages/docs/src/content/docs/getting-started/quickstart.mdx)
-- [Safety Guarantees & Pipeline Architecture](packages/docs/src/content/docs/safety/guarantees.mdx)
-- [CLI Reference](packages/docs/src/content/docs/reference/cli.md)
-- [Configuration Schema](packages/docs/src/content/docs/reference/config.md)
-- [Error Codes Directory (PGM-xxx)](packages/docs/src/content/docs/reference/errors/)
-
-See [spec/03-pgmoat-technical-architecture.md](spec/03-pgmoat-technical-architecture.md) for the multi-layer defense-in-depth safety pipeline, AST-level validation, and execution invariants.
----
-
-## Security
-
-Please report vulnerabilities confidentially to `security@kitalonlabs.com`. Review [SECURITY.md](SECURITY.md) for vulnerability disclosure timelines and policy.
-
----
+- Docs: https://kitalonlabs.com/pgmoat/docs
+- Source and issues: https://github.com/Kitalon-Labs-LLC/pgmoat
+- Security reports: security@kitalonlabs.com
 
 ## License
 
-MIT © 2026 Kitalon Labs
 MIT (c) 2026 Kitalon Labs

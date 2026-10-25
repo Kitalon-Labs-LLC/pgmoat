@@ -186,7 +186,7 @@ export async function startCommand(
 
     const loaded = loadConfig({ path: resolvedConfigPath, env: loadEnv });
     if (loaded.kind === 'none') {
-      throw refuse('PGM-109', `Config file not found at: ${resolvedConfigPath}`);
+      throw refuse('PGM-109', `Config file not found at: ${resolvedConfigPath}. Run 'pgmoat init' to create one, or start with 'pgmoat <postgres-url>'.`);
     }
     config = loaded.config;
   }
@@ -265,9 +265,14 @@ export async function startCommand(
   if (config.transport === 'http') {
     await startHttp(runtime);
   } else {
-    startStdio(runtime, {
+    const stdio = startStdio(runtime, {
       isZeroConfig: isZero,
       fromArgvPassword,
+    });
+    // The client closed stdin: flush audit, close pools, and exit so no
+    // orphaned process keeps database connections open.
+    process.stdin.once('end', () => {
+      void stdio.close().finally(() => process.exit(0));
     });
   }
 

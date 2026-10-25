@@ -29,6 +29,12 @@ git commit -s -m "feat(scope): your commit message"
   ```bash
   pnpm test:integration
   ```
+  No Docker? Point the tests at an existing Postgres 15+ server with a superuser
+  named `postgres`. Use a scratch database: the tests reseed it and create
+  `pgmoat_*` roles cluster-wide.
+  ```bash
+  PGMOAT_TEST_DATABASE_URL=postgres://postgres:pw@localhost:5432/pgmoat_test pnpm test:integration
+  ```
 - Typecheck and Lint:
   ```bash
   pnpm typecheck

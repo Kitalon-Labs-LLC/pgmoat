@@ -39,7 +39,7 @@ export function findConfig(options: LoadConfigOptions = {}): FindConfigResult {
     if (fs.existsSync(resolved)) {
       return { kind: 'file', path: resolved };
     }
-    throw refuse('PGM-109', `Config file not found at: ${resolved}`);
+    throw refuse('PGM-109', `Config file not found at: ${resolved}. Run 'pgmoat init' to create one, or start with 'pgmoat <postgres-url>'.`);
   }
 
   // 2. $PGMOAT_CONFIG

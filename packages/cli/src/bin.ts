@@ -76,14 +76,15 @@ export function createProgram(): Command {
     });
 
   program
-    .command('init')
+    .command('init [url]')
     .description('Create pgmoat.yaml for a database')
     .option('-y, --yes', 'Accept defaults without interactive prompts')
     .option('--merge', 'Merge into existing config without prompting')
-    .action(async () => {
-      // Stub for P8.4
+    .option('--out <dir>', 'Directory to write pgmoat.yaml into')
+    .option('--include-system', 'Include system schemas')
+    .action(async (url: string | undefined, _opts, cmd: Command) => {
       const { initCommand } = await import('./commands/init.js');
-      await initCommand();
+      await initCommand({ ...cmd.optsWithGlobals(), ...(url ? { url } : {}) });
     });
 
   program
@@ -103,20 +104,18 @@ export function createProgram(): Command {
     .command('validate')
     .description('Check pgmoat.yaml against the schema and the database')
     .option('--strict', 'Fail on warnings')
-    .action(async (opts) => {
-      // Stub for P8.2
+    .action(async (opts, cmd: Command) => {
       const { validateCommand } = await import('./commands/validate.js');
-      await validateCommand(opts);
+      await validateCommand({ ...cmd.optsWithGlobals(), ...opts });
     });
 
   program
     .command('doctor')
     .description('Check the database role for unsafe privileges')
     .option('--strict', 'Fail on warnings')
-    .action(async (opts) => {
-      // Stub for P8.3
+    .action(async (opts, cmd: Command) => {
       const { doctorCommand } = await import('./commands/doctor.js');
-      await doctorCommand(opts);
+      await doctorCommand({ ...cmd.optsWithGlobals(), ...opts });
     });
 
   const audit = program
@@ -188,9 +187,9 @@ export function createProgram(): Command {
     .option('--config <path>', 'Config file (default: ./pgmoat.yaml)')
     .option('-o, --output <path>', 'Output file (defaults to stdout)')
     .option('--include-hidden-count', 'Include count of hidden tables and columns')
-    .action(async (opts) => {
+    .action(async (opts, cmd: Command) => {
       const { schemaExportCommand } = await import('./commands/schema-export.js');
-      await schemaExportCommand(opts);
+      await schemaExportCommand({ ...cmd.optsWithGlobals(), ...opts });
     });
 
   program
@@ -229,6 +228,13 @@ export async function runCli(argv: string[] = process.argv.slice(2)): Promise<vo
     const { startCommand } = await import('./commands/start.js');
     await startCommand(zeroConfigUrl, { isZeroConfig: true });
     return;
+  }
+
+  // `pgmoat --url-env VAR` with no command means `pgmoat start --url-env VAR`,
+  // as the zero-config banner suggests.
+  const hasCommand = argv.some((arg) => SUBCOMMANDS.has(arg));
+  if (!hasCommand && argv.includes('--url-env')) {
+    argv = ['start', ...argv];
   }
 
   const program = createProgram();
