@@ -21,7 +21,8 @@
     "check:licenses": "node tools/check-licenses.mjs",
     "gen:errors": "node tools/gen-errors.mjs",
     "check:errors": "node tools/gen-errors.mjs --check",
-    "check:docs": "node tools/gen-docs.mjs --check"
+    "check:docs": "node tools/gen-docs.mjs --check",
+    "gen:landing": "node tools/gen-landing.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
