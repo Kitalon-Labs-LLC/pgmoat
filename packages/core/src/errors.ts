@@ -3,7 +3,7 @@ import { type ErrorCode, ERROR_CODES } from './errors.generated.js';
 export * from './errors.generated.js';
 
 export function docsUrl(code: ErrorCode): string {
-  return `https://pgmoat.dev/docs/errors/${code}`;
+  return `https://kitalonlabs.com/pgmoat/docs/errors/${code}`;
 }
 
 export class PgmoatError extends Error {

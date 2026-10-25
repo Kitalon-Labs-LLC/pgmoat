@@ -293,7 +293,7 @@ describe('renderRefusal', () => {
       'PGM-208: Column access not allowed.\n' +
       '"SELECT *" would include hidden columns of public.users.\n' +
       'Allowed columns for public.users: id, email, created_at, deleted_at.\n' +
-      'https://pgmoat.dev/docs/errors/PGM-208';
+      'https://kitalonlabs.com/pgmoat/docs/errors/PGM-208';
 
     expect(rendered).toBe(expected);
   });

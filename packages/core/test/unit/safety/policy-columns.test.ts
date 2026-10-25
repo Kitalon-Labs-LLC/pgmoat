@@ -259,5 +259,35 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.code).toBe('PGM-208');
     });
+
+    it('refuses CTE that shadows table and attempts to access hidden columns (F-P2-01)', async () => {
+      const res = await testCol('WITH users AS (SELECT * FROM users) SELECT password_hash FROM users');
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.code).toBe('PGM-208');
+    });
+
+    it('refuses column alias lists on tables with hidden columns (F-P2-02)', async () => {
+      const res = await testCol('SELECT c FROM users u(a,b,c)');
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.code).toBe('PGM-208');
+    });
+
+    it('refuses USING clause referencing hidden column (F-P2-03)', async () => {
+      const res = await testCol('SELECT u1.id FROM users u1 JOIN users u2 USING (password_hash)');
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.code).toBe('PGM-208');
+    });
+
+    it('refuses NATURAL JOIN on table with hidden columns (F-P2-03)', async () => {
+      const res = await testCol('SELECT * FROM users NATURAL JOIN orders');
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.code).toBe('PGM-208');
+    });
+
+    it('refuses four-part column reference to hidden column (F-P2-04)', async () => {
+      const res = await testCol('SELECT postgres.public.users.password_hash FROM users');
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.code).toBe('PGM-208');
+    });
   });
 });

@@ -82,117 +82,139 @@ export async function runSafety(
   }
   timings.parseMs = performance.now() - t0;
 
-  // 2. Classify
-  const t1 = performance.now();
-  const classRes = classify(
-    parsedTree,
-    ctx.policy ? { config: { policy: ctx.policy } as unknown as Partial<PgmoatConfigT> } : undefined,
-  );
-  timings.classifyMs = performance.now() - t1;
+  // 2. Classify, Policy, Rewrite, Fingerprint inside safety wrapper
+  try {
+    const t1 = performance.now();
+    const classRes = classify(
+      parsedTree,
+      ctx.policy ? { config: { policy: ctx.policy } as unknown as Partial<PgmoatConfigT> } : undefined,
+    );
+    timings.classifyMs = performance.now() - t1;
 
-  if (!classRes.ok) {
-    timings.totalMs = performance.now() - startTotal;
-    const failRes: PipelineSafetyResult = {
-      allowed: false,
-      code: classRes.code,
-      message: classRes.message,
-      timings,
-    };
-    if (classRes.node) {
-      const nodeName = getNodeType(classRes.node);
-      if (nodeName) {
-        failRes.node = nodeName;
+    if (!classRes.ok) {
+      timings.totalMs = performance.now() - startTotal;
+      const failRes: PipelineSafetyResult = {
+        allowed: false,
+        code: classRes.code,
+        message: classRes.message,
+        timings,
+      };
+      if (classRes.node) {
+        const nodeName = getNodeType(classRes.node);
+        if (nodeName) {
+          failRes.node = nodeName;
+        }
       }
-    }
-    return failRes;
-  }
-
-  // 3. Policy (Relations & Columns)
-  const t2 = performance.now();
-  const relRes = checkRelations(parsedTree, ctx.policyIndex, ctx.policy);
-  if (!relRes.ok) {
-    timings.policyMs = performance.now() - t2;
-    timings.totalMs = performance.now() - startTotal;
-    return {
-      allowed: false,
-      code: relRes.code,
-      message: relRes.message,
-      timings,
-    };
-  }
-
-  const colRes = checkColumns(
-    parsedTree,
-    ctx.policyIndex,
-    ctx.policy,
-    ctx.checkColumnsOptions,
-  );
-  if (!colRes.ok) {
-    timings.policyMs = performance.now() - t2;
-    timings.totalMs = performance.now() - startTotal;
-    return {
-      allowed: false,
-      code: colRes.code,
-      message: colRes.message,
-      timings,
-    };
-  }
-  timings.policyMs = performance.now() - t2;
-
-  // 4. Rewrite
-  const t3 = performance.now();
-  let sqlExecuted = sql;
-  let limitInjected = false;
-  let treeForFingerprint = parsedTree;
-
-  if (ctx.mode !== 'explain') {
-    const rewriteCtx: RewriteContext = {
-      maxRows,
-      originalSql: sql,
-      policyIndex: ctx.policyIndex,
-    };
-    if (ctx.policy !== undefined) {
-      rewriteCtx.policy = ctx.policy;
-    }
-    if (ctx.checkColumnsOptions !== undefined) {
-      rewriteCtx.checkColumnsOptions = ctx.checkColumnsOptions;
+      return failRes;
     }
 
-    const rewriteRes = await rewrite(parsedTree, rewriteCtx);
-
-    timings.rewriteMs = performance.now() - t3;
-
-    if (!rewriteRes.ok) {
+    // 3. Policy (Relations & Columns)
+    const t2 = performance.now();
+    const relRes = checkRelations(parsedTree, ctx.policyIndex, ctx.policy);
+    if (!relRes.ok) {
+      timings.policyMs = performance.now() - t2;
       timings.totalMs = performance.now() - startTotal;
       return {
         allowed: false,
-        code: rewriteRes.code,
-        message: rewriteRes.message,
+        code: relRes.code,
+        message: relRes.message,
         timings,
       };
     }
 
-    sqlExecuted = rewriteRes.sql;
-    limitInjected = rewriteRes.limitInjected;
-    treeForFingerprint = rewriteRes.tree;
-  } else {
-    timings.rewriteMs = performance.now() - t3;
+    const colRes = checkColumns(
+      parsedTree,
+      ctx.policyIndex,
+      ctx.policy,
+      ctx.checkColumnsOptions,
+    );
+    if (!colRes.ok) {
+      timings.policyMs = performance.now() - t2;
+      timings.totalMs = performance.now() - startTotal;
+      return {
+        allowed: false,
+        code: colRes.code,
+        message: colRes.message,
+        timings,
+      };
+    }
+    timings.policyMs = performance.now() - t2;
+
+    // 4. Rewrite
+    const t3 = performance.now();
+    let sqlExecuted = sql;
+    let limitInjected = false;
+    let treeForFingerprint = parsedTree;
+
+    if (ctx.mode !== 'explain') {
+      const rewriteCtx: RewriteContext = {
+        maxRows,
+        originalSql: sql,
+        policyIndex: ctx.policyIndex,
+      };
+      if (ctx.policy !== undefined) {
+        rewriteCtx.policy = ctx.policy;
+      }
+      if (ctx.checkColumnsOptions !== undefined) {
+        rewriteCtx.checkColumnsOptions = ctx.checkColumnsOptions;
+      }
+
+      const rewriteRes = await rewrite(parsedTree, rewriteCtx);
+
+      timings.rewriteMs = performance.now() - t3;
+
+      if (!rewriteRes.ok) {
+        timings.totalMs = performance.now() - startTotal;
+        return {
+          allowed: false,
+          code: rewriteRes.code,
+          message: rewriteRes.message,
+          timings,
+        };
+      }
+
+      sqlExecuted = rewriteRes.sql;
+      limitInjected = rewriteRes.limitInjected;
+      treeForFingerprint = rewriteRes.tree;
+    } else {
+      timings.rewriteMs = performance.now() - t3;
+    }
+
+    // 5. Fingerprint
+    const t4 = performance.now();
+    const fp = await fingerprint(treeForFingerprint);
+    timings.fingerprintMs = performance.now() - t4;
+
+    timings.totalMs = performance.now() - startTotal;
+
+    return {
+      allowed: true,
+      sql: sqlExecuted,
+      fingerprint: fp,
+      limitInjected,
+      statementType: classRes.statementType,
+      timings,
+    };
+  } catch (err: unknown) {
+    timings.totalMs = performance.now() - startTotal;
+    if (err instanceof PgmoatError) {
+      const errRes: PipelineSafetyResult = {
+        allowed: false,
+        code: err.code as ErrorCode,
+        message: err.message,
+        timings,
+      };
+      if (err.hint !== undefined) {
+        errRes.hint = err.hint;
+      }
+      return errRes;
+    }
+    return {
+      allowed: false,
+      code: 'PGM-206',
+      message: err instanceof Error ? err.message : String(err),
+      timings,
+    };
   }
-
-  // 5. Fingerprint
-  const t4 = performance.now();
-  const fp = await fingerprint(treeForFingerprint);
-  timings.fingerprintMs = performance.now() - t4;
-
-  timings.totalMs = performance.now() - startTotal;
-
-  return {
-    allowed: true,
-    sql: sqlExecuted,
-    fingerprint: fp,
-    limitInjected,
-    statementType: classRes.statementType,
-    timings,
-  };
 }
 

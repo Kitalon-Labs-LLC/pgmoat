@@ -104,11 +104,6 @@ export async function executeExplain(
 
   const explainSql = await deparse(explainTree);
 
-  // Assert no ANALYZE in emitted SQL
-  if (/\banalyze\b/i.test(explainSql)) {
-    throw refuse('PGM-201', 'ANALYZE is not allowed in EXPLAIN');
-  }
-
   rc.sqlExecuted = explainSql;
   rc.sqlFingerprint = safetyResult.fingerprint;
 

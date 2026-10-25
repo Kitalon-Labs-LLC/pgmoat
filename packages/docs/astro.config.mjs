@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
-const site = process.env.PGMOAT_SITE_URL || 'https://pgmoat.dev';
+const site = process.env.PGMOAT_SITE_URL || 'https://kitalonlabs.com/pgmoat';
 
 export default defineConfig({
   site,
@@ -12,7 +12,7 @@ export default defineConfig({
         {
           icon: 'github',
           label: 'GitHub',
-          link: 'https://github.com/kitalonlabs/pgmoat',
+          link: 'https://github.com/Kitalon-Labs-LLC/pgmoat',
         },
       ],
       sidebar: [

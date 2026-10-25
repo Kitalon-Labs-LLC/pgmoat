@@ -96,12 +96,12 @@ export function formatError(
     code = 'PGM-501';
     title = error.message;
     fix = undefined;
-    docsUrl = `https://pgmoat.dev/docs/errors/${code}`;
+    docsUrl = `https://kitalonlabs.com/pgmoat/docs/errors/${code}`;
   } else {
     code = 'PGM-501';
     title = String(error);
     fix = undefined;
-    docsUrl = `https://pgmoat.dev/docs/errors/${code}`;
+    docsUrl = `https://kitalonlabs.com/pgmoat/docs/errors/${code}`;
   }
 
   if (jsonMode) {

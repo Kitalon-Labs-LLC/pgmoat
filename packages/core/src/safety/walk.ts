@@ -138,31 +138,45 @@ function walkSelectStmt(
     kind: 'select',
   };
 
-  // 1. Register withClause CTEs first (recursive CTEs see themselves)
+  // 1. Visit this SelectStmt
+  visitor(innerObj, 'SelectStmt', path, selectScope);
+
+  // 2. Walk withClause CTEs with proper scoping
+  // Non-recursive CTEs cannot see themselves or subsequent CTEs; recursive CTEs can see themselves.
   if (select.withClause && typeof select.withClause === 'object') {
     const withClause = select.withClause as Record<string, unknown>;
+    const isRecursive = Boolean(withClause.recursive);
     if (Array.isArray(withClause.ctes)) {
-      for (const cteWrapped of withClause.ctes) {
+      const accumulatedCtes = new Set(currentScope.ctes);
+      for (let i = 0; i < withClause.ctes.length; i++) {
+        const cteWrapped = withClause.ctes[i];
         const cte = unwrap(cteWrapped) as Record<string, unknown> | null;
-        if (cte && typeof cte.ctename === 'string') {
-          selectScope.ctes.add(cte.ctename);
+        const ctename = typeof cte?.ctename === 'string' ? cte.ctename : undefined;
+
+        const cteScope: Scope = {
+          parent: currentScope,
+          ctes: new Set(accumulatedCtes),
+          relations: [],
+          kind: 'select',
+        };
+        if (isRecursive && ctename) {
+          cteScope.ctes.add(ctename);
+        }
+
+        walkNode(
+          cteWrapped,
+          [...path, 'withClause', 'ctes', i],
+          cteScope,
+          depth + 1,
+          visitor,
+        );
+
+        if (ctename) {
+          accumulatedCtes.add(ctename);
+          selectScope.ctes.add(ctename);
         }
       }
     }
-  }
-
-  // 2. Visit this SelectStmt
-  visitor(innerObj, 'SelectStmt', path, selectScope);
-
-  // 3. Walk withClause
-  if (select.withClause !== undefined) {
-    walkNode(
-      select.withClause,
-      [...path, 'withClause'],
-      selectScope,
-      depth + 1,
-      visitor,
-    );
   }
 
   // 4. Set operations (op != SETOP_NONE, with larg/rarg): each arm gets its own scope;

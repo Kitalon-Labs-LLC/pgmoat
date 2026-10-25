@@ -151,6 +151,19 @@ describe('Safety Pipeline Orchestrator (P2.9)', () => {
       expect(res.timings.fingerprintMs).toBeGreaterThanOrEqual(0);
       expect(res.timings.totalMs).toBeGreaterThanOrEqual(0);
     });
+
+    it('refuses deeply nested subqueries safely without unhandled exception (F-P2-06)', async () => {
+      let q = 'SELECT 1';
+      for (let i = 0; i < 350; i++) {
+        q = 'SELECT (' + q + ')';
+      }
+      const res = await runSafety(q, {
+        policyIndex: defaultIndex,
+        mode: 'query',
+      });
+      expect(res.allowed).toBe(false);
+      expect(res.code).toBe('PGM-206');
+    });
   });
 });
 

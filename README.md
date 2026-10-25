@@ -108,7 +108,7 @@ pgmoat start --config ./pgmoat.yaml
 
 ---
 
-## What pgmoat Does Not Do
+## What pgmoat will not do
 
 - **It does not stop prompt injection.** It removes the write path, hides what you mark hidden, and labels returned data as untrusted, but an agent with other tools (web access, email) can still be tricked into sending readable data elsewhere.
 - **It does not replace Postgres permissions.** The strongest control is a dedicated Postgres role with only the grants it needs. pgmoat checks for this and warns if over-privileged, but the operator owns database role configuration.

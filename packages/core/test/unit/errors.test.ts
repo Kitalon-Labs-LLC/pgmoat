@@ -51,7 +51,7 @@ describe('error registry and PgmoatError', () => {
     expect(err.code).toBe('PGM-204');
     expect(err.kind).toBe('refused');
     expect(err.hint).toBe('Send one statement per call');
-    expect(err.docsUrl).toBe('https://pgmoat.dev/docs/errors/PGM-204');
+    expect(err.docsUrl).toBe('https://kitalonlabs.com/pgmoat/docs/errors/PGM-204');
     expect(err.message).toBe('Multiple statements are not permitted');
     expect(isPgmoatError(err)).toBe(true);
     expect(isPgmoatError(new Error('other'))).toBe(false);

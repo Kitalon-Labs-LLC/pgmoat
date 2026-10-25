@@ -407,3 +407,52 @@
   note: "Prompt injection payload in data content executes safely as literal text without altering query execution"
   bypass_class: "Prompt injection through data"
 
+- id: policy-061
+  group: policy
+  sql: "SELECT u1.id FROM users u1 JOIN users u2 USING (password_hash)"
+  expect:
+    refused: PGM-208
+  note: "USING clause referencing hidden column password_hash is refused"
+  bypass_class: "Join condition on hidden column"
+
+- id: policy-062
+  group: policy
+  sql: "SELECT * FROM users NATURAL JOIN orders"
+  expect:
+    refused: PGM-208
+  note: "NATURAL JOIN on table containing hidden columns is refused"
+  bypass_class: "Natural join hidden column leak"
+
+- id: policy-063
+  group: policy
+  sql: "SELECT c FROM users u(a,b,c)"
+  expect:
+    refused: PGM-208
+  note: "Column alias list on table with hidden columns is refused"
+  bypass_class: "Column alias bypass"
+
+- id: policy-064
+  group: policy
+  sql: "WITH users AS (SELECT * FROM users) SELECT password_hash FROM users"
+  expect:
+    refused: PGM-208
+  note: "CTE self-shadowing attempting to query hidden columns is refused"
+  bypass_class: "CTE shadowing bypass"
+
+- id: policy-065
+  group: policy
+  sql: "SELECT postgres.public.users.password_hash FROM users"
+  expect:
+    refused: PGM-208
+  note: "Four-part qualified column reference to hidden column is refused"
+  bypass_class: "Qualified column bypass"
+
+- id: policy-066
+  group: policy
+  sql: "SELECT 'internal_audit'::regclass"
+  expect:
+    refused: PGM-207
+  note: "regclass cast referencing hidden table is refused"
+  bypass_class: "Catalog regclass enumeration"
+
+

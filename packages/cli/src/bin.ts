@@ -49,8 +49,8 @@ Options
   --no-color          Disable colors (NO_COLOR is also honored)
   -h, --help          Show help
 
-Docs     https://pgmoat.dev/docs
-Issues   https://github.com/kitalonlabs/pgmoat/issues`;
+Docs     https://kitalonlabs.com/pgmoat/docs
+Issues   https://github.com/Kitalon-Labs-LLC/pgmoat/issues`;
 
 export function createProgram(): Command {
   const program = new Command();
@@ -240,10 +240,14 @@ export async function runCli(argv: string[] = process.argv.slice(2)): Promise<vo
 }
 
 // Auto-run if executed directly
+const argv1 = process.argv[1] ? process.argv[1].replace(/\\/g, '/') : '';
 const isDirectRun =
-  import.meta.url === `file://${process.argv[1]}` ||
-  (process.argv[1] && /\/bin\.(ts|js|mjs)$/.test(process.argv[1])) ||
-  (process.argv[1] && process.argv[1].endsWith('/pgmoat'));
+  Boolean(argv1 && (
+    import.meta.url === `file://${argv1}` ||
+    import.meta.url === `file:///${argv1}` ||
+    /\/bin\.(ts|js|mjs)$/.test(argv1) ||
+    /\/pgmoat(\.cmd|\.exe|\.ps1)?$/.test(argv1)
+  ));
 
 if (isDirectRun) {
   runCli().catch((err: unknown) => {

@@ -294,4 +294,29 @@ describe('Relation access policy (policy-relations.test.ts)', () => {
       if (!res.ok) expect(res.code).toBe('PGM-207');
     });
   });
+
+  describe('identifier typecasts', () => {
+    it('refuses regclass cast targeting hidden table (F-P2-05)', async () => {
+      const res = await testRel("SELECT 'secrets'::regclass");
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.code).toBe('PGM-207');
+    });
+
+    it('refuses regclass cast targeting unknown table (F-P2-05)', async () => {
+      const res = await testRel("SELECT 'nonexistent'::regclass");
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.code).toBe('PGM-207');
+    });
+
+    it('refuses regnamespace cast targeting unexposed schema (F-P2-05)', async () => {
+      const res = await testRel("SELECT 'secret_schema'::regnamespace");
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.code).toBe('PGM-207');
+    });
+
+    it('allows regclass cast targeting visible table', async () => {
+      const res = await testRel("SELECT 'users'::regclass");
+      expect(res.ok).toBe(true);
+    });
+  });
 });

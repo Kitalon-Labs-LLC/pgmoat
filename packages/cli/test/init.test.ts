@@ -47,7 +47,7 @@ describe('CLI init wizard (P8.4)', () => {
       relations,
     });
 
-    expect(yamlStr).toContain('# yaml-language-server: $schema=https://pgmoat.dev/schema/pgmoat.v1.json');
+    expect(yamlStr).toContain('# yaml-language-server: $schema=https://kitalonlabs.com/pgmoat/schema/pgmoat.v1.json');
     expect(yamlStr).toContain('password_hash: { hidden: true }');
     expect(yamlStr).toContain('mfa_secret:    { hidden: true }');
     expect(yamlStr).toContain('id:            { description: "Identifier" }');

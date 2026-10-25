@@ -237,7 +237,7 @@ export const PgmoatConfig = z
         endpoint: z
           .string()
           .url()
-          .default('https://telemetry.pgmoat.dev/v1/events'),
+          .default('https://kitalonlabs.com/pgmoat/telemetry/v1/events'),
       })
       .strict()
       .prefault({}),

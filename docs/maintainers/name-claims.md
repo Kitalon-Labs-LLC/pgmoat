@@ -26,9 +26,9 @@ Repository: `https://github.com/Kitalon-Labs-LLC/pgmoat`
   - Dependabot alerts and security updates enabled
   - CodeQL analysis enabled
 
-## 3. Domain Registration (OD-01)
+## 3. Web & Documentation Domain (OD-01)
 
-- [ ] Confirm or register `pgmoat.dev` (or configured fallback domain)
+- [x] Canonical documentation endpoint established at `https://kitalonlabs.com/pgmoat`
 
 ## 4. Trademark Knockout Search (OD-02)
 

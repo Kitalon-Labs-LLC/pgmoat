@@ -50,6 +50,73 @@ export function checkRelations(
   walk(tree, (node, type, _path, scope) => {
     if (refusal) return;
 
+    if (type === 'TypeCast') {
+      const tc = node as Record<string, unknown>;
+      const typeName = tc.typeName as Record<string, unknown> | undefined;
+      const names = Array.isArray(typeName?.names) ? typeName.names : [];
+      let isReg = false;
+      let regKind: string | null = null;
+      for (const n of names) {
+        const unwrapped = unwrap(n) as Record<string, unknown> | null;
+        const sval = typeof unwrapped?.sval === 'string' ? unwrapped.sval.toLowerCase() : '';
+        if (
+          sval === 'regclass' ||
+          sval === 'regrole' ||
+          sval === 'regnamespace' ||
+          sval === 'regproc' ||
+          sval === 'regprocedure' ||
+          sval === 'regoper' ||
+          sval === 'regoperator' ||
+          sval === 'regtype' ||
+          sval === 'regconfig' ||
+          sval === 'regdictionary'
+        ) {
+          isReg = true;
+          regKind = sval;
+          break;
+        }
+      }
+
+      if (isReg) {
+        const arg = unwrap(tc.arg) as Record<string, unknown> | null;
+        const sval =
+          arg && typeof arg.sval === 'object' && arg.sval !== null && 'sval' in arg.sval
+            ? String((arg.sval as { sval: unknown }).sval)
+            : arg && typeof arg.sval === 'string'
+              ? arg.sval
+              : null;
+
+        if (sval) {
+          const trimmed = sval.trim().replace(/^['"]|['"]$/g, '');
+          if (regKind === 'regnamespace') {
+            if (!index.exposedSchemas.includes(trimmed)) {
+              refusal = {
+                ok: false,
+                code: 'PGM-207',
+                message:
+                  'Table not available. Use list_tables to see the tables you can query.',
+                node: tc,
+              };
+              return;
+            }
+          } else {
+            const resolved = resolveRelationFromIndex(trimmed, index);
+            if (!resolved) {
+              refusal = {
+                ok: false,
+                code: 'PGM-207',
+                message:
+                  'Table not available. Use list_tables to see the tables you can query.',
+                node: tc,
+              };
+              return;
+            }
+          }
+        }
+      }
+      return;
+    }
+
     if (type === 'RangeVar') {
       const rangeVar = node as Record<string, unknown>;
       const relname =
@@ -199,7 +266,22 @@ function getScopeHiddenInfo(scope: Scope, index: PolicyIndex) {
   let currScope: Scope | undefined = scope;
   while (currScope) {
     for (const rel of currScope.relations) {
-      if (rel.isCte) continue;
+      if (rel.isCte) {
+        for (const schema of index.exposedSchemas) {
+          const qual = `${schema}.${rel.name}`;
+          const hiddenCols = index.hiddenColumns.get(qual);
+          if (hiddenCols && hiddenCols.size > 0) {
+            for (const c of hiddenCols) {
+              hiddenColNames.add(c);
+            }
+            if (rel.alias) {
+              tablesWithHiddenCols.set(rel.alias, qual);
+            }
+            tablesWithHiddenCols.set(rel.name, qual);
+          }
+        }
+        continue;
+      }
       const qual = resolveRelationName(rel, index);
       if (qual) {
         const hiddenCols = index.hiddenColumns.get(qual);
@@ -296,6 +378,100 @@ export function checkColumns(
 
   walk(tree, (node, type, _path, scope) => {
     if (refusal) return;
+
+    if (type === 'RangeVar') {
+      const rangeVar = node as Record<string, unknown>;
+      if (
+        rangeVar.alias &&
+        typeof rangeVar.alias === 'object' &&
+        Array.isArray((rangeVar.alias as Record<string, unknown>).colnames) &&
+        ((rangeVar.alias as Record<string, unknown>).colnames as unknown[]).length > 0
+      ) {
+        const relname = typeof rangeVar.relname === 'string' ? rangeVar.relname : '';
+        const schemaname = typeof rangeVar.schemaname === 'string' ? rangeVar.schemaname : null;
+        let hasHidden = false;
+        if (schemaname) {
+          const qual = `${schemaname}.${relname}`;
+          if (index.hiddenColumns.get(qual)?.size) hasHidden = true;
+        } else {
+          for (const s of index.exposedSchemas) {
+            const qual = `${s}.${relname}`;
+            if (index.hiddenColumns.get(qual)?.size) {
+              hasHidden = true;
+              break;
+            }
+          }
+        }
+        if (hasHidden) {
+          refusal = {
+            ok: false,
+            code: 'PGM-208',
+            message:
+              'Column access not allowed. Column alias lists are not permitted on tables with hidden columns.',
+            node: rangeVar,
+          };
+          return;
+        }
+      }
+      return;
+    }
+
+    if (type === 'JoinExpr') {
+      const join = node as Record<string, unknown>;
+      const { hiddenColNames, tablesWithHiddenCols } = getScopeHiddenInfo(scope, index);
+
+      // Check usingClause
+      if (Array.isArray(join.usingClause) && join.usingClause.length > 0) {
+        for (const item of join.usingClause) {
+          const unwrapped = unwrap(item) as Record<string, unknown> | null;
+          const sval = typeof unwrapped?.sval === 'string' ? unwrapped.sval : null;
+          if (sval) {
+            let isHidden = hiddenColNames.has(sval);
+            if (!isHidden) {
+              for (const cols of index.hiddenColumns.values()) {
+                if (cols.has(sval)) {
+                  isHidden = true;
+                  break;
+                }
+              }
+            }
+            if (isHidden) {
+              refusal = {
+                ok: false,
+                code: 'PGM-208',
+                message: `Column access not allowed. Column "${sval}" is hidden.`,
+                node: join,
+              };
+              return;
+            }
+          }
+        }
+      }
+
+      // Check isNatural
+      if (join.isNatural === true) {
+        let anyHidden = tablesWithHiddenCols.size > 0;
+        if (!anyHidden) {
+          for (const cols of index.hiddenColumns.values()) {
+            if (cols.size > 0) {
+              anyHidden = true;
+              break;
+            }
+          }
+        }
+        if (anyHidden) {
+          refusal = {
+            ok: false,
+            code: 'PGM-208',
+            message:
+              'Column access not allowed. NATURAL JOIN is not permitted on tables with hidden columns.',
+            node: join,
+          };
+          return;
+        }
+      }
+      return;
+    }
 
     if (type === 'ColumnRef') {
       const colRef = node as Record<string, unknown>;
@@ -481,6 +657,44 @@ export function checkColumns(
 
         if (extracted[2]?.sval !== null) {
           const col = extracted[2]!.sval!;
+          if (index.hiddenColumns.get(qual)?.has(col)) {
+            refusal = {
+              ok: false,
+              code: 'PGM-208',
+              message: `Column access not allowed. Column "${qual}.${col}" is hidden. Allowed columns for ${qual}: ${formatAllowedColumns(qual, index, options)}`,
+              node: colRef,
+            };
+            return;
+          }
+        }
+      }
+
+      // Case 5: Length 4: [db, schema, table, *] or [db, schema, table, col]
+      if (
+        extracted.length === 4 &&
+        extracted[1]?.sval !== null &&
+        extracted[2]?.sval !== null
+      ) {
+        const schema = extracted[1]!.sval!;
+        const table = extracted[2]!.sval!;
+        const qual = `${schema}.${table}`;
+
+        if (extracted[3]?.isStar) {
+          if (index.hiddenColumns.get(qual)?.size) {
+            refusal = {
+              ok: false,
+              code: 'PGM-208',
+              // eslint-disable-next-line pgmoat/no-sql-string-building -- human-facing error message
+              message: `Column access not allowed. Wildcard "${qual}.*" on table with hidden columns. Allowed columns for ${qual}: ${formatAllowedColumns(qual, index, options)}`,
+              node: colRef,
+            };
+            return;
+          }
+          return;
+        }
+
+        if (extracted[3]?.sval !== null) {
+          const col = extracted[3]!.sval!;
           if (index.hiddenColumns.get(qual)?.has(col)) {
             refusal = {
               ok: false,
