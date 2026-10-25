@@ -139,6 +139,8 @@ export type SafetyResult =
       allowed: false;
       code: ErrorCode;
       message: string;
+      /** Render exactly like a database error (no hint), so hidden columns look missing. */
+      asDatabaseError?: true;
       hint?: string;
       node?: string;
     };

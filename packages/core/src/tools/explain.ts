@@ -1,5 +1,5 @@
 import { deparse } from 'pgsql-deparser';
-import { refuse, fail, isPgmoatError } from '../errors.js';
+import { refuse, fail, isPgmoatError, safetyError } from '../errors.js';
 import { resolveRls } from '../rls/resolve.js';
 import { parseSql } from '../safety/parse.js';
 import { runSafety } from '../safety/pipeline.js';
@@ -53,7 +53,7 @@ export async function executeExplain(
   });
 
   if (!safetyResult.allowed) {
-    throw refuse(safetyResult.code, safetyResult.message);
+    throw safetyError(safetyResult);
   }
 
   // 3. Construct EXPLAIN statement AST wrapping the parsed statement

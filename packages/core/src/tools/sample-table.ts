@@ -1,6 +1,6 @@
 import { deparse } from 'pgsql-deparser';
 import type { ParseResult, Node } from '@pgsql/types';
-import { refuse } from '../errors.js';
+import { refuse, safetyError } from '../errors.js';
 import { resolveRls } from '../rls/resolve.js';
 import { resolveRelationFromIndex } from '../safety/policy.js';
 import { runSafety } from '../safety/pipeline.js';
@@ -202,7 +202,7 @@ export async function executeSampleTable(
   });
 
   if (!safetyResult.allowed) {
-    throw refuse(safetyResult.code, safetyResult.message);
+    throw safetyError(safetyResult);
   }
 
   rc.sqlExecuted = safetyResult.sql;

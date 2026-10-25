@@ -135,6 +135,7 @@ export async function runSafety(
         allowed: false,
         code: colRes.code,
         message: colRes.message,
+        ...(colRes.asDatabaseError ? { asDatabaseError: true as const } : {}),
         timings,
       };
     }

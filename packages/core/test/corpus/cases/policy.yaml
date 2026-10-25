@@ -107,105 +107,105 @@
   group: policy
   sql: "SELECT password_hash FROM users"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Unqualified access to hidden column password_hash is refused"
 
 - id: policy-017
   group: policy
   sql: "SELECT users.password_hash FROM users"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Table-qualified access to hidden column users.password_hash is refused"
 
 - id: policy-018
   group: policy
   sql: "SELECT u.password_hash FROM users u"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Alias-qualified access to hidden column u.password_hash is refused"
 
 - id: policy-019
   group: policy
   sql: "SELECT public.users.password_hash FROM public.users"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Schema-qualified access to hidden column public.users.password_hash is refused"
 
 - id: policy-020
   group: policy
   sql: "SELECT mfa_secret FROM users"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Access to hidden column mfa_secret is refused"
 
 - id: policy-021
   group: policy
   sql: "SELECT u.mfa_secret FROM users u"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Qualified access to hidden column u.mfa_secret is refused"
 
 - id: policy-022
   group: policy
   sql: "SELECT id FROM users WHERE password_hash = 'hash123'"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column referenced in WHERE clause is refused"
 
 - id: policy-023
   group: policy
   sql: "SELECT id FROM users ORDER BY password_hash"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column referenced in ORDER BY clause is refused"
 
 - id: policy-024
   group: policy
   sql: "SELECT count(*) FROM users GROUP BY password_hash"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column referenced in GROUP BY clause is refused"
 
 - id: policy-025
   group: policy
   sql: "SELECT count(*) FROM users GROUP BY id HAVING count(password_hash) > 0"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column referenced in HAVING clause is refused"
 
 - id: policy-026
   group: policy
   sql: "SELECT md5(password_hash) FROM users"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column passed to function is refused"
 
 - id: policy-027
   group: policy
   sql: "SELECT CASE WHEN password_hash IS NULL THEN 1 ELSE 0 END FROM users"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column inside CASE expression is refused"
 
 - id: policy-028
   group: policy
   sql: "SELECT id FROM users WHERE coalesce(password_hash, '') = ''"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column inside coalesce expression is refused"
 
 - id: policy-029
   group: policy
   sql: "SELECT * FROM (SELECT password_hash FROM users) sub"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column inside subquery target list is refused"
 
 - id: policy-030
   group: policy
   sql: "WITH c AS (SELECT password_hash FROM users) SELECT * FROM c"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Hidden column inside CTE target list is refused"
 
 - id: policy-031
@@ -367,14 +367,14 @@
   group: policy
   sql: "SELECT id FROM users WHERE password_hash IS NOT NULL"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Reference to hidden column password_hash in WHERE condition is refused"
 
 - id: policy-056
   group: policy
   sql: "SELECT id, name FROM users ORDER BY mfa_secret"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Reference to hidden column mfa_secret in ORDER BY clause is refused"
 
 - id: policy-057
@@ -388,7 +388,7 @@
   group: policy
   sql: "SELECT min(mfa_secret) FROM users"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Aggregate function referencing hidden column mfa_secret is refused"
 
 - id: policy-059
@@ -411,7 +411,7 @@
   group: policy
   sql: "SELECT u1.id FROM users u1 JOIN users u2 USING (password_hash)"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "USING clause referencing hidden column password_hash is refused"
   bypass_class: "Join condition on hidden column"
 
@@ -443,7 +443,7 @@
   group: policy
   sql: "SELECT postgres.public.users.password_hash FROM users"
   expect:
-    refused: PGM-208
+    refused: PGM-506
   note: "Four-part qualified column reference to hidden column is refused"
   bypass_class: "Qualified column bypass"
 

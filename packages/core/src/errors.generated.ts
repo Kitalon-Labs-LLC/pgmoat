@@ -278,10 +278,10 @@ export const ERROR_CODES: Readonly<Record<ErrorCode, ErrorDefinition>> = Object.
   },
   'PGM-208': {
     code: 'PGM-208',
-    title: "Column not allowed: hidden column, whole-row reference, or `*` on a table with h",
+    title: "Column not allowed: `*`, whole-row reference, column alias list, or NATURAL JOIN",
     section: '2xx',
     kind: 'refused',
-    fix: "Select these columns instead: <list>",
+    fix: "Use describe_table to see the columns you can select",
   },
   'PGM-209': {
     code: 'PGM-209',

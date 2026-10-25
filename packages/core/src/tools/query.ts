@@ -1,4 +1,4 @@
-import { refuse } from '../errors.js';
+import { refuse, safetyError } from '../errors.js';
 import { resolveRls } from '../rls/resolve.js';
 import { runSafety } from '../safety/pipeline.js';
 import { executeRead, type ExecuteBudgets } from '../postgres/execute.js';
@@ -50,7 +50,7 @@ export async function executeQuery(
   });
 
   if (!safetyResult.allowed) {
-    throw refuse(safetyResult.code, safetyResult.message);
+    throw safetyError(safetyResult);
   }
 
   rc.sqlExecuted = safetyResult.sql;

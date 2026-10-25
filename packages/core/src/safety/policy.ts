@@ -12,8 +12,27 @@ export type PolicyResult =
       ok: false;
       code: ErrorCode;
       message: string;
+      /** Render exactly like a database error (no hint), so hidden columns look missing. */
+      asDatabaseError?: true;
       node?: unknown;
     };
+
+/**
+ * Refusal for a hidden column. It must be indistinguishable from a column that
+ * does not exist, so it reproduces Postgres's undefined_column message, which
+ * postgres/errors.ts passes through as PGM-506.
+ */
+function missingColumn(node: unknown, name: string, relname?: string): PolicyResult {
+  return {
+    ok: false,
+    code: 'PGM-506',
+    asDatabaseError: true,
+    message: relname
+      ? `column ${relname}.${name} does not exist`
+      : `column "${name}" does not exist`,
+    node,
+  };
+}
 
 export interface CheckColumnsOptions {
   snapshot?: SchemaSnapshot;
@@ -344,7 +363,7 @@ function formatAllowedColumns(
   if (cols && cols.length > 0) {
     return cols.slice(0, 40).join(', ');
   }
-  return 'see schema';
+  return 'use describe_table to list them';
 }
 
 export function checkColumns(
@@ -436,10 +455,30 @@ export function checkColumns(
               }
             }
             if (isHidden) {
+              // Postgres checks the left side first; name the side the column is hidden on.
+              const larg = unwrap(join.larg) as Record<string, unknown> | null;
+              const leftQual =
+                larg && typeof larg.relname === 'string'
+                  ? resolveRelationName(
+                      {
+                        alias: null,
+                        schema: typeof larg.schemaname === 'string' ? larg.schemaname : null,
+                        name: larg.relname,
+                        isCte: false,
+                      },
+                      index,
+                    )
+                  : null;
+              const side =
+                leftQual && getVisibleColumns(leftQual, index, options)?.includes(sval)
+                  ? 'right'
+                  : 'left';
               refusal = {
                 ok: false,
-                code: 'PGM-208',
-                message: `Column access not allowed. Column "${sval}" is hidden.`,
+                code: 'PGM-506',
+                asDatabaseError: true,
+                // eslint-disable-next-line pgmoat/no-sql-string-building -- human-facing error message
+                message: `column "${sval}" specified in USING clause does not exist in ${side} table`,
                 node: join,
               };
               return;
@@ -526,19 +565,7 @@ export function checkColumns(
         // Subcase 2b: Unqualified column reference
         if (hiddenColNames.has(name)) {
           if (strictUnqualified) {
-            let hidingTable = 'in-scope table';
-            for (const qual of tablesWithHiddenCols.values()) {
-              if (index.hiddenColumns.get(qual)?.has(name)) {
-                hidingTable = qual;
-                break;
-              }
-            }
-            refusal = {
-              ok: false,
-              code: 'PGM-208',
-              message: `Column access not allowed. Unqualified column "${name}" matches a hidden column. Qualify the column or use list_tables to see available columns. Allowed columns for ${hidingTable}: ${formatAllowedColumns(hidingTable, index, options)}`,
-              node: colRef,
-            };
+            refusal = missingColumn(colRef, name);
             return;
           } else {
             // Non-strict: check if resolvable only to non-hidden table
@@ -567,21 +594,16 @@ export function checkColumns(
             }
 
             if (hidingCandidates.length > 0 && nonHidingCandidates.length === 0) {
-              const hidingTable = hidingCandidates[0]!;
-              refusal = {
-                ok: false,
-                code: 'PGM-208',
-                message: `Column access not allowed. Unqualified column "${name}" is hidden. Allowed columns for ${hidingTable}: ${formatAllowedColumns(hidingTable, index, options)}`,
-                node: colRef,
-              };
+              refusal = missingColumn(colRef, name);
               return;
             } else if (hidingCandidates.length > 0 && nonHidingCandidates.length > 0) {
               // Ambiguous
-              const hidingTable = hidingCandidates[0]!;
+              // Same message Postgres gives when the name exists in two in-scope tables.
               refusal = {
                 ok: false,
-                code: 'PGM-208',
-                message: `Column access not allowed. Ambiguous unqualified column "${name}" matches hidden column in ${hidingTable}. Allowed columns for ${hidingTable}: ${formatAllowedColumns(hidingTable, index, options)}`,
+                code: 'PGM-506',
+                asDatabaseError: true,
+                message: `column reference "${name}" is ambiguous`,
                 node: colRef,
               };
               return;
@@ -618,12 +640,7 @@ export function checkColumns(
           if (matchedRel) {
             const qual = resolveRelationName(matchedRel, index);
             if (qual && index.hiddenColumns.get(qual)?.has(col)) {
-              refusal = {
-                ok: false,
-                code: 'PGM-208',
-                message: `Column access not allowed. Column "${qualifier}.${col}" is hidden. Allowed columns for ${qual}: ${formatAllowedColumns(qual, index, options)}`,
-                node: colRef,
-              };
+              refusal = missingColumn(colRef, col, qualifier);
               return;
             }
           }
@@ -658,12 +675,7 @@ export function checkColumns(
         if (extracted[2]?.sval !== null) {
           const col = extracted[2]!.sval!;
           if (index.hiddenColumns.get(qual)?.has(col)) {
-            refusal = {
-              ok: false,
-              code: 'PGM-208',
-              message: `Column access not allowed. Column "${qual}.${col}" is hidden. Allowed columns for ${qual}: ${formatAllowedColumns(qual, index, options)}`,
-              node: colRef,
-            };
+            refusal = missingColumn(colRef, col, table);
             return;
           }
         }
@@ -696,12 +708,7 @@ export function checkColumns(
         if (extracted[3]?.sval !== null) {
           const col = extracted[3]!.sval!;
           if (index.hiddenColumns.get(qual)?.has(col)) {
-            refusal = {
-              ok: false,
-              code: 'PGM-208',
-              message: `Column access not allowed. Column "${qual}.${col}" is hidden. Allowed columns for ${qual}: ${formatAllowedColumns(qual, index, options)}`,
-              node: colRef,
-            };
+            refusal = missingColumn(colRef, col, table);
             return;
           }
         }

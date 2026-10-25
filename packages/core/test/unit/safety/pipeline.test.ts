@@ -79,11 +79,13 @@ describe('Safety Pipeline Orchestrator (P2.9)', () => {
       expect(res.timings.policyMs).toBeGreaterThanOrEqual(0);
     });
 
-    it('refuses access to hidden column with PGM-208', async () => {
+    it('refuses a hidden column with the same error as a missing column', async () => {
       const res = await runSafety('SELECT password_hash FROM users', { policyIndex: defaultIndex });
       expect(res.allowed).toBe(false);
       if (res.allowed) return;
-      expect(res.code).toBe('PGM-208');
+      expect(res.code).toBe('PGM-506');
+      expect(res.asDatabaseError).toBe(true);
+      expect(res.message).toBe('column "password_hash" does not exist');
     });
 
     it('allows access to visible columns on allowed tables', async () => {
