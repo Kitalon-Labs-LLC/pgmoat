@@ -48,6 +48,10 @@ jobs:
       - name: Build Bundles
         run: pnpm build
 
+      - name: Pack npm tarball for the GitHub release
+        working-directory: packages/cli
+        run: npm pack
+
       - name: Determine Pre-release Tag
         id: prerelease_check
         run: |
@@ -120,12 +124,8 @@ jobs:
 
       - name: Publish to MCP Registry
         if: steps.prerelease_check.outputs.is_prerelease == 'false'
+        working-directory: distribution/registry
         run: |
-          # Fetch mcp-publisher release and publish server.json via GitHub OIDC
-          echo "Publishing to MCP Registry..."
-          curl -sSL -o /tmp/mcp-publisher https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher-linux-amd64 || true
-          if [ -f /tmp/mcp-publisher ]; then
-            chmod +x /tmp/mcp-publisher
-            /tmp/mcp-publisher publish --manifest distribution/registry/server.json || echo "mcp-publisher output logged"
-          fi
-
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

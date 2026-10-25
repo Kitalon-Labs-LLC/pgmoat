@@ -48,3 +48,23 @@ Any user-facing change must include a changeset:
 pnpm changeset
 ```
 Follow the interactive prompts to describe whether your change is a patch, minor, or major version update.
+
+## Releasing (maintainers)
+
+Pushing a `v*` tag runs `.github/workflows/release.yml`, which publishes to npm (with provenance), GHCR, the MCP Registry, and GitHub Releases. Tags without a `-` (for example `v0.2.0`) publish as `latest`; tags with one (for example `v0.2.0-beta.1`) publish as `next` and skip the MCP Registry.
+
+1. Merge `dev` into `main` through a pull request with green CI.
+2. On `main`, apply the pending changesets (bumps `packages/cli` and writes its CHANGELOG), then copy that version to the other files:
+   ```bash
+   pnpm changeset version
+   node tools/sync-versions.mjs
+   git commit -am "release: v0.2.0"
+   ```
+3. Tag and push:
+   ```bash
+   git tag v0.2.0
+   git push origin main v0.2.0
+   ```
+4. Check the Release workflow run, then the npm, GHCR, and GitHub release pages.
+
+Follow semver. Before 1.0.0, breaking changes bump the minor version.

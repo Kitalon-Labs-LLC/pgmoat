@@ -41,6 +41,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Single-file standalone ESM bundle (`packages/cli/dist/bin.mjs`).
   - Multi-architecture Docker image running as non-root user `node` (UID 1000).
   - Claude Desktop bundle (`.mcpb`) with sensitive credential prompt.
-  - MCP Registry server definition (`io.github.kitalonlabs/pgmoat`).
+  - MCP Registry server definition (`io.github.Kitalon-Labs-LLC/pgmoat`).
   - Public adversarial test corpus with 315 test cases covering all known bypass classes.
   - Starlight documentation site with error directory for all 68 `PGM-xxx` error codes.

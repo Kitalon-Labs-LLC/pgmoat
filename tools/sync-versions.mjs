@@ -57,5 +57,12 @@ if (fs.existsSync(cliPkgPath)) {
   console.log('Updated packages/cli/package.json');
 }
 
+// 4. packages/core/src/version.ts (reported by pgmoat --version and audit entries)
+const versionTsPath = path.join(root, 'packages/core/src/version.ts');
+if (fs.existsSync(versionTsPath)) {
+  fs.writeFileSync(versionTsPath, `export const PGMOAT_VERSION = '${targetVersion}';\n`);
+  console.log('Updated packages/core/src/version.ts');
+}
+
 console.log('Version synchronization complete.');
 

@@ -18,7 +18,7 @@ FROM node:24-bookworm-slim AS runtime
 
 ARG VERSION=0.1.0
 
-LABEL org.opencontainers.image.source="https://github.com/kitalonlabs/pgmoat" \
+LABEL org.opencontainers.image.source="https://github.com/Kitalon-Labs-LLC/pgmoat" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.description="Governed, read-only Postgres access for AI agents"

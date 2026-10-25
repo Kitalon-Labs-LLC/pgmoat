@@ -99,7 +99,7 @@ Run `pgmoat --help` for all options.
 ```bash
 docker run -i --rm \
   -e PGMOAT_DATABASE_URL="postgresql://readonly_user:password@host.docker.internal:5432/mydb" \
-  ghcr.io/kitalonlabs/pgmoat:latest
+  ghcr.io/kitalon-labs-llc/pgmoat:latest
 ```
 
 ## Contributing

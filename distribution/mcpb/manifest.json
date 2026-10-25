@@ -8,7 +8,7 @@
   "icon": "icon.png",
   "author": {
     "name": "Kitalon Labs",
-    "url": "https://github.com/kitalonlabs/pgmoat"
+    "url": "https://github.com/Kitalon-Labs-LLC/pgmoat"
   },
   "server": {
     "type": "node",

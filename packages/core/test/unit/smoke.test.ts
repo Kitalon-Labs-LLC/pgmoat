@@ -4,6 +4,6 @@ import { PGMOAT_VERSION } from '../../src/version.js';
 describe('smoke', () => {
   it('exports PGMOAT_VERSION as a string', () => {
     expect(PGMOAT_VERSION).toBeTypeOf('string');
-    expect(PGMOAT_VERSION).toBe('0.1.0');
+    expect(PGMOAT_VERSION).toMatch(/^\d+\.\d+\.\d+(-[\w.]+)?$/);
   });
 });
