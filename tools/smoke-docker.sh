@@ -66,7 +66,7 @@ let stdout = "";
 child.stdout.on("data", (chunk) => {
   stdout += chunk.toString();
   // Stop once the full tools/list response line (id 2) has arrived
-  if (stdout.split("\n").slice(0, -1).some((line) => line.includes('"id":2'))) {
+  if (stdout.split("\n").slice(0, -1).some((line) => /"id":2[,}]/.test(line))) {
     setTimeout(() => child.kill(), 100);
   }
 });
