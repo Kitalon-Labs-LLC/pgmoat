@@ -31,12 +31,20 @@ docker network create "$NET_NAME"
 docker run -d --name "$DB_NAME" --network "$NET_NAME" -e POSTGRES_PASSWORD=postgres postgres:17-alpine
 
 echo "Waiting for postgres to become ready..."
-for i in {1..30}; do
-  if docker exec "$DB_NAME" pg_isready -U postgres >/dev/null 2>&1; then
+# Check over TCP: the image's first-boot init server listens only on the socket,
+# then restarts, so a socket check can pass too early.
+READY=0
+for i in {1..60}; do
+  if docker exec "$DB_NAME" pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1; then
+    READY=1
     break
   fi
   sleep 1
 done
+if [ "$READY" != 1 ]; then
+  echo "FAIL: Postgres did not become ready within 60s"
+  exit 1
+fi
 
 docker exec -i "$DB_NAME" psql -U postgres -d postgres < packages/core/test/integration/harness/seed.sql
 docker exec -i "$DB_NAME" psql -U postgres -d postgres < packages/core/test/integration/harness/roles.sql
@@ -57,7 +65,8 @@ const child = spawn("docker", [
 let stdout = "";
 child.stdout.on("data", (chunk) => {
   stdout += chunk.toString();
-  if (/describe_table/.test(stdout)) {
+  // Stop once the full tools/list response line (id 2) has arrived
+  if (stdout.split("\n").slice(0, -1).some((line) => /"id":2[,}]/.test(line))) {
     setTimeout(() => child.kill(), 100);
   }
 });
@@ -67,10 +76,15 @@ const initReq = JSON.stringify({
   id: 1,
   method: "initialize",
   params: {
-    protocolVersion: "2024-11-05",
+    protocolVersion: "2025-11-25",
     capabilities: {},
     clientInfo: { name: "smoke-client", version: "1.0.0" }
   }
+}) + "\n";
+
+const initializedNote = JSON.stringify({
+  jsonrpc: "2.0",
+  method: "notifications/initialized"
 }) + "\n";
 
 const listReq = JSON.stringify({
@@ -82,8 +96,17 @@ const listReq = JSON.stringify({
 
 child.stdin.write(initReq);
 setTimeout(() => {
+  child.stdin.write(initializedNote);
   child.stdin.write(listReq);
 }, 500);
+
+// Fail instead of hanging if the server never lists its tools
+setTimeout(() => {
+  console.error("FAIL: no tools/list response within 60s. Server stdout so far:");
+  console.error(stdout || "(empty)");
+  child.kill();
+  process.exitCode = 1;
+}, 60000).unref();
 
 child.on("close", () => {
   console.log(stdout);
