@@ -31,12 +31,20 @@ docker network create "$NET_NAME"
 docker run -d --name "$DB_NAME" --network "$NET_NAME" -e POSTGRES_PASSWORD=postgres postgres:17-alpine
 
 echo "Waiting for postgres to become ready..."
-for i in {1..30}; do
-  if docker exec "$DB_NAME" pg_isready -U postgres >/dev/null 2>&1; then
+# Check over TCP: the image's first-boot init server listens only on the socket,
+# then restarts, so a socket check can pass too early.
+READY=0
+for i in {1..60}; do
+  if docker exec "$DB_NAME" pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1; then
+    READY=1
     break
   fi
   sleep 1
 done
+if [ "$READY" != 1 ]; then
+  echo "FAIL: Postgres did not become ready within 60s"
+  exit 1
+fi
 
 docker exec -i "$DB_NAME" psql -U postgres -d postgres < packages/core/test/integration/harness/seed.sql
 docker exec -i "$DB_NAME" psql -U postgres -d postgres < packages/core/test/integration/harness/roles.sql
