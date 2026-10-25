@@ -136,7 +136,7 @@ export function printDoctorRefusalBanner(error: DoctorEnforceError): void {
     `  Run \`pgmoat doctor\` for all findings. To start anyway (not recommended),`,
     `  pass --allow-unsafe-role. Every audit entry will record the override.`,
     '',
-    `  https://kitalonlabs.com/pgmoat/docs/errors/${code}`,
+    `  https://kitalonlabs.com/pgmoat#${code}`,
   ].join('\n');
 
   process.stderr.write(banner + '\n');

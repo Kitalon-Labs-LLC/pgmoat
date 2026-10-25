@@ -309,6 +309,6 @@ export function renderClientSnippets(
     `         "env": { "PGMOAT_DATABASE_URL": "${rawUrl}" }`,
     '       }',
     '',
-    'https://kitalonlabs.com/pgmoat/docs/quickstart',
+    'https://kitalonlabs.com/pgmoat#quickstart',
   ].join('\n');
 }

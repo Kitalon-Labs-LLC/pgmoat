@@ -113,7 +113,7 @@ describe('CLI start & validate (P8.2)', () => {
       expect(out).toContain('role svc_agent has BYPASSRLS');
       expect(out).toContain('Fix: ALTER ROLE svc_agent NOBYPASSRLS;');
       expect(out).toContain('pass --allow-unsafe-role');
-      expect(out).toContain('https://kitalonlabs.com/pgmoat/docs/errors/PGM-702');
+      expect(out).toContain('https://kitalonlabs.com/pgmoat#PGM-702');
     } finally {
       process.stderr.write = origWrite;
     }

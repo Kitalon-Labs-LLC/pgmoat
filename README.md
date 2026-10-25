@@ -108,7 +108,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately as desc
 
 ## Links
 
-- Docs: https://kitalonlabs.com/pgmoat/docs
+- Docs: https://kitalonlabs.com/pgmoat
 - Source and issues: https://github.com/Kitalon-Labs-LLC/pgmoat
 - Security reports: security@kitalonlabs.com
 

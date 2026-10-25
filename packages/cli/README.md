@@ -92,7 +92,7 @@ Run `pgmoat --help` for all options.
 
 ## Links
 
-- Docs: https://kitalonlabs.com/pgmoat/docs
+- Docs: https://kitalonlabs.com/pgmoat
 - Source and issues: https://github.com/Kitalon-Labs-LLC/pgmoat
 - Security reports: security@kitalonlabs.com
 

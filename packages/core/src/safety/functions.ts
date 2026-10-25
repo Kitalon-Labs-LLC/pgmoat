@@ -433,7 +433,7 @@ export function functionPolicy(
       return {
         ok: false,
         code: 'PGM-205',
-        message: `Function "${name}" is not allowed. See https://kitalonlabs.com/pgmoat/docs/safety#functions`,
+        message: `Function "${name}" is not allowed. See https://kitalonlabs.com/pgmoat#functions`,
         node: funcNode,
       };
     }
@@ -445,7 +445,7 @@ export function functionPolicy(
         return {
           ok: false,
           code: 'PGM-205',
-          message: `Function "${qualified}" is not allowed. See https://kitalonlabs.com/pgmoat/docs/safety#functions`,
+          message: `Function "${qualified}" is not allowed. See https://kitalonlabs.com/pgmoat#functions`,
           node: funcNode,
         };
       }
@@ -460,7 +460,7 @@ export function functionPolicy(
       return {
         ok: false,
         code: 'PGM-205',
-        message: `Function "${display}" is not allowed. See https://kitalonlabs.com/pgmoat/docs/safety#functions`,
+        message: `Function "${display}" is not allowed. See https://kitalonlabs.com/pgmoat#functions`,
         node: funcNode,
       };
     }

@@ -38,7 +38,7 @@ Options
   --no-color          Disable colors (NO_COLOR is also honored)
   -h, --help          Show help
 
-Docs     https://kitalonlabs.com/pgmoat/docs
+Docs     https://kitalonlabs.com/pgmoat
 Issues   https://github.com/Kitalon-Labs-LLC/pgmoat/issues`;
 
     expect(HELP_TEXT).toBe(expected);
@@ -133,7 +133,7 @@ Issues   https://github.com/Kitalon-Labs-LLC/pgmoat/issues`;
     expect(formatted).toContain('  Mode:       read-only');
     expect(formatted).toContain('  Fix: pgmoat only runs SELECT, SHOW, and plan-only EXPLAIN in read-only mode.');
     expect(formatted).toContain('       Scoped writes arrive in v1.1.');
-    expect(formatted).toContain('  https://kitalonlabs.com/pgmoat/docs/errors/PGM-201');
+    expect(formatted).toContain('  https://kitalonlabs.com/pgmoat#PGM-201');
 
     // Test JSON format
     const jsonFormatted = formatError(
@@ -157,7 +157,7 @@ Issues   https://github.com/Kitalon-Labs-LLC/pgmoat/issues`;
         mode: 'read-only',
       },
       fix: 'pgmoat only runs SELECT, SHOW, and plan-only EXPLAIN in read-only mode.\nScoped writes arrive in v1.1.',
-      docs: 'https://kitalonlabs.com/pgmoat/docs/errors/PGM-201',
+      docs: 'https://kitalonlabs.com/pgmoat#PGM-201',
     });
   });
 
