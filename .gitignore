@@ -1,0 +1,21 @@
+node_modules
+dist
+coverage
+*.log
+pgmoat-audit/
+tmp/
+.env*
+!.env.example
+*.tgz
+dist-mcpb/
+
+# Internal planning and assistant files (kept locally, not published)
+spec/
+CLAUDE.md
+launch/
+.claude/
+docs/maintainers/name-claims.md
+docs/maintainers/release-checklist.md
+docs/maintainers/demo-script.md
+docs/maintainers/security-review-*.md
+docs/security/

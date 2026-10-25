@@ -1,0 +1,15 @@
+# expect: PGM-117
+version: 1
+server:
+  name: aud-mismatch
+transport: http
+http:
+  host: 127.0.0.1
+  public_url: https://mcp.example.com
+auth:
+  mode: oauth
+  issuer: https://auth.example.com
+  audience: https://different.example.com
+  jwks_url: https://auth.example.com/jwks.json
+connection:
+  url: postgresql://localhost/app

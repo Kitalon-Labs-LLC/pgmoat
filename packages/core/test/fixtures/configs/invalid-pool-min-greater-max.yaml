@@ -1,0 +1,9 @@
+# expect: PGM-106
+version: 1
+server:
+  name: pool-reversed
+connection:
+  url: postgresql://localhost/app
+  pool:
+    min: 15
+    max: 5

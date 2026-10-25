@@ -1,0 +1,8 @@
+# expect: PGM-109
+version: 1
+server:
+  name: bad-payload
+budgets:
+  max_payload_bytes: 50
+connection:
+  url: postgresql://localhost/app

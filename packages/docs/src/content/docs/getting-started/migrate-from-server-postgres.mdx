@@ -1,0 +1,39 @@
+---
+title: "Migrating from @modelcontextprotocol/server-postgres"
+description: "Upgrading from server-postgres to pgmoat"
+---
+
+# Migrating from @modelcontextprotocol/server-postgres
+
+\`pgmoat\` is a drop-in governed replacement for the reference \`server-postgres\` MCP server.
+
+## One-Line Swap
+
+Change:
+
+\`\`\`json
+{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://..."]
+}
+\`\`\`
+
+To:
+
+\`\`\`json
+{
+  "command": "npx",
+  "args": ["-y", "pgmoat", "start", "--url-env", "PGMOAT_DATABASE_URL"],
+  "env": {
+    "PGMOAT_DATABASE_URL": "postgresql://..."
+  }
+}
+\`\`\`
+
+## Key Differences
+
+1. **Layered Safety**: Blocks destructive SQL (DML, DDL, write CTEs, data exfiltration functions) using PostgreSQL AST parsing.
+2. **Hidden Columns & Relations**: Sensitive credentials or internal tables can be completely hidden from LLM visibility.
+3. **Budget Guardrails**: Automatic caps on rows returned (default 200), query time (5000 ms), and total bytes prevent context flooding.
+4. **Tamper-Evident Audit**: Every query and refused attempt is cryptographically chained and recorded.
+

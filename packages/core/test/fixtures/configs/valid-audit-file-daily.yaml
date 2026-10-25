@@ -1,0 +1,10 @@
+# expect: valid
+version: 1
+server:
+  name: file-daily
+connection:
+  url: postgresql://localhost/app
+audit:
+  destination: file
+  rotation: daily
+  retain_days: 30

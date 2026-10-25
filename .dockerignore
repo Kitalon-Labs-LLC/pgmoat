@@ -1,0 +1,11 @@
+node_modules
+.git
+.github
+dist
+coverage
+*.log
+tmp
+pgmoat-audit
+docs
+site
+spec

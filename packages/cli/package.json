@@ -1,0 +1,61 @@
+{
+  "name": "pgmoat",
+  "version": "0.1.0",
+  "description": "Governed, read-only Postgres access for AI agents: an MCP server with AST-level SQL safety, hidden columns, RLS, budgets, and a tamper-evident audit log.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "postgres",
+    "postgresql",
+    "ai",
+    "agents",
+    "claude",
+    "read-only",
+    "rls",
+    "audit"
+  ],
+  "license": "MIT",
+  "author": "Kitalon Labs",
+  "homepage": "https://kitalonlabs.com/pgmoat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kitalon-Labs-LLC/pgmoat.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/Kitalon-Labs-LLC/pgmoat/issues"
+  },
+  "type": "module",
+  "bin": {
+    "pgmoat": "./dist/bin.mjs"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "mcpName": "io.github.Kitalon-Labs-LLC/pgmoat",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "libpg-query": "^18.1.5",
+    "pg": "^8.23.1",
+    "pg-cursor": "^2.22.1"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^1.8.1",
+    "@pgmoat/core": "workspace:*",
+    "commander": "^14.0.3",
+    "tsdown": "^0.23.1",
+    "yaml": "^2.9.1"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

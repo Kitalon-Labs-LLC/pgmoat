@@ -1,0 +1,3 @@
+# expect: PGM-107
+version: 1
+server: [broken syntax

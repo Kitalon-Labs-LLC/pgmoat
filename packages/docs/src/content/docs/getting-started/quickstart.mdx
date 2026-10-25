@@ -1,0 +1,32 @@
+---
+title: "Quickstart"
+description: "Get started with pgmoat in 5 minutes"
+---
+
+# Quickstart
+
+Run pgmoat with your Postgres connection string in zero-config mode:
+
+\`\`\`bash
+npx -y pgmoat postgresql://readonly_user:password@localhost:5432/app_db
+\`\`\`
+
+## Using Environment Variables
+
+To keep database credentials out of process argv listings, pass the connection URL via an environment variable:
+
+\`\`\`bash
+export PGMOAT_DATABASE_URL="postgresql://readonly_user:password@localhost:5432/app_db"
+npx -y pgmoat start --url-env PGMOAT_DATABASE_URL
+\`\`\`
+
+## Generating a Configuration File
+
+Run the interactive wizard to generate \`pgmoat.yaml\`:
+
+\`\`\`bash
+npx -y pgmoat init
+\`\`\`
+
+This inspects the database schema, checks user role privileges, and generates a structured \`pgmoat.yaml\` file.
+

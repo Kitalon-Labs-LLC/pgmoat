@@ -1,0 +1,10 @@
+# expect: PGM-113
+version: 1
+server:
+  name: token-stdio
+transport: stdio
+connection:
+  url: postgresql://localhost/app
+rls:
+  session_variables:
+    app.tenant: token.sub

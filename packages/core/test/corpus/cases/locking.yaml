@@ -1,0 +1,63 @@
+- id: locking-001
+  group: locking
+  sql: "SELECT id FROM users FOR UPDATE"
+  expect:
+    refused: PGM-202
+  note: "FOR UPDATE row locking is forbidden in read-only mode"
+
+- id: locking-002
+  group: locking
+  sql: "SELECT id FROM users FOR NO KEY UPDATE"
+  expect:
+    refused: PGM-202
+  note: "FOR NO KEY UPDATE row locking is forbidden in read-only mode"
+
+- id: locking-003
+  group: locking
+  sql: "SELECT id FROM users FOR SHARE"
+  expect:
+    refused: PGM-202
+  note: "FOR SHARE row locking is forbidden in read-only mode"
+
+- id: locking-004
+  group: locking
+  sql: "SELECT id FROM users FOR KEY SHARE"
+  expect:
+    refused: PGM-202
+  note: "FOR KEY SHARE row locking is forbidden in read-only mode"
+
+- id: locking-005
+  group: locking
+  sql: "SELECT id FROM users FOR UPDATE NOWAIT"
+  expect:
+    refused: PGM-202
+  note: "FOR UPDATE NOWAIT row locking is forbidden in read-only mode"
+
+- id: locking-006
+  group: locking
+  sql: "SELECT id FROM users FOR UPDATE SKIP LOCKED"
+  expect:
+    refused: PGM-202
+  note: "FOR UPDATE SKIP LOCKED row locking is forbidden in read-only mode"
+
+- id: locking-007
+  group: locking
+  sql: "SELECT id INTO new_users FROM users"
+  expect:
+    refused: PGM-202
+  note: "SELECT INTO table creation is forbidden in read-only mode"
+
+- id: locking-008
+  group: locking
+  sql: "SELECT u.id FROM users u FOR UPDATE OF u"
+  expect:
+    refused: PGM-202
+  note: "FOR UPDATE OF table specification is forbidden in read-only mode"
+
+- id: locking-009
+  group: locking
+  sql: "SELECT * FROM (SELECT id FROM users FOR UPDATE) sub"
+  expect:
+    refused: PGM-202
+  note: "Row locking inside subquery is forbidden in read-only mode"
+

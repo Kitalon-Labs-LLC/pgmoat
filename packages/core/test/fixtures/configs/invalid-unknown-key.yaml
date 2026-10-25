@@ -1,0 +1,7 @@
+# expect: PGM-109
+version: 1
+server:
+  name: unknown-key
+unknown_section: true
+connection:
+  url: postgresql://localhost/app

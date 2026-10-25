@@ -1,0 +1,31 @@
+---
+title: "Claude Desktop"
+description: "Connect Claude Desktop to Postgres using pgmoat"
+---
+
+# Claude Desktop Integration
+
+## Option 1: Claude Desktop Extension (.mcpb)
+
+Download \`pgmoat-<version>.mcpb\` from GitHub Releases and open it in Claude Desktop. Fill in:
+1. **Postgres connection URL**: Use a read-only role (`postgresql://readonly@host:5432/db`).
+2. **pgmoat.yaml path (optional)**: Path to custom configuration.
+
+## Option 2: claude_desktop_config.json
+
+Add pgmoat to \`claude_desktop_config.json\`:
+
+\`\`\`json
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "pgmoat", "start", "--url-env", "PGMOAT_DATABASE_URL"],
+      "env": {
+        "PGMOAT_DATABASE_URL": "postgresql://readonly_user:password@localhost:5432/app"
+      }
+    }
+  }
+}
+\`\`\`
+

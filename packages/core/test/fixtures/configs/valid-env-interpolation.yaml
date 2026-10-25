@@ -1,0 +1,6 @@
+# expect: valid
+version: 1
+server:
+  name: env-interp
+connection:
+  url: postgresql://${PG_USER:-postgres}@localhost/app

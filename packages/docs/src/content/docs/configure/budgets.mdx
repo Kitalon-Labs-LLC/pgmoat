@@ -1,0 +1,23 @@
+---
+title: "Budgets & Limits"
+description: "Configure query deadlines and payload limits"
+---
+
+# Budgets & Limits
+
+Budgets protect agent contexts and database load by enforcing execution limits:
+
+\`\`\`yaml
+budgets:
+  max_rows: 200              # Maximum rows returned per query
+  max_query_ms: 5000         # Server-side execution timeout
+  max_payload_bytes: 65536   # Maximum response payload size (64 KB)
+  max_columns: 50            # Truncates wide tables beyond 50 columns
+\`\`\`
+
+## Handling Budget Exceeded
+
+- Queries requesting more rows than allowed fail with \`PGM-302\`.
+- Queries exceeding time budgets are cancelled server-side and report \`PGM-303\`.
+- Responses exceeding byte limits truncate rows cleanly with warning \`PGM-305\`.
+

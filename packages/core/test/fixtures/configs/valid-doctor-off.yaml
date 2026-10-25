@@ -1,0 +1,8 @@
+# expect: valid
+version: 1
+server:
+  name: doc-off
+connection:
+  url: postgresql://localhost/app
+doctor:
+  on_start: off

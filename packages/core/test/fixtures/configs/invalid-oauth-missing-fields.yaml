@@ -1,0 +1,12 @@
+# expect: PGM-116
+version: 1
+server:
+  name: oauth-missing
+transport: http
+http:
+  host: 127.0.0.1
+auth:
+  mode: oauth
+  issuer: https://auth.example.com
+connection:
+  url: postgresql://localhost/app

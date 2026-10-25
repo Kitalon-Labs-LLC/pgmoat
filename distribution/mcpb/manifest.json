@@ -1,0 +1,82 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/manifest-v1.json",
+  "name": "pgmoat",
+  "version": "0.1.0",
+  "display_name": "pgmoat",
+  "description": "Governed, read-only Postgres access for Claude.",
+  "long_description": "Ask Claude about your Postgres data with guardrails: read-only enforced in layers, hidden columns, row limits, tenant scoping, and a tamper-evident audit log. Runs on your machine.",
+  "icon": "icon.png",
+  "author": {
+    "name": "Kitalon Labs",
+    "url": "https://github.com/Kitalon-Labs-LLC/pgmoat"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/bin.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/bin.mjs",
+        "start",
+        "--url-env",
+        "PGMOAT_DATABASE_URL"
+      ],
+      "env": {
+        "PGMOAT_DATABASE_URL": "${user_config.database_url}",
+        "PGMOAT_CONFIG": "${user_config.config_path}"
+      }
+    }
+  },
+  "user_config": {
+    "database_url": {
+      "label": "Postgres connection URL",
+      "type": "string",
+      "sensitive": true,
+      "required": true,
+      "description": "Use a read-only role. Example: postgresql://readonly@host:5432/db"
+    },
+    "config_path": {
+      "label": "pgmoat.yaml (optional)",
+      "type": "file",
+      "required": false,
+      "description": "Adds descriptions, hidden columns, RLS, and budgets"
+    }
+  },
+  "tools": [
+    {
+      "name": "describe_table",
+      "title": "Describe a table",
+      "description": "Show columns, types, primary keys, and relations for a visible table."
+    },
+    {
+      "name": "explain",
+      "title": "Show a query plan",
+      "description": "Explain an execution plan without running write operations."
+    },
+    {
+      "name": "list_tables",
+      "title": "List tables",
+      "description": "List all visible tables and views in allowed schemas."
+    },
+    {
+      "name": "query",
+      "title": "Run a read-only SQL query",
+      "description": "Execute a validated read-only SQL query within row and timeout budgets."
+    },
+    {
+      "name": "sample_table",
+      "title": "Show sample rows",
+      "description": "Sample up to budget limit rows from a visible table with sensitive masking."
+    }
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=22.12.0"
+    }
+  }
+}

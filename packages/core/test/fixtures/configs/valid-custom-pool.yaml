@@ -1,0 +1,10 @@
+# expect: valid
+version: 1
+server:
+  name: pool-config
+connection:
+  url: postgresql://localhost/app
+  pool:
+    min: 5
+    max: 25
+    acquire_timeout_ms: 10000

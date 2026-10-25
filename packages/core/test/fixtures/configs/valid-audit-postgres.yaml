@@ -1,0 +1,10 @@
+# expect: valid
+version: 1
+server:
+  name: audit-pg
+connection:
+  url: postgresql://localhost/app
+audit:
+  destination: postgres
+  postgres:
+    url: postgresql://localhost/audit_db

@@ -1,0 +1,20 @@
+database:
+  url_env: DATABASE_URL
+
+schemas:
+  expose:
+    - public
+
+budgets:
+  max_rows: 1000
+  max_sql_chars: 32768
+  statement_timeout_ms: 10000
+
+catalogs:
+  allow: true
+
+audit:
+  destinations:
+    - type: file
+      path: ./analytics-audit.log
+

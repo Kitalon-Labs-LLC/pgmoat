@@ -1,0 +1,7 @@
+# expect: PGM-102
+version: 1
+server:
+  name: scoped-write-server
+mode: scoped-write
+connection:
+  url: postgresql://localhost/app

@@ -1,0 +1,31 @@
+---
+title: "pgmoat: Governed Postgres access for AI agents"
+description: "Read-only enforced in layers. Hidden columns stay hidden. Rows scoped per tenant. Tamper-evident audit log."
+template: splash
+hero:
+  tagline: "Governed Postgres access for AI agents. Read-only enforced in layers. Hidden columns stay hidden. Rows scoped per tenant. Every query on a tamper-evident audit log."
+  actions:
+    - text: Quickstart
+      link: /getting-started/quickstart/
+      icon: right-arrow
+      variant: primary
+    - text: Safety Model
+      link: /safety/guarantees/
+      icon: external
+      variant: secondary
+---
+
+## Quickstart
+
+\`\`\`bash
+npx -y pgmoat postgresql://readonly@localhost:5432/app
+\`\`\`
+
+## Five Core Guarantees
+
+- **Read-only, three times over**: Enforced via libpg-query AST parser, read-only transaction parameters, and single-statement wire protocol checks.
+- **Hidden means unreachable**: Tables and columns marked hidden are removed from catalog introspection and systematically blocked at query execution time.
+- **Results sized for agents**: Guardrails on row counts, execution deadlines, column widths, and total response bytes prevent context flooding.
+- **Tenant from verified identity**: Verified token claims inject session variables dynamically for native PostgreSQL Row-Level Security.
+- **Proof, not promises**: Validated against an adversarial test suite of 318 bypass attempts covering catalog snooping, CTE writes, and parser exploits.
+

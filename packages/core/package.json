@@ -1,0 +1,32 @@
+{
+  "name": "@pgmoat/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "^2.1.1",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "@pgsql/types": "^18.0.0",
+    "jose": "^6.2.12",
+    "libpg-query": "^18.1.5",
+    "pg": "^8.23.1",
+    "pg-cursor": "^2.22.1",
+    "pgsql-deparser": "^18.3.12",
+    "pino": "^10.4.0",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.3.1",
+    "@testcontainers/postgresql": "^12.2.1",
+    "@types/pg": "^8.23.1",
+    "@types/pg-cursor": "^2.7.2",
+    "fast-check": "^4.10.2"
+  }
+}

@@ -1,0 +1,10 @@
+# expect: valid
+version: 1
+server:
+  name: file-size
+connection:
+  url: postgresql://localhost/app
+audit:
+  destination: file
+  rotation: size:50MB
+  retain_days: 60

@@ -1,0 +1,33 @@
+---
+title: "HTTP & OAuth 2.0"
+description: "Deploying pgmoat as a central Streamable HTTP MCP gateway"
+---
+
+# HTTP & OAuth Transport
+
+pgmoat can run as a multi-tenant HTTP service supporting RFC 9728 Protected Resource Metadata:
+
+\`\`\`yaml
+transport: http
+
+http:
+  host: "0.0.0.0"
+  port: 8787
+  path: "/mcp"
+  public_url: "https://pgmoat.example.com/mcp"
+  allowed_hosts: ["pgmoat.example.com"]
+  allowed_origins: ["https://chat.example.com"]
+  max_body_bytes: 1048576
+
+auth:
+  mode: oauth
+  issuer: "https://auth.example.com/"
+  audience: "https://pgmoat.example.com/mcp"
+  jwks_url: "https://auth.example.com/.well-known/jwks.json"
+  algorithms: ["RS256"]
+  required_scopes: ["pgmoat:read"]
+\`\`\`
+
+## Supported Identity Providers
+- **Auth0 / Okta / Entra ID / Keycloak**: Configure an API resource matching the audience URL, issue JWT access tokens with scope \`pgmoat:read\`, and include tenant ID claims in the token payload.
+

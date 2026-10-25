@@ -1,0 +1,21 @@
+---
+title: "Deployment Patterns"
+description: "Architectural patterns for running pgmoat in production"
+---
+
+# Deployment Patterns
+
+| Pattern | Transport | Use Case |
+|---|---|---|
+| **Local Sidecar** | stdio | Developer laptops, Claude Desktop, Cursor |
+| **Pod Sidecar** | stdio | Single-tenant containerized backend agents |
+| **Central Gateway** | HTTP + OAuth | Multi-tenant SaaS, centralized audit collection |
+
+## Running with Docker
+
+\`\`\`bash
+docker run --rm -i \
+  -e PGMOAT_DATABASE_URL="postgresql://readonly@host:5432/app" \
+  ghcr.io/kitalon-labs-llc/pgmoat:latest start --url-env PGMOAT_DATABASE_URL
+\`\`\`
+

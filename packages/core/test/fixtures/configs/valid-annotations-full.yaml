@@ -1,0 +1,17 @@
+# expect: valid
+version: 1
+server:
+  name: annotated-server
+connection:
+  url: postgresql://localhost/app
+tables:
+  orders:
+    description: Customer orders table
+    relationships: ["users.id references customers.id"]
+    columns:
+      id:
+        description: Primary key
+      card_token:
+        sensitive: high
+      customer_note:
+        untrusted: true

@@ -1,0 +1,10 @@
+# expect: PGM-103
+version: 1
+server:
+  name: update-cols-bad
+connection:
+  url: postgresql://localhost/app
+tables:
+  users:
+    update_columns: [email]
+    write: [insert]

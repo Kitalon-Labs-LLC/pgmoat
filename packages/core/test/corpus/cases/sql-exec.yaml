@@ -1,0 +1,113 @@
+- id: sql-exec-001
+  group: sql-exec
+  sql: "SELECT query_to_xml('select * from internal_audit', true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "query_to_xml executes arbitrary dynamic SQL inside the database engine"
+  bypass_class: "SQL-executing functions"
+
+- id: sql-exec-002
+  group: sql-exec
+  sql: "SELECT pg_catalog.query_to_xml('select * from users', true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "Schema-qualified pg_catalog.query_to_xml executing arbitrary SQL"
+
+- id: sql-exec-003
+  group: sql-exec
+  sql: "SELECT query_to_xmlschema('select 1', true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "query_to_xmlschema executes dynamic SQL to generate schema"
+
+- id: sql-exec-004
+  group: sql-exec
+  sql: "SELECT query_to_xml_and_xmlschema('select 1', true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "query_to_xml_and_xmlschema executes arbitrary SQL"
+
+- id: sql-exec-005
+  group: sql-exec
+  sql: "SELECT cursor_to_xml('my_cursor'::refcursor, 10, true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "cursor_to_xml consumes cursor state dynamically"
+
+- id: sql-exec-006
+  group: sql-exec
+  sql: "SELECT cursor_to_xmlschema('my_cursor'::refcursor, true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "cursor_to_xmlschema inspects cursor state dynamically"
+
+- id: sql-exec-007
+  group: sql-exec
+  sql: "SELECT table_to_xml('internal_audit'::regclass, true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "table_to_xml dumps arbitrary tables including hidden ones"
+
+- id: sql-exec-008
+  group: sql-exec
+  sql: "SELECT table_to_xmlschema('internal_audit'::regclass, true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "table_to_xmlschema dumps schema of tables including hidden ones"
+
+- id: sql-exec-009
+  group: sql-exec
+  sql: "SELECT table_to_xml_and_xmlschema('internal_audit'::regclass, true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "table_to_xml_and_xmlschema dumps table data and schema"
+
+- id: sql-exec-010
+  group: sql-exec
+  sql: "SELECT schema_to_xml('public', true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "schema_to_xml dumps whole database schemas"
+
+- id: sql-exec-011
+  group: sql-exec
+  sql: "SELECT schema_to_xmlschema('public', true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "schema_to_xmlschema dumps whole database schemas"
+
+- id: sql-exec-012
+  group: sql-exec
+  sql: "SELECT database_to_xml(true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "database_to_xml dumps entire database contents"
+
+- id: sql-exec-013
+  group: sql-exec
+  sql: "SELECT database_to_xmlschema(true, false, '')"
+  expect:
+    refused: PGM-205
+  note: "database_to_xmlschema dumps entire database schema"
+
+- id: sql-exec-014
+  group: sql-exec
+  sql: "SELECT ts_stat('select to_tsvector(name) from users')"
+  expect:
+    refused: PGM-205
+  note: "ts_stat executes dynamic SQL query strings"
+
+- id: sql-exec-015
+  group: sql-exec
+  sql: "SELECT * FROM dblink('dbname=postgres', 'select * from users') AS t(id int)"
+  expect:
+    refused: PGM-205
+  note: "dblink executes cross-database or out-of-band queries"
+
+- id: sql-exec-016
+  group: sql-exec
+  sql: "SELECT dblink_exec('dbname=postgres', 'delete from users')"
+  expect:
+    refused: PGM-205
+  note: "dblink_exec executes writes via remote dblink connection"
+

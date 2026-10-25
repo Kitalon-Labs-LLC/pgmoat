@@ -1,0 +1,6 @@
+# expect: PGM-108
+version: 1
+server:
+  name: missing-env
+connection:
+  url: postgresql://${REQUIRED_AND_TOTALLY_MISSING_VAR}@localhost/app

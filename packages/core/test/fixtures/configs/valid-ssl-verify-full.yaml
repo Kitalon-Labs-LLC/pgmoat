@@ -1,0 +1,7 @@
+# expect: valid
+version: 1
+server:
+  name: ssl-verify
+connection:
+  url: postgresql://localhost/app
+  ssl: verify-full

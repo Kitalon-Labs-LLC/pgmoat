@@ -1,0 +1,77 @@
+- id: budgets-001
+  group: budgets
+  sql: "SELECT id FROM orders LIMIT 201"
+  expect:
+    refused: PGM-302
+  note: "LIMIT 201 exceeds default max_rows budget of 200"
+
+- id: budgets-002
+  group: budgets
+  sql: "SELECT id FROM orders LIMIT 500"
+  expect:
+    refused: PGM-302
+  note: "LIMIT 500 exceeds default max_rows budget of 200"
+
+- id: budgets-003
+  group: budgets
+  sql: "SELECT id FROM orders LIMIT 10000"
+  expect:
+    refused: PGM-302
+  note: "LIMIT 10000 exceeds default max_rows budget of 200"
+
+- id: budgets-004
+  group: budgets
+  sql: "SELECT id FROM orders FETCH FIRST 201 ROWS ONLY"
+  expect:
+    refused: PGM-302
+  note: "FETCH FIRST 201 ROWS exceeds default max_rows budget of 200"
+
+- id: budgets-005
+  group: budgets
+  sql: "SELECT id FROM orders FETCH FIRST 1000 ROWS ONLY"
+  expect:
+    refused: PGM-302
+  note: "FETCH FIRST 1000 ROWS exceeds default max_rows budget of 200"
+
+- id: budgets-006
+  group: budgets
+  sql: "SELECT id FROM orders LIMIT 200"
+  expect:
+    allowed: true
+
+- id: budgets-007
+  group: budgets
+  sql: "SELECT id FROM orders LIMIT 50"
+  expect:
+    allowed: true
+
+- id: budgets-008
+  group: budgets
+  sql: "SELECT id FROM orders LIMIT 1"
+  expect:
+    allowed: true
+
+- id: budgets-009
+  group: budgets
+  sql: "SELECT id FROM orders LIMIT $1"
+  expect:
+    allowed: true
+
+- id: budgets-010
+  group: budgets
+  sql: "SELECT id FROM orders LIMIT (SELECT 10)"
+  expect:
+    allowed: true
+
+- id: budgets-011
+  group: budgets
+  sql: "SELECT id FROM orders FETCH FIRST 10 ROWS ONLY"
+  expect:
+    allowed: true
+
+- id: budgets-012
+  group: budgets
+  sql: "SELECT id FROM orders OFFSET 1000"
+  expect:
+    allowed: true
+
