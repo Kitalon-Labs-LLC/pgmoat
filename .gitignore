@@ -8,3 +8,9 @@ tmp/
 !.env.example
 *.tgz
 dist-mcpb/
+
+# Internal planning and assistant files (kept locally, not published)
+spec/
+CLAUDE.md
+launch/
+.claude/
