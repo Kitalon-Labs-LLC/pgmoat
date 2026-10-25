@@ -4,7 +4,7 @@ This document specifies the benchmark methodology, non-functional performance re
 
 ## Targets and Performance Requirements
 
-The test suite continuously guards five primary performance targets defined in `spec/04-pgmoat-trd.md`:
+The test suite continuously guards five primary performance targets:
 
 | Requirement ID | Description | Target Threshold | Measured Test Suite |
 |---|---|---|---|

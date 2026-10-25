@@ -14,3 +14,8 @@ spec/
 CLAUDE.md
 launch/
 .claude/
+docs/maintainers/name-claims.md
+docs/maintainers/release-checklist.md
+docs/maintainers/demo-script.md
+docs/maintainers/security-review-*.md
+docs/security/
