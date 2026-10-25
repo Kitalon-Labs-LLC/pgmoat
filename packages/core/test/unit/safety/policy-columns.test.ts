@@ -28,6 +28,35 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
     return checkColumns(parsed.tree, index, policy);
   }
 
+  // --- Hidden columns read exactly like missing ones ---
+  // Expected strings are Postgres 14-18 undefined_column messages for a column that does not exist.
+  describe('hidden column errors match missing-column errors', () => {
+    it.each([
+      ['SELECT password_hash FROM users', 'column "password_hash" does not exist'],
+      ['SELECT u.password_hash FROM users u', 'column u.password_hash does not exist'],
+      ['SELECT users.password_hash FROM users', 'column users.password_hash does not exist'],
+      ['SELECT public.users.password_hash FROM users', 'column users.password_hash does not exist'],
+      ['SELECT db.public.users.password_hash FROM users', 'column users.password_hash does not exist'],
+      [
+        'SELECT 1 FROM users a JOIN contacts b USING (ssn)',
+        'column "ssn" specified in USING clause does not exist in left table',
+      ],
+      [
+        'SELECT 1 FROM contacts a JOIN users b USING (ssn)',
+        'column "ssn" specified in USING clause does not exist in left table',
+      ],
+    ])('%s', async (sql, message) => {
+      const res = await testCol(sql);
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.code).toBe('PGM-506');
+        expect(res.asDatabaseError).toBe(true);
+        expect(res.message).toBe(message);
+        expect(res.message).not.toMatch(/hidden|not allowed/i);
+      }
+    });
+  });
+
   // --- Allowed column queries ---
   describe('allowed column queries', () => {
     it('allows query selecting visible columns only', async () => {
@@ -63,9 +92,7 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
       const res = await testCol('SELECT password_hash FROM users');
       expect(res.ok).toBe(false);
       if (!res.ok) {
-        expect(res.code).toBe('PGM-208');
-        expect(res.message).toContain('Column access not allowed');
-        expect(res.message).toContain('Allowed columns for public.users: id, name, email, created_at');
+        expect(res.code).toBe('PGM-506');
       }
     });
 
@@ -73,28 +100,26 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
       const res = await testCol('SELECT u.password_hash FROM users u');
       expect(res.ok).toBe(false);
       if (!res.ok) {
-        expect(res.code).toBe('PGM-208');
-        expect(res.message).toContain('Column "u.password_hash" is hidden');
-        expect(res.message).toContain('Allowed columns for public.users:');
+        expect(res.code).toBe('PGM-506');
       }
     });
 
     it('refuses table-qualified hidden column (users.password_hash)', async () => {
       const res = await testCol('SELECT users.password_hash FROM users');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses schema-qualified hidden column (public.users.password_hash)', async () => {
       const res = await testCol('SELECT public.users.password_hash FROM users');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses second hidden column (ssn)', async () => {
       const res = await testCol('SELECT ssn FROM users');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
   });
 
@@ -107,8 +132,7 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
       });
       expect(res.ok).toBe(false);
       if (!res.ok) {
-        expect(res.code).toBe('PGM-208');
-        expect(res.message).toContain('Unqualified column "ssn" matches a hidden column');
+        expect(res.code).toBe('PGM-506');
       }
     });
 
@@ -117,7 +141,7 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
         strict_unqualified_columns: false,
       });
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
   });
 
@@ -203,55 +227,55 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
     it('refuses hidden column in WHERE clause', async () => {
       const res = await testCol("SELECT id FROM users WHERE password_hash = 'secret'");
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses alias-qualified hidden column in WHERE clause', async () => {
       const res = await testCol("SELECT u.id FROM users u WHERE u.password_hash = 'secret'");
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses hidden column in ORDER BY clause', async () => {
       const res = await testCol('SELECT id FROM users ORDER BY ssn DESC');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses hidden column in GROUP BY clause', async () => {
       const res = await testCol('SELECT count(*) FROM users GROUP BY ssn');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses hidden column in HAVING clause', async () => {
       const res = await testCol('SELECT id FROM users GROUP BY id HAVING max(ssn) > "100"');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses hidden column in JOIN ON clause', async () => {
       const res = await testCol('SELECT u.id FROM users u JOIN orders o ON o.user_id = u.password_hash');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses hidden column in window PARTITION BY', async () => {
       const res = await testCol('SELECT id, rank() OVER (PARTITION BY password_hash ORDER BY id) FROM users');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses hidden column inside CTE body', async () => {
       const res = await testCol('WITH user_cte AS (SELECT password_hash FROM users) SELECT * FROM user_cte');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses hidden column inside subquery', async () => {
       const res = await testCol('SELECT (SELECT u.password_hash FROM users u WHERE u.id = o.user_id) FROM orders o');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses star inside subquery over table with hidden columns', async () => {
@@ -275,7 +299,7 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
     it('refuses USING clause referencing hidden column (F-P2-03)', async () => {
       const res = await testCol('SELECT u1.id FROM users u1 JOIN users u2 USING (password_hash)');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
 
     it('refuses NATURAL JOIN on table with hidden columns (F-P2-03)', async () => {
@@ -287,7 +311,7 @@ describe('Column, whole-row, and star policy (policy-columns.test.ts)', () => {
     it('refuses four-part column reference to hidden column (F-P2-04)', async () => {
       const res = await testCol('SELECT postgres.public.users.password_hash FROM users');
       expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.code).toBe('PGM-208');
+      if (!res.ok) expect(res.code).toBe('PGM-506');
     });
   });
 });

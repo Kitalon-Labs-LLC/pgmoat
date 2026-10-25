@@ -43,6 +43,22 @@ export function refuse(
   );
 }
 
+/**
+ * Error for a refused safety check. Refusals marked asDatabaseError carry no
+ * hint, so they render exactly like the database errors in postgres/errors.ts;
+ * they stay kind 'refused' so the audit log still records them as refusals.
+ */
+export function safetyError(result: {
+  code: ErrorCode;
+  message: string;
+  asDatabaseError?: true;
+}): PgmoatError {
+  if (result.asDatabaseError) {
+    return new PgmoatError(result.code, result.message, 'refused');
+  }
+  return refuse(result.code, result.message);
+}
+
 export function fail(code: ErrorCode, message: string): PgmoatError {
   // eslint-disable-next-line security/detect-object-injection -- code is typed ErrorCode union
   const def = ERROR_CODES[code];

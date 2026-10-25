@@ -149,7 +149,7 @@ describe('query tool integration (P6.5)', () => {
     expect(emittedAudit[0]?.error_code).toBe('PGM-302');
   });
 
-  it('refuses query accessing hidden column with PGM-208', async () => {
+  it('answers a hidden column exactly like a missing column', async () => {
     emittedAudit = [];
     const res = await queryTool(
       { sql: 'SELECT password_hash FROM users' },
@@ -158,12 +158,23 @@ describe('query tool integration (P6.5)', () => {
     );
 
     expect(res).toHaveProperty('isError', true);
-    expect(res._meta['com.kitalonlabs.pgmoat/error_code']).toBe('PGM-208');
-    expect(res.content[0]?.text).toContain('PGM-208');
+    expect(res._meta['com.kitalonlabs.pgmoat/error_code']).toBe('PGM-506');
+    expect(res.content[0]?.text).toContain('column "password_hash" does not exist');
 
+    // The audit log still records the attempt as a refusal for the operator
     expect(emittedAudit.length).toBe(1);
     expect(emittedAudit[0]?.status).toBe('refused');
-    expect(emittedAudit[0]?.error_code).toBe('PGM-208');
+    expect(emittedAudit[0]?.error_code).toBe('PGM-506');
+
+    // The agent cannot tell it apart from a column that does not exist
+    const missing = await queryTool(
+      { sql: 'SELECT password_hasx FROM users' },
+      {},
+      deps,
+    );
+    expect(missing.content[0]?.text).toBe(
+      res.content[0]?.text.replace('password_hash', 'password_hasx'),
+    );
   });
 
   it('enforces tenant scoping when RLS is configured', async () => {
