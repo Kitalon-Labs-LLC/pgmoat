@@ -187,11 +187,13 @@ export async function createRuntime(
   };
 
   let signalListenersInstalled = false;
+  // Installing a handler replaces Node's default exit on these signals,
+  // so exit once shutdown has flushed the audit log and closed the pools.
   const onSigint = () => {
-    void shutdown('SIGINT');
+    void shutdown('SIGINT').finally(() => process.exit(0));
   };
   const onSigterm = () => {
-    void shutdown('SIGTERM');
+    void shutdown('SIGTERM').finally(() => process.exit(0));
   };
 
   const removeSignalHandlers = () => {
