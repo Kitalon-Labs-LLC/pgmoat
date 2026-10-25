@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { loadModule } from 'libpg-query';
 import { AuditPipeline, type AuditDestination, type AuditPipelineLogger, type Clock } from '../../../src/audit/pipeline.js';
 import { Chain } from '../../../src/audit/chain.js';
 import { buildEntry, type EntryMeta, type RequestOutcome } from '../../../src/audit/entry.js';
@@ -74,6 +75,11 @@ function createDummyEntry(query = 'SELECT 1', durationMs = 5): AuditEntry {
 }
 
 describe('AuditPipeline', () => {
+  // redactEntrySync needs the parser loaded; nothing else in this file loads it
+  beforeAll(async () => {
+    await loadModule();
+  });
+
   it('flushes entries in order to destination', async () => {
     const chain = new Chain('inst-1');
     const dest = new MockDestination();
