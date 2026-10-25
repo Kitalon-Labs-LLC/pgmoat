@@ -49,7 +49,7 @@ Options
   --no-color          Disable colors (NO_COLOR is also honored)
   -h, --help          Show help
 
-Docs     https://kitalonlabs.com/pgmoat/docs
+Docs     https://kitalonlabs.com/pgmoat
 Issues   https://github.com/Kitalon-Labs-LLC/pgmoat/issues`;
 
 export function createProgram(): Command {

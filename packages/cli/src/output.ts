@@ -96,12 +96,12 @@ export function formatError(
     code = 'PGM-501';
     title = error.message;
     fix = undefined;
-    docsUrl = `https://kitalonlabs.com/pgmoat/docs/errors/${code}`;
+    docsUrl = `https://kitalonlabs.com/pgmoat#${code}`;
   } else {
     code = 'PGM-501';
     title = String(error);
     fix = undefined;
-    docsUrl = `https://kitalonlabs.com/pgmoat/docs/errors/${code}`;
+    docsUrl = `https://kitalonlabs.com/pgmoat#${code}`;
   }
 
   if (jsonMode) {
@@ -126,7 +126,7 @@ export function formatError(
   //   Fix: pgmoat only runs SELECT, SHOW, and plan-only EXPLAIN in read-only mode.
   //        Scoped writes arrive in v1.1.
   //
-  //   https://pgmoat.dev/docs/errors/PGM-201
+  //   https://kitalonlabs.com/pgmoat#PGM-201
 
   const marker = colorEnabled ? '\x1b[31mx\x1b[0m' : 'x';
   const lines: string[] = [];

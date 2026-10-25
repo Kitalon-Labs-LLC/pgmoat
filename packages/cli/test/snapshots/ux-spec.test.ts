@@ -48,7 +48,7 @@ Options
   --no-color          Disable colors (NO_COLOR is also honored)
   -h, --help          Show help
 
-Docs     https://kitalonlabs.com/pgmoat/docs
+Docs     https://kitalonlabs.com/pgmoat
 Issues   https://github.com/Kitalon-Labs-LLC/pgmoat/issues`;
 
     expect(HELP_TEXT).toBe(expected);
@@ -183,12 +183,12 @@ Issues   https://github.com/Kitalon-Labs-LLC/pgmoat/issues`;
       '  Run `pgmoat doctor` for all findings. To start anyway (not recommended),',
       '  pass --allow-unsafe-role. Every audit entry will record the override.',
       '',
-      '  https://kitalonlabs.com/pgmoat/docs/errors/PGM-702',
+      '  https://kitalonlabs.com/pgmoat#PGM-702',
     ].join('\n');
 
     expect(refusal).toContain('x pgmoat did not start: the database role failed safety checks.');
     expect(refusal).toContain('pass --allow-unsafe-role. Every audit entry will record the override.');
-    expect(refusal).toContain('https://kitalonlabs.com/pgmoat/docs/errors/PGM-702');
+    expect(refusal).toContain('https://kitalonlabs.com/pgmoat#PGM-702');
   });
 
   it('2.5 Init client snippets snapshot', () => {
@@ -212,7 +212,7 @@ Issues   https://github.com/Kitalon-Labs-LLC/pgmoat/issues`;
       '  Fix: check that Postgres is running and reachable:',
       '       pg_isready -h db.internal -p 5432',
       '',
-      '  https://kitalonlabs.com/pgmoat/docs/errors/PGM-101',
+      '  https://kitalonlabs.com/pgmoat#PGM-101',
     ].join('\n');
 
     expect(connRefused).toContain('x PGM-101  Cannot connect to Postgres');
