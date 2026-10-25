@@ -101,7 +101,8 @@ setTimeout(() => {
 
 // Fail instead of hanging if the server never lists its tools
 setTimeout(() => {
-  console.error("FAIL: no tools/list response within 60s");
+  console.error("FAIL: no tools/list response within 60s. Server stdout so far:");
+  console.error(stdout || "(empty)");
   child.kill();
   process.exitCode = 1;
 }, 60000).unref();
