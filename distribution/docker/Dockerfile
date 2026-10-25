@@ -1,5 +1,5 @@
 # Stage 1: Build the packed npm tarball
-FROM node:24-bookworm-slim AS builder
+FROM node:26-bookworm-slim AS builder
 
 WORKDIR /build
 
@@ -14,7 +14,7 @@ RUN pnpm build
 RUN cd packages/cli && npm pack --pack-destination /build
 
 # Stage 2: Runtime
-FROM node:24-bookworm-slim AS runtime
+FROM node:26-bookworm-slim AS runtime
 
 ARG VERSION=0.1.0
 
