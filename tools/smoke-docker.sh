@@ -67,10 +67,15 @@ const initReq = JSON.stringify({
   id: 1,
   method: "initialize",
   params: {
-    protocolVersion: "2024-11-05",
+    protocolVersion: "2025-11-25",
     capabilities: {},
     clientInfo: { name: "smoke-client", version: "1.0.0" }
   }
+}) + "\n";
+
+const initializedNote = JSON.stringify({
+  jsonrpc: "2.0",
+  method: "notifications/initialized"
 }) + "\n";
 
 const listReq = JSON.stringify({
@@ -82,8 +87,16 @@ const listReq = JSON.stringify({
 
 child.stdin.write(initReq);
 setTimeout(() => {
+  child.stdin.write(initializedNote);
   child.stdin.write(listReq);
 }, 500);
+
+// Fail instead of hanging if the server never lists its tools
+setTimeout(() => {
+  console.error("FAIL: no tools/list response within 60s");
+  child.kill();
+  process.exitCode = 1;
+}, 60000).unref();
 
 child.on("close", () => {
   console.log(stdout);
