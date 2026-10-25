@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/manifest-v1.json",
   "name": "pgmoat",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "display_name": "pgmoat",
   "description": "Governed, read-only Postgres access for Claude.",
   "long_description": "Ask Claude about your Postgres data with guardrails: read-only enforced in layers, hidden columns, row limits, tenant scoping, and a tamper-evident audit log. Runs on your machine.",
