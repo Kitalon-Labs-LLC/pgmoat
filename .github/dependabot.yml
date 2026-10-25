@@ -25,3 +25,7 @@ updates:
     directory: /distribution/docker
     schedule:
       interval: weekly
+    ignore:
+      # Node majors need Dockerfile changes (Node 25+ images drop corepack); upgrade by hand
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
