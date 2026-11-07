@@ -47,7 +47,7 @@
     "@clack/prompts": "^1.8.1",
     "@pgmoat/core": "workspace:*",
     "commander": "^15.0.0",
-    "tsdown": "^0.23.1",
+    "tsdown": "^0.23.5",
     "yaml": "^2.9.1"
   },
   "scripts": {
