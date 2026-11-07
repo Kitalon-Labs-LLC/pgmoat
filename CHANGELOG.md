@@ -51,5 +51,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Multi-architecture Docker image running as non-root user `node` (UID 1000).
   - Claude Desktop bundle (`.mcpb`) with sensitive credential prompt.
   - MCP Registry server definition (`io.github.Kitalon-Labs-LLC/pgmoat`).
-  - Public adversarial test corpus with 315 test cases covering all known bypass classes.
+  - Public adversarial test corpus with 321 test cases covering all known bypass classes.
   - Starlight documentation site with error directory for all 68 `PGM-xxx` error codes.
