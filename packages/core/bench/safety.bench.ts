@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { parseSql, warmParser } from '../src/safety/parse.js';
 import { classify } from '../src/safety/classify.js';
 import { checkRelations, checkColumns } from '../src/safety/policy.js';
+import { runSafety } from '../src/safety/pipeline.js';
 import { corpusPolicyIndex } from '../test/corpus/fixture-schema.js';
 
 // 20 representative ~1KB queries
@@ -251,12 +252,86 @@ export async function runSafetyBenchmark(): Promise<{
   return { p50, p95, p99, iterations: count };
 }
 
+export interface FullBenchmarkResults {
+  median: number;
+  p95: number;
+  p99: number;
+  iterations: number;
+  steps: {
+    parseMs: number;
+    classifyMs: number;
+    policyMs: number;
+    rewriteMs: number;
+    fingerprintMs: number;
+  };
+}
+
+export async function runFullPipelineBenchmark(count = 1000): Promise<FullBenchmarkResults> {
+  await warmParser();
+
+  // Warmup 50 iterations
+  for (let i = 0; i < 50; i++) {
+    const q = REPRESENTATIVE_QUERIES[i % REPRESENTATIVE_QUERIES.length]!;
+    await runSafety(q, {
+      policyIndex: corpusPolicyIndex,
+      mode: 'query',
+      budgets: { max_rows: 200 },
+    });
+  }
+
+  const durations: number[] = [];
+  const stepsTotal = {
+    parseMs: 0,
+    classifyMs: 0,
+    policyMs: 0,
+    rewriteMs: 0,
+    fingerprintMs: 0,
+  };
+
+  for (let i = 0; i < count; i++) {
+    const q = REPRESENTATIVE_QUERIES[i % REPRESENTATIVE_QUERIES.length]!;
+    const t0 = performance.now();
+    const res = await runSafety(q, {
+      policyIndex: corpusPolicyIndex,
+      mode: 'query',
+      budgets: { max_rows: 200 },
+    });
+    const total = performance.now() - t0;
+    durations.push(total);
+
+    stepsTotal.parseMs += res.timings.parseMs;
+    stepsTotal.classifyMs += res.timings.classifyMs;
+    stepsTotal.policyMs += res.timings.policyMs;
+    stepsTotal.rewriteMs += res.timings.rewriteMs;
+    stepsTotal.fingerprintMs += res.timings.fingerprintMs;
+  }
+
+  durations.sort((a, b) => a - b);
+  const median = durations[Math.floor(count * 0.50)]!;
+  const p95 = durations[Math.floor(count * 0.95)]!;
+  const p99 = durations[Math.floor(count * 0.99)]!;
+
+  return {
+    median,
+    p95,
+    p99,
+    iterations: count,
+    steps: {
+      parseMs: stepsTotal.parseMs / count,
+      classifyMs: stepsTotal.classifyMs / count,
+      policyMs: stepsTotal.policyMs / count,
+      rewriteMs: stepsTotal.rewriteMs / count,
+      fingerprintMs: stepsTotal.fingerprintMs / count,
+    },
+  };
+}
+
 describe('Safety Pipeline Benchmark (NFR-PERF-02)', () => {
   it('parse + classify + policy stays under 3 ms p95 for 1 KB queries', async () => {
     const { p50, p95, p99, iterations } = await runSafetyBenchmark();
 
     console.log(`\n======================================================`);
-    console.log(` Safety Pipeline Benchmark Results (${iterations} iterations)`);
+    console.log(` Partial Safety Pipeline Results (${iterations} iterations)`);
     console.log(`------------------------------------------------------`);
     console.log(`  p50: ${p50.toFixed(3)} ms`);
     console.log(`  p95: ${p95.toFixed(3)} ms`);
@@ -267,4 +342,25 @@ describe('Safety Pipeline Benchmark (NFR-PERF-02)', () => {
       expect(p95).toBeLessThan(3.0);
     }
   }, 30000);
+
+  it('full 5-step safety pipeline benchmark (excludes DB round trip)', async () => {
+    const count = process.env.BENCH_RUNS ? parseInt(process.env.BENCH_RUNS, 10) : 1000;
+    const res = await runFullPipelineBenchmark(count);
+
+    console.log(`\n======================================================`);
+    console.log(` Full 5-Step Pipeline Benchmark (${res.iterations} runs, excluding DB)`);
+    console.log(`------------------------------------------------------`);
+    console.log(`  Median (p50)   : ${res.median.toFixed(3)} ms`);
+    console.log(`  p95            : ${res.p95.toFixed(3)} ms`);
+    console.log(`  p99            : ${res.p99.toFixed(3)} ms`);
+    console.log(`  Stage Breakdown (average):`);
+    console.log(`    1. Parse (libpg-query WASM) : ${res.steps.parseMs.toFixed(3)} ms`);
+    console.log(`    2. Classify                 : ${res.steps.classifyMs.toFixed(3)} ms`);
+    console.log(`    3. Scoped Policy            : ${res.steps.policyMs.toFixed(3)} ms`);
+    console.log(`    4. Rewrite & Deparse        : ${res.steps.rewriteMs.toFixed(3)} ms`);
+    console.log(`    5. Fingerprint (SHA-256)    : ${res.steps.fingerprintMs.toFixed(3)} ms`);
+    console.log(`======================================================\n`);
+
+    expect(res.median).toBeLessThan(5.0);
+  }, 60000);
 });

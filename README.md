@@ -40,7 +40,7 @@ Or to Claude Desktop (`claude_desktop_config.json`):
 
 Passing the URL through `--url-env` keeps the password out of process listings.
 
-Use a dedicated read-only role. pgmoat warns at startup if the role is a superuser or can write.
+Use a dedicated read-only role. If the account is a superuser (PGM-701), can bypass RLS (PGM-702) or owns protected tables (PGM-703), pgmoat refuses to start unless the operator passes `--allow-unsafe-role`. The override is recorded in every audit entry.
 
 ## Add descriptions and hide sensitive data
 
