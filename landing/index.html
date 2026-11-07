@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   pgmoat page for kitalonlabs.com/pgmoat
-  One file. No external requests: the fonts are embedded and there are no scripts from other sites.
+  One file. The fonts are embedded and there are no scripts from other sites. The only external request is the mcprush listing card image in the hero.
 
   Upload this file as index.html inside a folder named "pgmoat" so it opens at kitalonlabs.com/pgmoat/
 -->
@@ -81,7 +81,7 @@ h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;margin:0;text-wrap:bal
 /* hero */
 .hero{border-bottom:1px solid var(--line);position:relative}
 .hero::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--grad)}
-.hero-in{max-width:1140px;margin:0 auto;padding-top:56px;padding-bottom:56px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:start}
+.hero-in{max-width:1140px;margin:0 auto;padding-top:56px;padding-bottom:56px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center}
 .eyebrow{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:16px}
 .hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.025em}
 .hero .sub{font-size:18px;color:var(--ink-soft);margin:20px 0 28px;max-width:34rem}
@@ -89,8 +89,15 @@ h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;margin:0;text-wrap:bal
 .btn{display:inline-block;font-family:var(--f-body);font-weight:600;font-size:15px;padding:11px 18px;border-radius:6px;text-decoration:none;border:1px solid var(--ink);color:var(--ink)}
 .btn.primary{background:var(--ink);color:var(--paper)}
 .btn:hover{border-color:var(--accent-fill);color:var(--paper);background:var(--accent-fill)}
-.facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin:28px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-soft)}
-.facts b{font-family:var(--f-mono);font-weight:600;color:var(--ink)}
+.facts{display:grid;grid-template-columns:repeat(4,max-content);gap:16px 32px;margin:32px 0 0;padding:0;list-style:none;font-size:13px;line-height:1.4;color:var(--ink-soft)}
+.facts li{display:flex;flex-direction:column;gap:4px}
+.facts b{font-family:var(--f-mono);font-size:22px;line-height:1.2;font-weight:600;color:var(--ink)}
+.hero-side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.listing{display:block;width:100%;line-height:0;border-radius:10px}
+.listing img{display:block;width:100%;height:auto;border-radius:10px;box-shadow:0 18px 40px -28px rgba(23,16,38,.35);transition:transform .2s ease-out,box-shadow .2s ease-out}
+.listing:hover img{transform:translateY(-2px);box-shadow:0 22px 44px -26px rgba(23,16,38,.45)}
+@media (prefers-reduced-motion:reduce){.listing img{transition:none}.listing:hover img{transform:none}}
+@media (max-width:560px){.facts{grid-template-columns:repeat(2,max-content);gap:16px 40px}}
 
 /* code blocks */
 .code{position:relative;margin:0 0 20px;background:var(--term-bg);color:var(--term-fg);border-radius:8px;border:1px solid var(--term-line);overflow:hidden}
@@ -132,6 +139,7 @@ h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;margin:0;text-wrap:bal
   .toc-wide{display:none}
   .toc-narrow{display:block}
   .hero-in{grid-template-columns:minmax(0,1fr);gap:36px;padding-top:40px;padding-bottom:40px}
+  .listing{max-width:520px}
 }
 
 /* content */
@@ -255,16 +263,19 @@ footer{border-top:1px solid var(--line);background:var(--card)}
       </figure>
       <ul class="facts">
         <li><b>5</b> read tools</li>
-        <li><b>315</b> public safety test cases</li>
+        <li><b>321</b> public safety test cases</li>
         <li><b>68</b> documented error codes</li>
         <li><b>MIT</b> licensed</li>
       </ul>
     </div>
-    <div class="tx" role="group" aria-label="Three example tool calls and how pgmoat answers them">
-      <div class="tx-bar"><span>agent &rarr; pgmoat</span><span>real output from the safety pipeline</span></div>
-      <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>SELECT id, name FROM customers WHERE tier = 'enterprise'</code></div><div class="tx-res"><span class="st ok">allowed</span><span class="l1">runs as: SELECT id, name FROM customers WHERE tier = 'enterprise' LIMIT 201</span></div></div>
-      <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>COMMIT; DROP SCHEMA public CASCADE</code></div><div class="tx-res"><span class="st no">refused PGM-204</span><span class="l1">Expected exactly 1 statement, got 2</span><span>Send one statement per call</span><br><span>https://kitalonlabs.com/pgmoat/#PGM-204</span></div></div>
-      <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>SELECT password_hash FROM users</code></div><div class="tx-res"><span class="st no">refused PGM-208</span><span class="l1">Column access not allowed. Unqualified column &quot;password_hash&quot; matches a hidden column. Qualify the column or use list_tables to see available columns. Allowed columns for public.users: id, name, email, created_at, updated_at, tenant_id, role</span><span>https://kitalonlabs.com/pgmoat/#PGM-208</span></div></div>
+    <div class="hero-side">
+      <div class="tx" role="group" aria-label="Three example tool calls and how pgmoat answers them">
+        <div class="tx-bar"><span>agent &rarr; pgmoat</span><span>real output from the safety pipeline</span></div>
+        <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>SELECT id, name FROM customers WHERE tier = 'enterprise'</code></div><div class="tx-res"><span class="st ok">allowed</span><span class="l1">runs as: SELECT id, name FROM customers WHERE tier = 'enterprise' LIMIT 201</span></div></div>
+        <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>COMMIT; DROP SCHEMA public CASCADE</code></div><div class="tx-res"><span class="st no">refused PGM-204</span><span class="l1">Expected exactly 1 statement, got 2</span><span>Send one statement per call</span><br><span>https://kitalonlabs.com/pgmoat/#PGM-204</span></div></div>
+        <div class="tx-item"><div class="tx-call"><span class="tx-label">query</span><code>SELECT password_hash FROM users</code></div><div class="tx-res"><span class="st no">refused PGM-506</span><span class="l1">column &quot;password_hash&quot; does not exist</span><span>https://kitalonlabs.com/pgmoat/#PGM-506</span></div></div>
+      </div>
+      <a class="listing" href="https://mcprush.com/kitalon-labs-llc/pgmoat-mcp" rel="noopener"><img width="380" height="200" src="https://mcprush.com/badge/pgmoat-mcp/card.svg?theme=light" alt="pgmoat on mcprush: security grade, monthly npm downloads and supported MCP clients" loading="lazy"></a>
     </div>
   </div>
 </div>
@@ -373,7 +384,7 @@ footer{border-top:1px solid var(--line);background:var(--card)}
             <tr><td><span class="muted small">Locking read</span><code class="sqlc">SELECT id FROM orders FOR UPDATE</code></td><td><span class="chip no">Refused</span> <a href="#PGM-202" class="chip info">PGM-202</a><span class="said">Row locking clauses (FOR UPDATE/SHARE) are not allowed in read-only mode</span></td></tr>
             <tr><td><span class="muted small">EXPLAIN that would execute</span><code class="sqlc">EXPLAIN ANALYZE SELECT id FROM orders</code></td><td><span class="chip no">Refused</span> <a href="#PGM-209" class="chip info">PGM-209</a><span class="said">EXPLAIN ANALYZE is not allowed because it executes the statement</span></td></tr>
             <tr><td><span class="muted small">Hidden table</span><code class="sqlc">SELECT * FROM internal_audit</code></td><td><span class="chip no">Refused</span> <a href="#PGM-207" class="chip info">PGM-207</a><span class="said">Table not available. Use list_tables to see the tables you can query.</span></td></tr>
-            <tr><td><span class="muted small">Hidden column</span><code class="sqlc">SELECT password_hash FROM users</code></td><td><span class="chip no">Refused</span> <a href="#PGM-208" class="chip info">PGM-208</a><span class="said">Column access not allowed. Unqualified column &quot;password_hash&quot; matches a hidden column. Qualify the column or use list_tables to see available columns. Allowed columns for public.users: id, name, email, created_at, updated_at, tenant_id, role</span></td></tr>
+            <tr><td><span class="muted small">Hidden column</span><code class="sqlc">SELECT password_hash FROM users</code></td><td><span class="chip no">Refused</span> <a href="#PGM-506" class="chip info">PGM-506</a><span class="said">column &quot;password_hash&quot; does not exist</span></td></tr>
             <tr><td><span class="muted small">Star over a hidden column</span><code class="sqlc">SELECT * FROM users</code></td><td><span class="chip no">Refused</span> <a href="#PGM-208" class="chip info">PGM-208</a><span class="said">Column access not allowed. Wildcard &quot;*&quot; on table with hidden columns. Allowed columns for public.users: id, name, email, created_at, updated_at, tenant_id, role</span></td></tr>
             <tr><td><span class="muted small">Whole-row reference</span><code class="sqlc">SELECT to_jsonb(u) FROM users u</code></td><td><span class="chip no">Refused</span> <a href="#PGM-208" class="chip info">PGM-208</a><span class="said">Column access not allowed. Whole-row reference to &quot;u&quot; exposes hidden columns. Allowed columns for public.users: id, name, email, created_at, updated_at, tenant_id, role</span></td></tr>
             <tr><td><span class="muted small">System catalog</span><code class="sqlc">SELECT * FROM pg_catalog.pg_class</code></td><td><span class="chip no">Refused</span> <a href="#PGM-207" class="chip info">PGM-207</a><span class="said">Table not available. Use list_tables to see the tables you can query.</span></td></tr>
@@ -852,7 +863,7 @@ ORDER BY ts;</code></pre>
             <tr id="PGM-205"><td class="k"><a href="#PGM-205">PGM-205</a></td><td><span class="chip no">refused</span></td><td>Function not allowed</td><td>Use an allowed function; see docs/safety#functions</td></tr>
             <tr id="PGM-206"><td class="k"><a href="#PGM-206">PGM-206</a></td><td><span class="chip no">refused</span></td><td>SQL could not be parsed, is empty, or is too long</td><td>Fix the syntax; Postgres 18 grammar</td></tr>
             <tr id="PGM-207"><td class="k"><a href="#PGM-207">PGM-207</a></td><td><span class="chip no">refused</span></td><td>Relation not allowed: hidden, unknown, outside exposed schemas, or a system catalog</td><td>Use list_tables to see available tables</td></tr>
-            <tr id="PGM-208"><td class="k"><a href="#PGM-208">PGM-208</a></td><td><span class="chip no">refused</span></td><td>Column not allowed: hidden column, whole-row reference, or <code>*</code> on a table with hidden columns</td><td>Select the allowed columns listed in the message</td></tr>
+            <tr id="PGM-208"><td class="k"><a href="#PGM-208">PGM-208</a></td><td><span class="chip no">refused</span></td><td>Column not allowed: whole-row reference, column alias list, or <code>*</code> on a table with hidden columns. A hidden column named directly returns PGM-506.</td><td>Select the allowed columns listed in the message</td></tr>
             <tr id="PGM-209"><td class="k"><a href="#PGM-209">PGM-209</a></td><td><span class="chip no">refused</span></td><td><code>EXPLAIN ANALYZE</code> would execute the statement</td><td>Use the explain tool for plans</td></tr>
             <tr id="PGM-210"><td class="k"><a href="#PGM-210">PGM-210</a></td><td><span class="chip no">refused</span></td><td>Internal safety invariant failed after rewrite</td><td>Report a bug; the query was not run</td></tr>
           </tbody>
@@ -913,7 +924,7 @@ ORDER BY ts;</code></pre>
             <tr id="PGM-503"><td class="k"><a href="#PGM-503">PGM-503</a></td><td><span class="chip no">error</span></td><td>Timed out waiting for a database connection</td><td>Raise <code>pool.max</code> or reduce concurrency</td></tr>
             <tr id="PGM-504"><td class="k"><a href="#PGM-504">PGM-504</a></td><td><span class="chip no">error</span></td><td>Database connection lost</td><td>Retry; check database health</td></tr>
             <tr id="PGM-505"><td class="k"><a href="#PGM-505">PGM-505</a></td><td><span class="chip info">canceled</span></td><td>Client canceled the request; query canceled</td><td>None</td></tr>
-            <tr id="PGM-506"><td class="k"><a href="#PGM-506">PGM-506</a></td><td><span class="chip no">error</span></td><td>Internal error</td><td>Report a bug with the request_id</td></tr>
+            <tr id="PGM-506"><td class="k"><a href="#PGM-506">PGM-506</a></td><td><span class="chip no">error</span></td><td>Internal error. Also returned for a hidden column, with the same message as a column that does not exist, so names cannot be probed.</td><td>Report a bug with the request_id</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -966,7 +977,7 @@ ORDER BY ts;</code></pre>
       <h2>Reporting a security problem</h2>
       <p class="lede">If you think you found a way around a pgmoat guarantee, please tell us privately first.</p>
       <dl class="defs">
-        <dt>Email</dt><dd><a href="mailto:security@kitalonlabs.com">security@kitalonlabs.com</a></dd>
+        <dt>Email</dt><dd><a href="mailto:sowad@kitalonlabs.com">sowad@kitalonlabs.com</a></dd>
         <dt>Please do not</dt><dd>Open a public issue for a vulnerability.</dd>
         <dt>Acknowledgment</dt><dd>Within 72 hours.</dd>
         <dt>Disclosure</dt><dd>Coordinated, with a 90-day window. Fixed issues are published as GitHub Security Advisories.</dd>
@@ -976,7 +987,7 @@ ORDER BY ts;</code></pre>
 
     <section class="sec" id="status">
       <h2>Status and roadmap</h2>
-      <p>pgmoat v0.1.0 is available now. The complete read-only core is built and verified: the safety checker, the Postgres execution path, row-level security settings, the audit log, the five tools, stdio and HTTP transports, and the CLI. Scoped writes with human confirmation and additional audit sinks are scheduled for v1.1.</p>
+      <p>pgmoat v0.1.1 is available now. pgmoat is currently 0.1.x. v1.0 is the planned stable release, and v1.1 adds scoped writes. The complete read-only core is built and verified: the safety checker, the Postgres execution path, row-level security settings, the audit log, the five tools, stdio and HTTP transports, and the CLI. Scoped writes with human confirmation and additional audit sinks are scheduled for v1.1.</p>
       <div class="tbl">
         <table>
           <thead><tr><th>Release</th><th>Contents</th></tr></thead>
@@ -1015,7 +1026,7 @@ ORDER BY ts;</code></pre>
         <li><a href="#quickstart">Quickstart</a></li>
         <li><a href="#safety">Safety model</a></li>
         <li><a href="#errors">Error codes</a></li>
-        <li><a href="mailto:security@kitalonlabs.com">security@kitalonlabs.com</a></li>
+        <li><a href="mailto:sowad@kitalonlabs.com">sowad@kitalonlabs.com</a></li>
                 <li>Source: <a href="https://github.com/Kitalon-Labs-LLC/pgmoat" rel="noopener">github.com/Kitalon-Labs-LLC/pgmoat</a></li>
       </ul>
     </div>

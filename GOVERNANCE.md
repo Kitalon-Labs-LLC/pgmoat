@@ -3,7 +3,7 @@
 pgmoat is maintained by Kitalon Labs LLC.
 
 - **Project Lead & Document Owner:** Sowad Al-Mughni (`sowad@kitalonlabs.com`)
-- **Security Contact:** `security@kitalonlabs.com`
+- **Security Contact:** `sowad@kitalonlabs.com`
 
 ## Review Process
 

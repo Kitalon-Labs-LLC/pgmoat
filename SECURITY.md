@@ -7,7 +7,7 @@ We take the security of pgmoat seriously. If you believe you have found a securi
 **Please do not report security vulnerabilities through public GitHub issues.**
 
 Instead, please report security issues by emailing:
-**security@kitalonlabs.com**
+**sowad@kitalonlabs.com**
 
 ### Policy and Timeline
 

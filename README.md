@@ -40,7 +40,7 @@ Or to Claude Desktop (`claude_desktop_config.json`):
 
 Passing the URL through `--url-env` keeps the password out of process listings.
 
-Use a dedicated read-only role. If the account is a superuser (PGM-701), can bypass RLS (PGM-702) or owns protected tables (PGM-703), pgmoat refuses to start unless the operator passes `--allow-unsafe-role`. The override is recorded in every audit entry.
+Use a dedicated read-only role. pgmoat checks the role at startup. With a `pgmoat.yaml`, it refuses to start if the role is a superuser (PGM-701), has `BYPASSRLS` while row-level security is configured (PGM-702), or owns a protected table without `FORCE ROW LEVEL SECURITY` (PGM-703), unless you pass `--allow-unsafe-role`; every audit entry then records the override. In zero-config mode (a URL and no config file) it warns and continues.
 
 ## Add descriptions and hide sensitive data
 
@@ -110,7 +110,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately as desc
 
 - Docs: https://kitalonlabs.com/pgmoat/docs
 - Source and issues: https://github.com/Kitalon-Labs-LLC/pgmoat
-- Security reports: security@kitalonlabs.com
+- Security reports: sowad@kitalonlabs.com
 
 ## License
 

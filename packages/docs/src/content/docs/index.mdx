@@ -27,5 +27,5 @@ npx -y pgmoat postgresql://readonly@localhost:5432/app
 - **Hidden means unreachable**: Tables and columns marked hidden are removed from catalog introspection and systematically blocked at query execution time.
 - **Results sized for agents**: Guardrails on row counts, execution deadlines, column widths, and total response bytes prevent context flooding.
 - **Tenant from verified identity**: Verified token claims inject session variables dynamically for native PostgreSQL Row-Level Security.
-- **Proof, not promises**: Validated against an adversarial test suite of 318 bypass attempts covering catalog snooping, CTE writes, and parser exploits.
+- **Proof, not promises**: Checked against a public test corpus of 321 cases: 179 attempts that must be refused (catalog snooping, CTE writes, parser exploits and more) and 142 legitimate queries that must be allowed.
 
