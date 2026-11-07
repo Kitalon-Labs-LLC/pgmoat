@@ -1,5 +1,12 @@
 # pgmoat
 
+## 0.1.2
+
+### Patch Changes
+
+- 2bb51be: `pgmoat test-corpus` now runs the full public safety corpus: 321 cases instead of 289, the same cases as the repository's test suite.
+- 1464437: The README describes the startup role check as it behaves (refuse with a `pgmoat.yaml` unless `--allow-unsafe-role` is passed, warn in zero-config mode), and security reports now go to sowad@kitalonlabs.com.
+
 ## 0.1.1
 
 ### Patch Changes
