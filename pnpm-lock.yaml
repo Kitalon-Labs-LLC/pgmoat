@@ -258,8 +258,8 @@ importers:
         specifier: ^2.22.1
         version: 2.22.1(pg@8.23.1)
       pgsql-deparser:
-        specifier: ^18.3.12
-        version: 18.3.12
+        specifier: ^18.4.2
+        version: 18.4.2
       pino:
         specifier: ^10.4.0
         version: 10.4.0
@@ -1782,8 +1782,8 @@ packages:
   pgpass@1.0.5:
     resolution: {integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==}
 
-  pgsql-deparser@18.3.12:
-    resolution: {integrity: sha512-0azr0ffrTdcZlaWFxZxKou9t0H7PDCZfbyO+XebbPhKPJgu+j5jYN0ToyncQMZIq313JPvdYOpzHYT+FPXXRAg==}
+  pgsql-deparser@18.4.2:
+    resolution: {integrity: sha512-BDo6BpyJAYKvwoiGUQSDnJ2pZjUE9odiXTkpP0U6FqRHke+UjJU2iYJticcagGOp+Q9TOX6OO6pi795dNRRC9A==}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -3707,7 +3707,7 @@ snapshots:
     dependencies:
       split2: 4.2.0
 
-  pgsql-deparser@18.3.12:
+  pgsql-deparser@18.4.2:
     dependencies:
       '@pgsql/quotes': 18.2.4
       '@pgsql/types': 18.0.0
