@@ -21,6 +21,12 @@ export default defineConfig({
       },
       {
         test: {
+          name: 'heldout',
+          include: ['packages/core/test/heldout/**/*.test.ts'],
+        },
+      },
+      {
+        test: {
           name: 'corpus-db',
           include: ['packages/core/test/corpus/db.corpus.test.ts'],
           testTimeout: 60000,

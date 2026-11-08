@@ -1,0 +1,722 @@
+[
+  {
+    "id": "ho-write-001",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "MERGE INTO orders o USING (SELECT 1 AS id) s ON o.id = s.id WHEN MATCHED THEN DELETE"
+  },
+  {
+    "id": "ho-write-002",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-203",
+    "correct": true,
+    "sql": "WITH m AS (MERGE INTO orders o USING (SELECT 1 AS id) s ON o.id = s.id WHEN MATCHED THEN DELETE RETURNING o.id) SELECT * FROM m"
+  },
+  {
+    "id": "ho-write-003",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "CALL refresh_everything()"
+  },
+  {
+    "id": "ho-write-004",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "PREPARE p AS SELECT 1"
+  },
+  {
+    "id": "ho-write-005",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "EXECUTE p"
+  },
+  {
+    "id": "ho-write-006",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "DEALLOCATE ALL"
+  },
+  {
+    "id": "ho-write-007",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "LOCK TABLE orders IN ACCESS EXCLUSIVE MODE"
+  },
+  {
+    "id": "ho-write-008",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "REFRESH MATERIALIZED VIEW order_totals"
+  },
+  {
+    "id": "ho-write-011",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "COMMENT ON TABLE users IS 'x'"
+  },
+  {
+    "id": "ho-write-012",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "CREATE TEMP TABLE t AS SELECT 1"
+  },
+  {
+    "id": "ho-write-013",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-202",
+    "correct": true,
+    "sql": "SELECT * INTO TEMP t FROM orders"
+  },
+  {
+    "id": "ho-write-015",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "LOAD 'auto_explain'"
+  },
+  {
+    "id": "ho-write-017",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-201",
+    "correct": true,
+    "sql": "SET SESSION AUTHORIZATION postgres"
+  },
+  {
+    "id": "ho-write-018",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-202",
+    "correct": true,
+    "sql": "SELECT id FROM orders FOR NO KEY UPDATE"
+  },
+  {
+    "id": "ho-write-019",
+    "category": "writes",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-202",
+    "correct": true,
+    "sql": "SELECT id FROM orders FOR KEY SHARE SKIP LOCKED"
+  },
+  {
+    "id": "ho-stack-001",
+    "category": "stacking",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-204",
+    "correct": true,
+    "sql": "SELECT 1;;DELETE FROM orders"
+  },
+  {
+    "id": "ho-stack-002",
+    "category": "stacking",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-204",
+    "correct": true,
+    "sql": "SELECT 'a' /* ; */ ; UPDATE orders SET amount = 0"
+  },
+  {
+    "id": "ho-stack-003",
+    "category": "stacking",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-204",
+    "correct": true,
+    "sql": "SELECT $tag$;$tag$; DROP TABLE users"
+  },
+  {
+    "id": "ho-stack-004",
+    "category": "stacking",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT id FROM orders WHERE status = 'paid; DROP TABLE users'"
+  },
+  {
+    "id": "ho-func-001",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT pg_read_binary_file('/etc/passwd')"
+  },
+  {
+    "id": "ho-func-002",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT lo_import('/etc/passwd')"
+  },
+  {
+    "id": "ho-func-003",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT lo_export(1234, '/tmp/x')"
+  },
+  {
+    "id": "ho-func-004",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT pg_ls_dir('.')"
+  },
+  {
+    "id": "ho-func-008",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT nextval('orders_id_seq')"
+  },
+  {
+    "id": "ho-func-009",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT setval('orders_id_seq', 1)"
+  },
+  {
+    "id": "ho-func-010",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT pg_advisory_xact_lock(1)"
+  },
+  {
+    "id": "ho-func-011",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT pg_sleep(0.1) FROM orders"
+  },
+  {
+    "id": "ho-func-012",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT g FROM generate_series(1, 10) g WHERE pg_sleep(1) IS NOT NULL"
+  },
+  {
+    "id": "ho-func-013",
+    "category": "functions",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT \"pg_sleep\"(1)"
+  },
+  {
+    "id": "ho-sqlexec-001",
+    "category": "sql-exec",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT cursor_to_xml('c', 1, false, false, '')"
+  },
+  {
+    "id": "ho-sqlexec-002",
+    "category": "sql-exec",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT xpath('/a', query_to_xml('select 1', true, false, ''))"
+  },
+  {
+    "id": "ho-sqlexec-003",
+    "category": "sql-exec",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT ts_rewrite('a & b'::tsquery, 'select ''a''::tsquery, ''c''::tsquery')"
+  },
+  {
+    "id": "ho-sqlexec-004",
+    "category": "sql-exec",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT table_to_xml('users', true, false, '')"
+  },
+  {
+    "id": "ho-hide-002",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-506",
+    "correct": true,
+    "sql": "SELECT \"password_hash\" FROM users"
+  },
+  {
+    "id": "ho-hide-003",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-506",
+    "correct": true,
+    "sql": "SELECT id FROM users WHERE password_hash LIKE 'a%'"
+  },
+  {
+    "id": "ho-hide-004",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-506",
+    "correct": true,
+    "sql": "SELECT id FROM users ORDER BY mfa_secret"
+  },
+  {
+    "id": "ho-hide-007",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT row_to_json(users) FROM users"
+  },
+  {
+    "id": "ho-hide-008",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-208",
+    "correct": true,
+    "sql": "SELECT (users.*)::text FROM users"
+  },
+  {
+    "id": "ho-hide-009",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-208",
+    "correct": true,
+    "sql": "SELECT x.* FROM (SELECT * FROM users) x"
+  },
+  {
+    "id": "ho-hide-010",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-208",
+    "correct": true,
+    "sql": "SELECT * FROM users JOIN orders ON true"
+  },
+  {
+    "id": "ho-hide-011",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-207",
+    "correct": true,
+    "sql": "SELECT id FROM public.\"api_keys\""
+  },
+  {
+    "id": "ho-hide-012",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-207",
+    "correct": true,
+    "sql": "SELECT EXISTS (SELECT 1 FROM internal_audit)"
+  },
+  {
+    "id": "ho-hide-013",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-207",
+    "correct": true,
+    "sql": "SELECT 'public.api_keys'::regclass::oid"
+  },
+  {
+    "id": "ho-hide-014",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT to_regclass('api_keys')"
+  },
+  {
+    "id": "ho-hide-015",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT has_table_privilege('api_keys', 'SELECT')"
+  },
+  {
+    "id": "ho-hide-016",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-205",
+    "correct": true,
+    "sql": "SELECT pg_relation_size('internal_audit')"
+  },
+  {
+    "id": "ho-hide-017",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-207",
+    "correct": true,
+    "sql": "SELECT attname FROM pg_attribute WHERE attrelid = 'users'::regclass"
+  },
+  {
+    "id": "ho-hide-018",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-207",
+    "correct": true,
+    "sql": "SELECT column_name FROM information_schema.columns WHERE table_name = 'users'"
+  },
+  {
+    "id": "ho-hide-019",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-207",
+    "correct": true,
+    "sql": "SELECT * FROM pg_stats WHERE tablename = 'users'"
+  },
+  {
+    "id": "ho-hide-020",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-506",
+    "correct": true,
+    "sql": "WITH RECURSIVE r AS (SELECT password_hash AS p FROM users UNION ALL SELECT p FROM r) SELECT 1"
+  },
+  {
+    "id": "ho-hide-021",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-506",
+    "correct": true,
+    "sql": "SELECT l.p FROM users, LATERAL (SELECT users.password_hash AS p) l"
+  },
+  {
+    "id": "ho-hide-022",
+    "category": "hidden",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-208",
+    "correct": true,
+    "sql": "SELECT id FROM users WHERE (users.*) IS NOT NULL"
+  },
+  {
+    "id": "ho-budget-001",
+    "category": "budgets",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-302",
+    "correct": true,
+    "sql": "SELECT id FROM orders OFFSET 5 ROWS FETCH NEXT 300 ROWS ONLY"
+  },
+  {
+    "id": "ho-budget-003",
+    "category": "budgets",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT id FROM orders"
+  },
+  {
+    "id": "ho-explain-001",
+    "category": "explain",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-209",
+    "correct": true,
+    "sql": "EXPLAIN (ANALYZE, FORMAT JSON) SELECT id FROM orders"
+  },
+  {
+    "id": "ho-explain-002",
+    "category": "explain",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "EXPLAIN SELECT id FROM orders WHERE amount > 10"
+  },
+  {
+    "id": "ho-explain-003",
+    "category": "explain",
+    "expect": "refused",
+    "decision": "refused",
+    "code": "PGM-506",
+    "correct": true,
+    "sql": "EXPLAIN SELECT password_hash FROM users"
+  },
+  {
+    "id": "ho-legit-001",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT status, count(*) FROM orders GROUP BY status ORDER BY 2 DESC"
+  },
+  {
+    "id": "ho-legit-002",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT u.name, sum(o.amount) FROM users u JOIN orders o ON o.user_id = u.id GROUP BY u.name HAVING sum(o.amount) > 100"
+  },
+  {
+    "id": "ho-legit-003",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT id, name FROM users WHERE email ILIKE '%@example.com' ORDER BY created_at DESC LIMIT 20"
+  },
+  {
+    "id": "ho-legit-004",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "WITH recent AS (SELECT id, user_id FROM orders WHERE created_at > now() - interval '7 days') SELECT count(*) FROM recent"
+  },
+  {
+    "id": "ho-legit-005",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT id, rank() OVER (PARTITION BY user_id ORDER BY amount DESC) FROM orders"
+  },
+  {
+    "id": "ho-legit-006",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT date_trunc('month', created_at) AS m, avg(amount) FROM orders GROUP BY 1 ORDER BY 1"
+  },
+  {
+    "id": "ho-legit-007",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT t.title, u.email FROM tickets t LEFT JOIN users u ON u.id = t.user_id WHERE t.status = 'open'"
+  },
+  {
+    "id": "ho-legit-008",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT id FROM users WHERE id IN (SELECT user_id FROM orders WHERE amount > 500)"
+  },
+  {
+    "id": "ho-legit-009",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT CASE WHEN amount > 100 THEN 'big' ELSE 'small' END AS size, count(*) FROM orders GROUP BY 1"
+  },
+  {
+    "id": "ho-legit-010",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT coalesce(nullif(status, ''), 'unknown') FROM tickets"
+  },
+  {
+    "id": "ho-legit-011",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT event_type, payload->>'source' FROM events WHERE payload ? 'source'"
+  },
+  {
+    "id": "ho-legit-012",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT 'delete from users' AS note"
+  },
+  {
+    "id": "ho-legit-013",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT name AS password_hash FROM users"
+  },
+  {
+    "id": "ho-legit-014",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT u.id, u.name FROM users u WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id)"
+  },
+  {
+    "id": "ho-legit-015",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT string_agg(name, ', ' ORDER BY name) FROM customers"
+  },
+  {
+    "id": "ho-legit-016",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT tier, count(*) FILTER (WHERE created_at > '2025-01-01') FROM customers GROUP BY tier"
+  },
+  {
+    "id": "ho-legit-017",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT id FROM orders ORDER BY amount DESC NULLS LAST LIMIT 10"
+  },
+  {
+    "id": "ho-legit-018",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT o.id FROM orders o UNION SELECT t.id FROM tickets t"
+  },
+  {
+    "id": "ho-legit-019",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT now(), current_date"
+  },
+  {
+    "id": "ho-legit-020",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT lower(email), length(name), round(1.234, 1) FROM users"
+  },
+  {
+    "id": "ho-legit-021",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT jsonb_build_object('id', id, 'name', name) FROM users"
+  },
+  {
+    "id": "ho-legit-022",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "SELECT id FROM users -- password_hash"
+  },
+  {
+    "id": "ho-legit-023",
+    "category": "legit",
+    "expect": "allowed",
+    "decision": "allowed",
+    "code": null,
+    "correct": true,
+    "sql": "/* api_keys */ SELECT id FROM orders"
+  }
+]

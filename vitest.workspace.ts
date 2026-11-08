@@ -16,12 +16,6 @@ export default [
   },
   {
     test: {
-      name: 'heldout',
-      include: ['packages/core/test/heldout/**/*.test.ts'],
-    },
-  },
-  {
-    test: {
       name: 'property',
       include: ['packages/core/test/property/**/*.test.ts'],
     },
