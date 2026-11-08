@@ -23,9 +23,9 @@
 //       Roles must be able to log in without a password (trust auth), or set PGPASSWORD_READER.
 import { createRequire } from 'node:module';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
-const repo = process.argv[2];
+const repo = process.argv[2] && resolve(process.argv[2]);
 const outPath = process.argv[3] ?? 'baseline-results.json';
 if (!repo)
   throw new Error(

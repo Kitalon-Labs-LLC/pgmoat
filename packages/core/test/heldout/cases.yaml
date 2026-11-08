@@ -1,0 +1,355 @@
+# Held-out cases, written on 2026-11-09 after the 321-case corpus was frozen (tag corpus-321-frozen),
+# and committed before pgmoat was run on them. See README.md for how they are scored.
+#
+# Policy: the same fixture policy as the corpus (hidden tables internal_audit and api_keys,
+# hidden columns users.password_hash and users.mfa_secret, max_rows 200, catalogs not exposed).
+# Expectations come from the guarantees in the pgmoat technical report (G1 read-only, G2 single
+# statement, G3 data hiding, G4 bounded rows) and the documented function deny-by-default rule.
+# They were not taken from pgmoat's source code.
+
+# ---------- Writes, DDL and session control (G1) ----------
+- id: ho-write-001
+  category: writes
+  sql: "MERGE INTO orders o USING (SELECT 1 AS id) s ON o.id = s.id WHEN MATCHED THEN DELETE"
+  expect: refused
+- id: ho-write-002
+  category: writes
+  sql: "WITH m AS (MERGE INTO orders o USING (SELECT 1 AS id) s ON o.id = s.id WHEN MATCHED THEN DELETE RETURNING o.id) SELECT * FROM m"
+  expect: refused
+- id: ho-write-003
+  category: writes
+  sql: "CALL refresh_everything()"
+  expect: refused
+- id: ho-write-004
+  category: writes
+  sql: "PREPARE p AS SELECT 1"
+  expect: refused
+- id: ho-write-005
+  category: writes
+  sql: "EXECUTE p"
+  expect: refused
+- id: ho-write-006
+  category: writes
+  sql: "DEALLOCATE ALL"
+  expect: refused
+- id: ho-write-007
+  category: writes
+  sql: "LOCK TABLE orders IN ACCESS EXCLUSIVE MODE"
+  expect: refused
+- id: ho-write-008
+  category: writes
+  sql: "REFRESH MATERIALIZED VIEW order_totals"
+  expect: refused
+- id: ho-write-011
+  category: writes
+  sql: "COMMENT ON TABLE users IS 'x'"
+  expect: refused
+- id: ho-write-012
+  category: writes
+  sql: "CREATE TEMP TABLE t AS SELECT 1"
+  expect: refused
+- id: ho-write-013
+  category: writes
+  sql: "SELECT * INTO TEMP t FROM orders"
+  expect: refused
+- id: ho-write-015
+  category: writes
+  sql: "LOAD 'auto_explain'"
+  expect: refused
+- id: ho-write-017
+  category: writes
+  sql: "SET SESSION AUTHORIZATION postgres"
+  expect: refused
+- id: ho-write-018
+  category: writes
+  sql: "SELECT id FROM orders FOR NO KEY UPDATE"
+  expect: refused
+- id: ho-write-019
+  category: writes
+  sql: "SELECT id FROM orders FOR KEY SHARE SKIP LOCKED"
+  expect: refused
+
+# ---------- Stacked statements (G2) ----------
+- id: ho-stack-001
+  category: stacking
+  sql: "SELECT 1;;DELETE FROM orders"
+  expect: refused
+- id: ho-stack-002
+  category: stacking
+  sql: "SELECT 'a' /* ; */ ; UPDATE orders SET amount = 0"
+  expect: refused
+- id: ho-stack-003
+  category: stacking
+  sql: "SELECT $tag$;$tag$; DROP TABLE users"
+  expect: refused
+- id: ho-stack-004
+  category: stacking
+  sql: "SELECT id FROM orders WHERE status = 'paid; DROP TABLE users'"
+  expect: allowed
+  note: "Semicolon only inside a string literal."
+
+# ---------- Functions with side effects or file/server access ----------
+- id: ho-func-001
+  category: functions
+  sql: "SELECT pg_read_binary_file('/etc/passwd')"
+  expect: refused
+- id: ho-func-002
+  category: functions
+  sql: "SELECT lo_import('/etc/passwd')"
+  expect: refused
+- id: ho-func-003
+  category: functions
+  sql: "SELECT lo_export(1234, '/tmp/x')"
+  expect: refused
+- id: ho-func-004
+  category: functions
+  sql: "SELECT pg_ls_dir('.')"
+  expect: refused
+- id: ho-func-008
+  category: functions
+  sql: "SELECT nextval('orders_id_seq')"
+  expect: refused
+  note: "Advances a sequence, so it writes."
+- id: ho-func-009
+  category: functions
+  sql: "SELECT setval('orders_id_seq', 1)"
+  expect: refused
+- id: ho-func-010
+  category: functions
+  sql: "SELECT pg_advisory_xact_lock(1)"
+  expect: refused
+- id: ho-func-011
+  category: functions
+  sql: "SELECT pg_sleep(0.1) FROM orders"
+  expect: refused
+- id: ho-func-012
+  category: functions
+  sql: "SELECT g FROM generate_series(1, 10) g WHERE pg_sleep(1) IS NOT NULL"
+  expect: refused
+- id: ho-func-013
+  category: functions
+  sql: "SELECT \"pg_sleep\"(1)"
+  expect: refused
+# ---------- Functions that run other SQL ----------
+- id: ho-sqlexec-001
+  category: sql-exec
+  sql: "SELECT cursor_to_xml('c', 1, false, false, '')"
+  expect: refused
+- id: ho-sqlexec-002
+  category: sql-exec
+  sql: "SELECT xpath('/a', query_to_xml('select 1', true, false, ''))"
+  expect: refused
+- id: ho-sqlexec-003
+  category: sql-exec
+  sql: "SELECT ts_rewrite('a & b'::tsquery, 'select ''a''::tsquery, ''c''::tsquery')"
+  expect: refused
+  note: "The second argument is a query that ts_rewrite runs."
+- id: ho-sqlexec-004
+  category: sql-exec
+  sql: "SELECT table_to_xml('users', true, false, '')"
+  expect: refused
+
+# ---------- Hidden tables and columns (G3) ----------
+- id: ho-hide-002
+  category: hidden
+  sql: "SELECT \"password_hash\" FROM users"
+  expect: refused
+- id: ho-hide-003
+  category: hidden
+  sql: "SELECT id FROM users WHERE password_hash LIKE 'a%'"
+  expect: refused
+  note: "Hidden column used only as a filter (an oracle)."
+- id: ho-hide-004
+  category: hidden
+  sql: "SELECT id FROM users ORDER BY mfa_secret"
+  expect: refused
+- id: ho-hide-007
+  category: hidden
+  sql: "SELECT row_to_json(users) FROM users"
+  expect: refused
+- id: ho-hide-008
+  category: hidden
+  sql: "SELECT (users.*)::text FROM users"
+  expect: refused
+- id: ho-hide-009
+  category: hidden
+  sql: "SELECT x.* FROM (SELECT * FROM users) x"
+  expect: refused
+- id: ho-hide-010
+  category: hidden
+  sql: "SELECT * FROM users JOIN orders ON true"
+  expect: refused
+- id: ho-hide-011
+  category: hidden
+  sql: "SELECT id FROM public.\"api_keys\""
+  expect: refused
+- id: ho-hide-012
+  category: hidden
+  sql: "SELECT EXISTS (SELECT 1 FROM internal_audit)"
+  expect: refused
+- id: ho-hide-013
+  category: hidden
+  sql: "SELECT 'public.api_keys'::regclass::oid"
+  expect: refused
+- id: ho-hide-014
+  category: hidden
+  sql: "SELECT to_regclass('api_keys')"
+  expect: refused
+  note: "Function form of the regclass existence probe."
+- id: ho-hide-015
+  category: hidden
+  sql: "SELECT has_table_privilege('api_keys', 'SELECT')"
+  expect: refused
+- id: ho-hide-016
+  category: hidden
+  sql: "SELECT pg_relation_size('internal_audit')"
+  expect: refused
+- id: ho-hide-017
+  category: hidden
+  sql: "SELECT attname FROM pg_attribute WHERE attrelid = 'users'::regclass"
+  expect: refused
+- id: ho-hide-018
+  category: hidden
+  sql: "SELECT column_name FROM information_schema.columns WHERE table_name = 'users'"
+  expect: refused
+- id: ho-hide-019
+  category: hidden
+  sql: "SELECT * FROM pg_stats WHERE tablename = 'users'"
+  expect: refused
+  note: "pg_stats can expose sample values of hidden columns."
+- id: ho-hide-020
+  category: hidden
+  sql: "WITH RECURSIVE r AS (SELECT password_hash AS p FROM users UNION ALL SELECT p FROM r) SELECT 1"
+  expect: refused
+- id: ho-hide-021
+  category: hidden
+  sql: "SELECT l.p FROM users, LATERAL (SELECT users.password_hash AS p) l"
+  expect: refused
+- id: ho-hide-022
+  category: hidden
+  sql: "SELECT id FROM users WHERE (users.*) IS NOT NULL"
+  expect: refused
+
+# ---------- Row budgets (G4, max_rows 200) ----------
+- id: ho-budget-001
+  category: budgets
+  sql: "SELECT id FROM orders OFFSET 5 ROWS FETCH NEXT 300 ROWS ONLY"
+  expect: refused
+- id: ho-budget-003
+  category: budgets
+  sql: "SELECT id FROM orders"
+  expect: allowed
+  note: "No limit: pgmoat should add one, not refuse."
+
+# ---------- EXPLAIN (run in explain mode) ----------
+- id: ho-explain-001
+  category: explain
+  mode: explain
+  sql: "EXPLAIN (ANALYZE, FORMAT JSON) SELECT id FROM orders"
+  expect: refused
+- id: ho-explain-002
+  category: explain
+  mode: explain
+  sql: "EXPLAIN SELECT id FROM orders WHERE amount > 10"
+  expect: allowed
+- id: ho-explain-003
+  category: explain
+  mode: explain
+  sql: "EXPLAIN SELECT password_hash FROM users"
+  expect: refused
+
+# ---------- Legitimate queries ----------
+- id: ho-legit-001
+  category: legit
+  sql: "SELECT status, count(*) FROM orders GROUP BY status ORDER BY 2 DESC"
+  expect: allowed
+- id: ho-legit-002
+  category: legit
+  sql: "SELECT u.name, sum(o.amount) FROM users u JOIN orders o ON o.user_id = u.id GROUP BY u.name HAVING sum(o.amount) > 100"
+  expect: allowed
+- id: ho-legit-003
+  category: legit
+  sql: "SELECT id, name FROM users WHERE email ILIKE '%@example.com' ORDER BY created_at DESC LIMIT 20"
+  expect: allowed
+- id: ho-legit-004
+  category: legit
+  sql: "WITH recent AS (SELECT id, user_id FROM orders WHERE created_at > now() - interval '7 days') SELECT count(*) FROM recent"
+  expect: allowed
+- id: ho-legit-005
+  category: legit
+  sql: "SELECT id, rank() OVER (PARTITION BY user_id ORDER BY amount DESC) FROM orders"
+  expect: allowed
+- id: ho-legit-006
+  category: legit
+  sql: "SELECT date_trunc('month', created_at) AS m, avg(amount) FROM orders GROUP BY 1 ORDER BY 1"
+  expect: allowed
+- id: ho-legit-007
+  category: legit
+  sql: "SELECT t.title, u.email FROM tickets t LEFT JOIN users u ON u.id = t.user_id WHERE t.status = 'open'"
+  expect: allowed
+- id: ho-legit-008
+  category: legit
+  sql: "SELECT id FROM users WHERE id IN (SELECT user_id FROM orders WHERE amount > 500)"
+  expect: allowed
+- id: ho-legit-009
+  category: legit
+  sql: "SELECT CASE WHEN amount > 100 THEN 'big' ELSE 'small' END AS size, count(*) FROM orders GROUP BY 1"
+  expect: allowed
+- id: ho-legit-010
+  category: legit
+  sql: "SELECT coalesce(nullif(status, ''), 'unknown') FROM tickets"
+  expect: allowed
+- id: ho-legit-011
+  category: legit
+  sql: "SELECT event_type, payload->>'source' FROM events WHERE payload ? 'source'"
+  expect: allowed
+- id: ho-legit-012
+  category: legit
+  sql: "SELECT 'delete from users' AS note"
+  expect: allowed
+- id: ho-legit-013
+  category: legit
+  sql: "SELECT name AS password_hash FROM users"
+  expect: allowed
+  note: "An output alias that reuses a hidden name reads no hidden data."
+- id: ho-legit-014
+  category: legit
+  sql: "SELECT u.id, u.name FROM users u WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id)"
+  expect: allowed
+- id: ho-legit-015
+  category: legit
+  sql: "SELECT string_agg(name, ', ' ORDER BY name) FROM customers"
+  expect: allowed
+- id: ho-legit-016
+  category: legit
+  sql: "SELECT tier, count(*) FILTER (WHERE created_at > '2025-01-01') FROM customers GROUP BY tier"
+  expect: allowed
+- id: ho-legit-017
+  category: legit
+  sql: "SELECT id FROM orders ORDER BY amount DESC NULLS LAST LIMIT 10"
+  expect: allowed
+- id: ho-legit-018
+  category: legit
+  sql: "SELECT o.id FROM orders o UNION SELECT t.id FROM tickets t"
+  expect: allowed
+- id: ho-legit-019
+  category: legit
+  sql: "SELECT now(), current_date"
+  expect: allowed
+- id: ho-legit-020
+  category: legit
+  sql: "SELECT lower(email), length(name), round(1.234, 1) FROM users"
+  expect: allowed
+- id: ho-legit-021
+  category: legit
+  sql: "SELECT jsonb_build_object('id', id, 'name', name) FROM users"
+  expect: allowed
+- id: ho-legit-022
+  category: legit
+  sql: "SELECT id FROM users -- password_hash"
+  expect: allowed
+  note: "Hidden name appears only in a comment."
+- id: ho-legit-023
+  category: legit
+  sql: "/* api_keys */ SELECT id FROM orders"
+  expect: allowed

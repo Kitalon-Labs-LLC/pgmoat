@@ -13,6 +13,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run --project unit",
     "test:corpus": "vitest run --project corpus",
+    "test:heldout": "vitest run --project heldout",
     "test:corpus:db": "vitest run --project corpus-db",
     "test:integration": "vitest run --project integration",
     "coverage": "vitest run --coverage",
