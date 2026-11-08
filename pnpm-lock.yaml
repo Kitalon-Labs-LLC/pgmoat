@@ -209,8 +209,8 @@ importers:
   packages/cli:
     dependencies:
       libpg-query:
-        specifier: ^18.1.5
-        version: 18.1.5
+        specifier: ^18.2.2
+        version: 18.2.2
       pg:
         specifier: ^8.23.1
         version: 8.23.1
@@ -249,8 +249,8 @@ importers:
         specifier: ^6.2.13
         version: 6.2.13
       libpg-query:
-        specifier: ^18.1.5
-        version: 18.1.5
+        specifier: ^18.2.2
+        version: 18.2.2
       pg:
         specifier: ^8.23.1
         version: 8.23.1
@@ -1561,8 +1561,8 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  libpg-query@18.1.5:
-    resolution: {integrity: sha512-xsksgH106LyVUylIp2bJz1MPFmVVIGKbB8belGWmh+J8/i38w8eM1twDIBnd97tzeNQFctH9MWKMthl22+fWcQ==}
+  libpg-query@18.2.2:
+    resolution: {integrity: sha512-BOKY0X05vnxkFe+FD8JH71sSO560UKoSRv9Fsy67zapmryhqcew+4Hq0Phu8a6mcENklK7LiHJi0d0j8DbIb4A==}
 
   lightningcss-android-arm64@1.33.0:
     resolution: {integrity: sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==}
@@ -3526,7 +3526,7 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  libpg-query@18.1.5:
+  libpg-query@18.2.2:
     dependencies:
       '@pgsql/types': 18.0.0
 
