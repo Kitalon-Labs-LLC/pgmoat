@@ -14,7 +14,7 @@
     "@modelcontextprotocol/server": "^2.3.1",
     "@pgsql/types": "^18.0.0",
     "jose": "^6.2.13",
-    "libpg-query": "^18.1.5",
+    "libpg-query": "^18.2.2",
     "pg": "^8.23.1",
     "pg-cursor": "^2.22.1",
     "pgsql-deparser": "^18.3.12",
