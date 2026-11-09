@@ -121,3 +121,75 @@ jobs:
         run: pnpm test:corpus:db
         env:
           PGMOAT_TEST_PG: ${{ matrix.pg }}
+
+  # Reruns the read-only role baseline cited in the technical report and fails if any verdict differs
+  # from the recorded files in tools/baseline-results/. Postgres 14 is included only to show what the
+  # role lets through before Postgres 15; pgmoat itself supports 15 to 18.
+  role-baseline:
+    name: Read-only role baseline (Postgres ${{ matrix.pg }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [14, 15, 16, 17, 18]
+    services:
+      postgres:
+        image: postgres:${{ matrix.pg }}
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5433
+      PGUSER: postgres
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        with:
+          run_install: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Load the test fixtures
+        run: |
+          createdb testdb
+          for f in seed roles rls; do
+            psql -q -d testdb -v ON_ERROR_STOP=1 -f packages/core/test/integration/harness/$f.sql
+          done
+
+      - name: Run the baseline on both case sets
+        run: |
+          mkdir -p baseline-out
+          node tools/readonly-role-baseline.mjs . baseline-out/corpus-pg${{ matrix.pg }}.json --set corpus
+          node tools/readonly-role-baseline.mjs . baseline-out/heldout-pg${{ matrix.pg }}.json --set heldout
+
+      - name: Verdicts match the recorded results
+        run: |
+          for s in corpus heldout; do
+            f=$s-pg${{ matrix.pg }}.json
+            diff <(jq -r '.[] | "\(.id) \(.correct)"' tools/baseline-results/$f) \
+                 <(jq -r '.[] | "\(.id) \(.correct)"' baseline-out/$f)
+          done
+
+      - name: Upload the results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: role-baseline-pg${{ matrix.pg }}
+          path: baseline-out/

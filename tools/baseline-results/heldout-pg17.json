@@ -1,0 +1,711 @@
+[
+ {
+  "id": "ho-write-001",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "MERGE INTO orders o USING (SELECT 1 AS id) s ON o.id = s.id WHEN MATCHED THEN DELETE",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "ho-write-002",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "WITH m AS (MERGE INTO orders o USING (SELECT 1 AS id) s ON o.id = s.id WHEN MATCHED THEN DELETE RETURNING o.id) SELECT * FROM m",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "ho-write-003",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "CALL refresh_everything()",
+  "outcome": "error",
+  "code": "42883",
+  "message": "procedure refresh_everything() does not exist",
+  "correct": true
+ },
+ {
+  "id": "ho-write-004",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "PREPARE p AS SELECT 1",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-write-005",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "EXECUTE p",
+  "outcome": "error",
+  "code": "26000",
+  "message": "prepared statement \"p\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "ho-write-006",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "DEALLOCATE ALL",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-write-007",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "LOCK TABLE orders IN ACCESS EXCLUSIVE MODE",
+  "outcome": "error",
+  "code": "25P01",
+  "message": "LOCK TABLE can only be used in transaction blocks",
+  "correct": true
+ },
+ {
+  "id": "ho-write-008",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "REFRESH MATERIALIZED VIEW order_totals",
+  "outcome": "error",
+  "code": "42809",
+  "message": "\"order_totals\" is not a table or materialized view",
+  "correct": true
+ },
+ {
+  "id": "ho-write-011",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "COMMENT ON TABLE users IS 'x'",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of table users",
+  "correct": true
+ },
+ {
+  "id": "ho-write-012",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "CREATE TEMP TABLE t AS SELECT 1",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-write-013",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "SELECT * INTO TEMP t FROM orders",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-write-015",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "LOAD 'auto_explain'",
+  "outcome": "error",
+  "code": "42501",
+  "message": "access to library \"auto_explain\" is not allowed",
+  "correct": true
+ },
+ {
+  "id": "ho-write-017",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "SET SESSION AUTHORIZATION postgres",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied to set session authorization \"postgres\"",
+  "correct": true
+ },
+ {
+  "id": "ho-write-018",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "SELECT id FROM orders FOR NO KEY UPDATE",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table orders",
+  "correct": true
+ },
+ {
+  "id": "ho-write-019",
+  "group": "writes",
+  "expect": "refused",
+  "sql": "SELECT id FROM orders FOR KEY SHARE SKIP LOCKED",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table orders",
+  "correct": true
+ },
+ {
+  "id": "ho-stack-001",
+  "group": "stacking",
+  "expect": "refused",
+  "sql": "SELECT 1;;DELETE FROM orders",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table orders",
+  "correct": true
+ },
+ {
+  "id": "ho-stack-002",
+  "group": "stacking",
+  "expect": "refused",
+  "sql": "SELECT 'a' /* ; */ ; UPDATE orders SET amount = 0",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table orders",
+  "correct": true
+ },
+ {
+  "id": "ho-stack-003",
+  "group": "stacking",
+  "expect": "refused",
+  "sql": "SELECT $tag$;$tag$; DROP TABLE users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of table users",
+  "correct": true
+ },
+ {
+  "id": "ho-stack-004",
+  "group": "stacking",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders WHERE status = 'paid; DROP TABLE users'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-func-001",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT pg_read_binary_file('/etc/passwd')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_read_binary_file",
+  "correct": true
+ },
+ {
+  "id": "ho-func-002",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT lo_import('/etc/passwd')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function lo_import",
+  "correct": true
+ },
+ {
+  "id": "ho-func-003",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT lo_export(1234, '/tmp/x')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function lo_export",
+  "correct": true
+ },
+ {
+  "id": "ho-func-004",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT pg_ls_dir('.')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_ls_dir",
+  "correct": true
+ },
+ {
+  "id": "ho-func-008",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT nextval('orders_id_seq')",
+  "outcome": "error",
+  "code": "42P01",
+  "message": "relation \"orders_id_seq\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "ho-func-009",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT setval('orders_id_seq', 1)",
+  "outcome": "error",
+  "code": "42P01",
+  "message": "relation \"orders_id_seq\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "ho-func-010",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT pg_advisory_xact_lock(1)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-func-011",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT pg_sleep(0.1) FROM orders",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-func-012",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT g FROM generate_series(1, 10) g WHERE pg_sleep(1) IS NOT NULL",
+  "outcome": "ran",
+  "note": "ran until statement_timeout",
+  "correct": false
+ },
+ {
+  "id": "ho-func-013",
+  "group": "functions",
+  "expect": "refused",
+  "sql": "SELECT \"pg_sleep\"(1)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-sqlexec-001",
+  "group": "sql-exec",
+  "expect": "refused",
+  "sql": "SELECT cursor_to_xml('c', 1, false, false, '')",
+  "outcome": "error",
+  "code": "34000",
+  "message": "cursor \"c\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "ho-sqlexec-002",
+  "group": "sql-exec",
+  "expect": "refused",
+  "sql": "SELECT xpath('/a', query_to_xml('select 1', true, false, ''))",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-sqlexec-003",
+  "group": "sql-exec",
+  "expect": "refused",
+  "sql": "SELECT ts_rewrite('a & b'::tsquery, 'select ''a''::tsquery, ''c''::tsquery')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-sqlexec-004",
+  "group": "sql-exec",
+  "expect": "refused",
+  "sql": "SELECT table_to_xml('users', true, false, '')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-002",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT \"password_hash\" FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-003",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT id FROM users WHERE password_hash LIKE 'a%'",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-004",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT id FROM users ORDER BY mfa_secret",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-007",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT row_to_json(users) FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-008",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT (users.*)::text FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-009",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT x.* FROM (SELECT * FROM users) x",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-010",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT * FROM users JOIN orders ON true",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-011",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT id FROM public.\"api_keys\"",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table api_keys",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-012",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT EXISTS (SELECT 1 FROM internal_audit)",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table internal_audit",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-013",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT 'public.api_keys'::regclass::oid",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-hide-014",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT to_regclass('api_keys')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-hide-015",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT has_table_privilege('api_keys', 'SELECT')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-hide-016",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT pg_relation_size('internal_audit')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-hide-017",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT attname FROM pg_attribute WHERE attrelid = 'users'::regclass",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-hide-018",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT column_name FROM information_schema.columns WHERE table_name = 'users'",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-hide-019",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT * FROM pg_stats WHERE tablename = 'users'",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-hide-020",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "WITH RECURSIVE r AS (SELECT password_hash AS p FROM users UNION ALL SELECT p FROM r) SELECT 1",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-hide-021",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT l.p FROM users, LATERAL (SELECT users.password_hash AS p) l",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-hide-022",
+  "group": "hidden",
+  "expect": "refused",
+  "sql": "SELECT id FROM users WHERE (users.*) IS NOT NULL",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-budget-001",
+  "group": "budgets",
+  "expect": "refused",
+  "sql": "SELECT id FROM orders OFFSET 5 ROWS FETCH NEXT 300 ROWS ONLY",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-budget-003",
+  "group": "budgets",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-explain-001",
+  "group": "explain",
+  "expect": "refused",
+  "sql": "EXPLAIN (ANALYZE, FORMAT JSON) SELECT id FROM orders",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "ho-explain-002",
+  "group": "explain",
+  "expect": "allowed",
+  "sql": "EXPLAIN SELECT id FROM orders WHERE amount > 10",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-explain-003",
+  "group": "explain",
+  "expect": "refused",
+  "sql": "EXPLAIN SELECT password_hash FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-001",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT status, count(*) FROM orders GROUP BY status ORDER BY 2 DESC",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-002",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT u.name, sum(o.amount) FROM users u JOIN orders o ON o.user_id = u.id GROUP BY u.name HAVING sum(o.amount) > 100",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-003",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT id, name FROM users WHERE email ILIKE '%@example.com' ORDER BY created_at DESC LIMIT 20",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-004",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "WITH recent AS (SELECT id, user_id FROM orders WHERE created_at > now() - interval '7 days') SELECT count(*) FROM recent",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-005",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT id, rank() OVER (PARTITION BY user_id ORDER BY amount DESC) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-006",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT date_trunc('month', created_at) AS m, avg(amount) FROM orders GROUP BY 1 ORDER BY 1",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-007",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT t.title, u.email FROM tickets t LEFT JOIN users u ON u.id = t.user_id WHERE t.status = 'open'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-008",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE id IN (SELECT user_id FROM orders WHERE amount > 500)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-009",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT CASE WHEN amount > 100 THEN 'big' ELSE 'small' END AS size, count(*) FROM orders GROUP BY 1",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-010",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT coalesce(nullif(status, ''), 'unknown') FROM tickets",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-011",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT event_type, payload->>'source' FROM events WHERE payload ? 'source'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-012",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT 'delete from users' AS note",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-013",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT name AS password_hash FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-014",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT u.id, u.name FROM users u WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-015",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT string_agg(name, ', ' ORDER BY name) FROM customers",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-016",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT tier, count(*) FILTER (WHERE created_at > '2025-01-01') FROM customers GROUP BY tier",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-017",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders ORDER BY amount DESC NULLS LAST LIMIT 10",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-018",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT o.id FROM orders o UNION SELECT t.id FROM tickets t",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-019",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT now(), current_date",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-020",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT lower(email), length(name), round(1.234, 1) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-021",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT jsonb_build_object('id', id, 'name', name) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-022",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users -- password_hash",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "ho-legit-023",
+  "group": "legit",
+  "expect": "allowed",
+  "sql": "/* api_keys */ SELECT id FROM orders",
+  "outcome": "ran",
+  "correct": true
+ }
+]

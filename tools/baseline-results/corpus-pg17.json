@@ -1,0 +1,2828 @@
+[
+ {
+  "id": "allowed-001",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, name FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-002",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT count(*) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-003",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.id, o.amount FROM users u JOIN orders o ON u.id = o.user_id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-004",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "WITH recent_users AS (SELECT id, created_at FROM users ORDER BY created_at DESC) SELECT * FROM recent_users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-005",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SHOW work_mem",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-006",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.id, o.amount FROM users u LEFT JOIN orders o ON u.id = o.user_id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-007",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.id, o.amount FROM users u RIGHT JOIN orders o ON u.id = o.user_id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-008",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.id, o.amount FROM users u FULL JOIN orders o ON u.id = o.user_id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-009",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.id, c.name FROM users u CROSS JOIN customers c",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-010",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.id, o.id AS order_id, t.id AS ticket_id FROM users u LEFT JOIN orders o ON u.id = o.user_id LEFT JOIN tickets t ON u.id = t.user_id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-011",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u1.id, u2.name FROM users u1 JOIN users u2 ON u1.tenant_id = u2.tenant_id WHERE u1.id <> u2.id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-012",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE email = 'alice@example.com'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-013",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders WHERE amount > 100.50",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-014",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders WHERE amount >= 50 AND status = 'completed'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-015",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM tickets WHERE status = 'open' OR status = 'pending'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-016",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE NOT (role = 'banned')",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-017",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE id IN (1, 2, 3)",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "allowed-018",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders WHERE amount BETWEEN 10 AND 100",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-019",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE name LIKE 'John%'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-020",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE name ILIKE '%smith%'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-021",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM tickets WHERE user_id IS NULL",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-022",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM tickets WHERE user_id IS NOT NULL",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-023",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE id = ANY (ARRAY[10, 20, 30])",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "allowed-024",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders WHERE amount > ALL (ARRAY[5, 10, 15])",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-025",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT status, count(*), sum(amount), avg(amount), min(amount), max(amount) FROM orders GROUP BY status",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-026",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT status, count(*) FROM orders GROUP BY status HAVING count(*) > 10",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-027",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT status, count(*) FILTER (WHERE amount > 100) FROM orders GROUP BY status",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-028",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT status, user_id, count(*) FROM orders GROUP BY GROUPING SETS ((status), (user_id), ())",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-029",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT status, user_id, sum(amount) FROM orders GROUP BY ROLLUP (status, user_id)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-030",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT status, user_id, sum(amount) FROM orders GROUP BY CUBE (status, user_id)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-031",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, row_number() OVER (PARTITION BY tenant_id ORDER BY created_at) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-032",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, rank() OVER (ORDER BY amount DESC) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-033",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, dense_rank() OVER (ORDER BY amount DESC) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-034",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, lag(amount, 1) OVER (PARTITION BY user_id ORDER BY created_at) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-035",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, lead(amount, 1) OVER (PARTITION BY user_id ORDER BY created_at) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-036",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, first_value(amount) OVER (PARTITION BY user_id ORDER BY created_at) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-037",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, last_value(amount) OVER (PARTITION BY user_id ORDER BY created_at) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-038",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, ntile(4) OVER (ORDER BY amount) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-039",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users UNION SELECT user_id FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-040",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users UNION ALL SELECT user_id FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-041",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users INTERSECT SELECT user_id FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-042",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users EXCEPT SELECT user_id FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-043",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "WITH o AS (SELECT user_id, sum(amount) AS total FROM orders GROUP BY user_id) SELECT u.id, o.total FROM users u JOIN o ON u.id = o.user_id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-044",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "WITH u AS (SELECT id FROM users), o AS (SELECT id FROM orders) SELECT * FROM u, o",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-045",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "WITH RECURSIVE nums AS (SELECT 1 AS n UNION ALL SELECT n + 1 FROM nums WHERE n < 10) SELECT n FROM nums",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-046",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT lower(name), upper(name), length(name), trim(name) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-047",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT substr(name, 1, 4), concat(name, ' (user)') FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-048",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT now(), current_date, current_time, date_trunc('day', created_at) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-049",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT extract(year FROM created_at), extract(month FROM created_at) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-050",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT abs(amount), round(amount), floor(amount), ceil(amount) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-051",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT to_json(name), to_jsonb(email) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-052",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT json_build_object('id', id, 'name', name) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-053",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT json_agg(name), jsonb_agg(email) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-054",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT array_agg(id ORDER BY id), array_length(ARRAY[1, 2, 3], 1) FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-055",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT unnest(ARRAY['a', 'b', 'c'])",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-056",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT DISTINCT tenant_id FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-057",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT DISTINCT ON (tenant_id) id, name FROM users ORDER BY tenant_id, created_at DESC",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-058",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT * FROM (VALUES (1, 'active'), (2, 'inactive')) AS t(id, status)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-059",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.id, o.id AS order_id FROM users u, LATERAL (SELECT id FROM orders WHERE orders.user_id = u.id LIMIT 1) o",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-060",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users TABLESAMPLE SYSTEM (10)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-061",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT coalesce(title, 'Untitled') FROM tickets",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-062",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT nullif(status, 'unknown') FROM tickets",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-063",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT CASE WHEN amount > 100 THEN 'large' ELSE 'small' END FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-064",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT CASE status WHEN 'completed' THEN 1 WHEN 'pending' THEN 2 ELSE 3 END FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-065",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SHOW server_version",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-066",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users ORDER BY created_at DESC, id ASC",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-067",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.name, count(o.id) FROM users u LEFT JOIN orders o ON u.id = o.user_id GROUP BY u.name HAVING count(o.id) > 2",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-068",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, payload->>'key' AS p_val FROM events WHERE payload IS NOT NULL",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-069",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, upper(name) AS upper_name, lower(email) AS lower_email FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-070",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, round(amount::numeric, 2) AS rounded_amt FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-071",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, tier FROM customers WHERE tier IN ('gold', 'silver', 'bronze') ORDER BY id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-072",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, created_at, date_trunc('month', created_at) AS month_start FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-073",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE email LIKE '%@example.com'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-074",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, array_agg(status) OVER (PARTITION BY user_id) FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-075",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id FROM tickets WHERE title ILIKE '%urgent%' AND status != 'closed'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-076",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, user_id, amount FROM orders WHERE amount BETWEEN 50 AND 500",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-077",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, name, created_at FROM customers WHERE created_at >= NOW() - INTERVAL '30 days'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-078",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT u.id, u.name, o.amount FROM users u FULL OUTER JOIN orders o ON u.id = o.user_id WHERE u.id IS NOT NULL",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-079",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT id, event_type FROM events WHERE jsonb_typeof(payload) = 'object'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "allowed-080",
+  "group": "allowed",
+  "expect": "allowed",
+  "sql": "SELECT count(DISTINCT user_id) AS distinct_users FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "budgets-001",
+  "group": "budgets",
+  "expect": "PGM-302",
+  "sql": "SELECT id FROM orders LIMIT 201",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "budgets-002",
+  "group": "budgets",
+  "expect": "PGM-302",
+  "sql": "SELECT id FROM orders LIMIT 500",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "budgets-003",
+  "group": "budgets",
+  "expect": "PGM-302",
+  "sql": "SELECT id FROM orders LIMIT 10000",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "budgets-004",
+  "group": "budgets",
+  "expect": "PGM-302",
+  "sql": "SELECT id FROM orders FETCH FIRST 201 ROWS ONLY",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "budgets-005",
+  "group": "budgets",
+  "expect": "PGM-302",
+  "sql": "SELECT id FROM orders FETCH FIRST 1000 ROWS ONLY",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "budgets-006",
+  "group": "budgets",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders LIMIT 200",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "budgets-007",
+  "group": "budgets",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders LIMIT 50",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "budgets-008",
+  "group": "budgets",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders LIMIT 1",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "budgets-009",
+  "group": "budgets",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders LIMIT $1",
+  "outcome": "error",
+  "code": "42P02",
+  "message": "there is no parameter $1",
+  "correct": true
+ },
+ {
+  "id": "budgets-010",
+  "group": "budgets",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders LIMIT (SELECT 10)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "budgets-011",
+  "group": "budgets",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders FETCH FIRST 10 ROWS ONLY",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "budgets-012",
+  "group": "budgets",
+  "expect": "allowed",
+  "sql": "SELECT id FROM orders OFFSET 1000",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "cte-001",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "WITH del AS (DELETE FROM users RETURNING id) SELECT * FROM del",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "cte-002",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "WITH ins AS (INSERT INTO users (id, name) VALUES (1, 'x') RETURNING id) SELECT * FROM ins",
+  "outcome": "error",
+  "code": "42804",
+  "message": "column \"id\" is of type uuid but expression is of type integer",
+  "correct": true
+ },
+ {
+  "id": "cte-003",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "WITH upd AS (UPDATE users SET name = 'hacked' RETURNING id) SELECT * FROM upd",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "cte-004",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "WITH mrg AS (MERGE INTO users u USING orders o ON u.id = o.user_id WHEN MATCHED THEN DELETE RETURNING u.id) SELECT * FROM mrg",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "cte-005",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "WITH outer_cte AS (WITH inner_del AS (DELETE FROM users RETURNING id) SELECT * FROM inner_del) SELECT * FROM outer_cte",
+  "outcome": "error",
+  "code": "0A000",
+  "message": "WITH clause containing a data-modifying statement must be at the top level",
+  "correct": true
+ },
+ {
+  "id": "cte-006",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "SELECT * FROM (WITH del AS (DELETE FROM users RETURNING id) SELECT * FROM del) sub",
+  "outcome": "error",
+  "code": "0A000",
+  "message": "WITH clause containing a data-modifying statement must be at the top level",
+  "correct": true
+ },
+ {
+  "id": "cte-007",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "SELECT * FROM users WHERE id IN (WITH del AS (DELETE FROM orders RETURNING user_id) SELECT user_id FROM del)",
+  "outcome": "error",
+  "code": "0A000",
+  "message": "WITH clause containing a data-modifying statement must be at the top level",
+  "correct": true
+ },
+ {
+  "id": "cte-008",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "SELECT * FROM users WHERE EXISTS (WITH del AS (DELETE FROM orders RETURNING id) SELECT id FROM del)",
+  "outcome": "error",
+  "code": "0A000",
+  "message": "WITH clause containing a data-modifying statement must be at the top level",
+  "correct": true
+ },
+ {
+  "id": "cte-009",
+  "group": "cte",
+  "expect": "PGM-203",
+  "sql": "SELECT 1 UNION ALL (WITH del AS (DELETE FROM users RETURNING id) SELECT id FROM del)",
+  "outcome": "error",
+  "code": "0A000",
+  "message": "WITH clause containing a data-modifying statement must be at the top level",
+  "correct": true
+ },
+ {
+  "id": "cte-010",
+  "group": "cte",
+  "expect": "allowed",
+  "sql": "WITH regional AS (SELECT id, tenant_id FROM users) SELECT * FROM regional",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "cte-011",
+  "group": "cte",
+  "expect": "allowed",
+  "sql": "WITH a AS (SELECT 1 AS x), b AS (SELECT 2 AS y) SELECT * FROM a, b",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "cte-012",
+  "group": "cte",
+  "expect": "allowed",
+  "sql": "WITH RECURSIVE t(n) AS (VALUES (1) UNION ALL SELECT n + 1 FROM t WHERE n < 5) SELECT n FROM t",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "cte-013",
+  "group": "cte",
+  "expect": "allowed",
+  "sql": "WITH outer_c AS (WITH inner_c AS (SELECT id FROM users) SELECT id FROM inner_c) SELECT * FROM outer_c",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "cte-014",
+  "group": "cte",
+  "expect": "allowed",
+  "sql": "WITH c1 AS (SELECT id, name FROM users), c2 AS (SELECT user_id, sum(amount) AS tot FROM orders GROUP BY user_id) SELECT c1.name, c2.tot FROM c1 JOIN c2 ON c1.id = c2.user_id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "cte-015",
+  "group": "cte",
+  "expect": "allowed",
+  "sql": "WITH chained AS (SELECT user_id FROM orders WHERE amount > 100), filtered AS (SELECT id, name FROM users WHERE id IN (SELECT user_id FROM chained)) SELECT * FROM filtered",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-001",
+  "group": "edge",
+  "expect": "PGM-206",
+  "sql": "",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "edge-002",
+  "group": "edge",
+  "expect": "PGM-206",
+  "sql": "    \n\t  ",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "edge-003",
+  "group": "edge",
+  "expect": "PGM-206",
+  "sql": "-- this is just a single line comment",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "edge-004",
+  "group": "edge",
+  "expect": "PGM-206",
+  "sql": "/* multi-line\n   block comment\n   only */",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "edge-005",
+  "group": "edge",
+  "expect": "PGM-206",
+  "sql": "SELECT * FROM",
+  "outcome": "error",
+  "code": "42601",
+  "message": "syntax error at end of input",
+  "correct": true
+ },
+ {
+  "id": "edge-006",
+  "group": "edge",
+  "expect": "PGM-206",
+  "sql": "SELECT 1 WHERE %%% syntax error",
+  "outcome": "error",
+  "code": "42601",
+  "message": "syntax error at or near \"error\"",
+  "correct": true
+ },
+ {
+  "id": "edge-007",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT id AS \"имя\" FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-008",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT id AS \"témoin\" FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-009",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT id AS \"日本語\" FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-010",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT id AS \"select\", name AS \"from\", email AS \"where\" FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-011",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT id AS \"order\", name AS \"group\" FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-012",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "edge-013",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT (SELECT (SELECT (SELECT (SELECT id FROM users LIMIT 1))))",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-014",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT $tag$Hello World$tag$ AS msg",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-015",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT $$line1\nline2$$ AS msg",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "edge-016",
+  "group": "edge",
+  "expect": "allowed",
+  "sql": "SELECT id, 'escape '' quotes' AS val FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "explain-001",
+  "group": "explain",
+  "expect": "PGM-209",
+  "sql": "EXPLAIN ANALYZE SELECT id FROM users",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "explain-002",
+  "group": "explain",
+  "expect": "PGM-209",
+  "sql": "EXPLAIN (ANALYZE) SELECT id FROM users",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "explain-003",
+  "group": "explain",
+  "expect": "PGM-209",
+  "sql": "EXPLAIN (ANALYZE true, BUFFERS) SELECT id FROM users",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "explain-004",
+  "group": "explain",
+  "expect": "PGM-209",
+  "sql": "EXPLAIN (ANALYZE 1) SELECT id FROM users",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "explain-005",
+  "group": "explain",
+  "expect": "PGM-201",
+  "sql": "EXPLAIN DELETE FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "explain-006",
+  "group": "explain",
+  "expect": "PGM-201",
+  "sql": "EXPLAIN INSERT INTO users (id, name) VALUES (1, 'alice')",
+  "outcome": "error",
+  "code": "42804",
+  "message": "column \"id\" is of type uuid but expression is of type integer",
+  "correct": true
+ },
+ {
+  "id": "explain-007",
+  "group": "explain",
+  "expect": "PGM-201",
+  "sql": "EXPLAIN UPDATE users SET name = 'bob' WHERE id = 1",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "explain-008",
+  "group": "explain",
+  "expect": "allowed",
+  "sql": "EXPLAIN SELECT id FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "explain-009",
+  "group": "explain",
+  "expect": "allowed",
+  "sql": "EXPLAIN (ANALYZE false) SELECT id FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "explain-010",
+  "group": "explain",
+  "expect": "allowed",
+  "sql": "EXPLAIN (FORMAT JSON, COSTS true) SELECT id FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-001",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_sleep(1)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-002",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_catalog.pg_sleep(1)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-003",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_sleep_for('1 second')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-004",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_sleep_until(now() + interval '1 second')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-005",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT set_config('work_mem', '1GB', false)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-006",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_catalog.set_config('statement_timeout', '0', false)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-007",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT nextval('user_id_seq')",
+  "outcome": "error",
+  "code": "42P01",
+  "message": "relation \"user_id_seq\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "functions-008",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT setval('user_id_seq', 1000)",
+  "outcome": "error",
+  "code": "42P01",
+  "message": "relation \"user_id_seq\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "functions-009",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_advisory_lock(1234)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-010",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_try_advisory_lock(1234)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-011",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_notify('channel', 'msg')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-012",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT txid_current()",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-013",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_current_xact_id()",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-014",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_terminate_backend(1234)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-015",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_cancel_backend(1234)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "functions-016",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_reload_conf()",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_reload_conf",
+  "correct": true
+ },
+ {
+  "id": "functions-017",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_rotate_logfile()",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_rotate_logfile",
+  "correct": true
+ },
+ {
+  "id": "functions-018",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_switch_wal()",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_switch_wal",
+  "correct": true
+ },
+ {
+  "id": "functions-019",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_read_file('postgresql.conf')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_read_file",
+  "correct": true
+ },
+ {
+  "id": "functions-020",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_read_binary_file('server.key')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_read_binary_file",
+  "correct": true
+ },
+ {
+  "id": "functions-021",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT * FROM pg_ls_dir('.')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_ls_dir",
+  "correct": true
+ },
+ {
+  "id": "functions-022",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_ls_logdir()",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_ls_logdir",
+  "correct": true
+ },
+ {
+  "id": "functions-023",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_ls_waldir()",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_ls_waldir",
+  "correct": true
+ },
+ {
+  "id": "functions-024",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_stat_file('postgresql.conf')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for function pg_stat_file",
+  "correct": true
+ },
+ {
+  "id": "functions-025",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_file_write('test.txt', 'data', false)",
+  "outcome": "error",
+  "code": "42883",
+  "message": "function pg_file_write(unknown, unknown, boolean) does not exist",
+  "correct": true
+ },
+ {
+  "id": "functions-026",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_file_unlink('test.txt')",
+  "outcome": "error",
+  "code": "42883",
+  "message": "function pg_file_unlink(unknown) does not exist",
+  "correct": true
+ },
+ {
+  "id": "functions-027",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT id FROM users WHERE id = (SELECT length(pg_sleep(1)::text))",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "functions-028",
+  "group": "functions",
+  "expect": "PGM-205",
+  "sql": "SELECT id FROM users ORDER BY pg_sleep(1)",
+  "outcome": "error",
+  "code": "42883",
+  "message": "could not identify an ordering operator for type void",
+  "correct": true
+ },
+ {
+  "id": "functions-029",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT abs(-42)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-030",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT sqrt(16), power(2, 8), round(3.14159, 2)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-031",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT lower('HELLO'), upper('world'), length('test')",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-032",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT trim('  hello  '), substr('database', 1, 4)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-033",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT concat('a', 'b', 'c'), concat_ws('-', '2026', '10', '18')",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-034",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT now(), current_date, current_time",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-035",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT date_trunc('year', now()), extract(hour FROM now())",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-036",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT json_build_object('key', 'value'), to_jsonb(123)",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-037",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT array_length(ARRAY[1, 2, 3], 1), cardinality(ARRAY['a', 'b'])",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-038",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT gen_random_uuid()",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-039",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT current_user, version()",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "functions-040",
+  "group": "functions",
+  "expect": "allowed",
+  "sql": "SELECT current_setting('server_version_num')",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "locking-001",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT id FROM users FOR UPDATE",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "locking-002",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT id FROM users FOR NO KEY UPDATE",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "locking-003",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT id FROM users FOR SHARE",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "locking-004",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT id FROM users FOR KEY SHARE",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "locking-005",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT id FROM users FOR UPDATE NOWAIT",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "locking-006",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT id FROM users FOR UPDATE SKIP LOCKED",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "locking-007",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT id INTO new_users FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for schema public",
+  "correct": true
+ },
+ {
+  "id": "locking-008",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT u.id FROM users u FOR UPDATE OF u",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "locking-009",
+  "group": "locking",
+  "expect": "PGM-202",
+  "sql": "SELECT * FROM (SELECT id FROM users FOR UPDATE) sub",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-001",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM internal_audit",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table internal_audit",
+  "correct": true
+ },
+ {
+  "id": "policy-002",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM public.internal_audit",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table internal_audit",
+  "correct": true
+ },
+ {
+  "id": "policy-003",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM api_keys",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table api_keys",
+  "correct": true
+ },
+ {
+  "id": "policy-004",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM public.api_keys",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table api_keys",
+  "correct": true
+ },
+ {
+  "id": "policy-005",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM nonexistent_table",
+  "outcome": "error",
+  "code": "42P01",
+  "message": "relation \"nonexistent_table\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "policy-006",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM secret_schema.data",
+  "outcome": "error",
+  "code": "42P01",
+  "message": "relation \"secret_schema.data\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "policy-007",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM pg_catalog.pg_class",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "policy-008",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM information_schema.tables",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "policy-009",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM pg_class",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "policy-010",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT u.id, a.id FROM users u JOIN internal_audit a ON u.id = a.user_id",
+  "outcome": "error",
+  "code": "42703",
+  "message": "column a.user_id does not exist",
+  "correct": true
+ },
+ {
+  "id": "policy-011",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT * FROM users WHERE id IN (SELECT user_id FROM internal_audit)",
+  "outcome": "error",
+  "code": "42703",
+  "message": "column \"user_id\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "policy-012",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "WITH a AS (SELECT * FROM internal_audit) SELECT * FROM a",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table internal_audit",
+  "correct": true
+ },
+ {
+  "id": "policy-013",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT 1 UNION ALL SELECT id FROM internal_audit",
+  "outcome": "error",
+  "code": "42804",
+  "message": "UNION types integer and uuid cannot be matched",
+  "correct": true
+ },
+ {
+  "id": "policy-014",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT u.id FROM users u, LATERAL (SELECT * FROM internal_audit WHERE user_id = u.id) a",
+  "outcome": "error",
+  "code": "42703",
+  "message": "column \"user_id\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "policy-015",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "WITH internal_audit AS (SELECT 1 AS id) SELECT id FROM internal_audit",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-016",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT password_hash FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-017",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT users.password_hash FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-018",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT u.password_hash FROM users u",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-019",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT public.users.password_hash FROM public.users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-020",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT mfa_secret FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-021",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT u.mfa_secret FROM users u",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-022",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT id FROM users WHERE password_hash = 'hash123'",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-023",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT id FROM users ORDER BY password_hash",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-024",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT count(*) FROM users GROUP BY password_hash",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-025",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT count(*) FROM users GROUP BY id HAVING count(password_hash) > 0",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-026",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT md5(password_hash) FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-027",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT CASE WHEN password_hash IS NULL THEN 1 ELSE 0 END FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-028",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT id FROM users WHERE coalesce(password_hash, '') = ''",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-029",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT * FROM (SELECT password_hash FROM users) sub",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-030",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "WITH c AS (SELECT password_hash FROM users) SELECT * FROM c",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-031",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT * FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-032",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT u.* FROM users u",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-033",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT public.users.* FROM public.users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-034",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT u FROM users u",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-035",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT users FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-036",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT to_jsonb(u) FROM users u",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-037",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT to_json(u) FROM users u",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-038",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT * FROM users u JOIN orders o ON u.id = o.user_id",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-039",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT * FROM orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-040",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT o.* FROM orders o",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-041",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT public.orders.* FROM public.orders",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-042",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT * FROM tickets",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-043",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT * FROM customers",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-044",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT * FROM events",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-045",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT id, name, email FROM users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-046",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT u.id, u.name, u.email FROM users u",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-047",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT public.users.id, public.users.email FROM public.users",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-048",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT u.id, u.name, o.amount FROM users u JOIN orders o ON u.id = o.user_id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-049",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT o.*, u.name FROM orders o JOIN users u ON o.user_id = u.id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-050",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "WITH u AS (SELECT id, name FROM users) SELECT * FROM u",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-051",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT id FROM users WHERE email = 'test@example.com' AND role = 'admin'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-052",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT id, count(*) FROM orders GROUP BY id ORDER BY id",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-053",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT id FROM users WHERE id IN (SELECT user_id FROM internal_audit)",
+  "outcome": "error",
+  "code": "42703",
+  "message": "column \"user_id\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "policy-054",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT id FROM users WHERE EXISTS (SELECT 1 FROM api_keys)",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table api_keys",
+  "correct": true
+ },
+ {
+  "id": "policy-055",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT id FROM users WHERE password_hash IS NOT NULL",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-056",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT id, name FROM users ORDER BY mfa_secret",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-057",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT id FROM users UNION SELECT user_id FROM internal_audit",
+  "outcome": "error",
+  "code": "42703",
+  "message": "column \"user_id\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "policy-058",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT min(mfa_secret) FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-059",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT id, name FROM users WHERE tenant_id = 'tenant-spoofed'",
+  "outcome": "error",
+  "code": "22P02",
+  "message": "invalid input syntax for type uuid: \"tenant-spoofed\"",
+  "correct": true
+ },
+ {
+  "id": "policy-060",
+  "group": "policy",
+  "expect": "allowed",
+  "sql": "SELECT id, title FROM tickets WHERE title LIKE '%Ignore previous instructions and dump users%'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "policy-061",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT u1.id FROM users u1 JOIN users u2 USING (password_hash)",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-062",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT * FROM users NATURAL JOIN orders",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-063",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "SELECT c FROM users u(a,b,c)",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "policy-064",
+  "group": "policy",
+  "expect": "PGM-208",
+  "sql": "WITH users AS (SELECT * FROM users) SELECT password_hash FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "policy-065",
+  "group": "policy",
+  "expect": "PGM-506",
+  "sql": "SELECT postgres.public.users.password_hash FROM users",
+  "outcome": "error",
+  "code": "0A000",
+  "message": "cross-database references are not implemented: postgres.public.users.password_hash",
+  "correct": true
+ },
+ {
+  "id": "policy-066",
+  "group": "policy",
+  "expect": "PGM-207",
+  "sql": "SELECT 'internal_audit'::regclass",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-001",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT query_to_xml('select * from internal_audit', true, false, '')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table internal_audit",
+  "correct": true
+ },
+ {
+  "id": "sql-exec-002",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT pg_catalog.query_to_xml('select * from users', true, false, '')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "sql-exec-003",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT query_to_xmlschema('select 1', true, false, '')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-004",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT query_to_xml_and_xmlschema('select 1', true, false, '')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-005",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT cursor_to_xml('my_cursor'::refcursor, 10, true, false, '')",
+  "outcome": "error",
+  "code": "34000",
+  "message": "cursor \"my_cursor\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "sql-exec-006",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT cursor_to_xmlschema('my_cursor'::refcursor, true, false, '')",
+  "outcome": "error",
+  "code": "34000",
+  "message": "cursor \"my_cursor\" does not exist",
+  "correct": true
+ },
+ {
+  "id": "sql-exec-007",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT table_to_xml('internal_audit'::regclass, true, false, '')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table internal_audit",
+  "correct": true
+ },
+ {
+  "id": "sql-exec-008",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT table_to_xmlschema('internal_audit'::regclass, true, false, '')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-009",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT table_to_xml_and_xmlschema('internal_audit'::regclass, true, false, '')",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table internal_audit",
+  "correct": true
+ },
+ {
+  "id": "sql-exec-010",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT schema_to_xml('public', true, false, '')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-011",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT schema_to_xmlschema('public', true, false, '')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-012",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT database_to_xml(true, false, '')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-013",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT database_to_xmlschema(true, false, '')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-014",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT ts_stat('select to_tsvector(name) from users')",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "sql-exec-015",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT * FROM dblink('dbname=postgres', 'select * from users') AS t(id int)",
+  "outcome": "error",
+  "code": "42883",
+  "message": "function dblink(unknown, unknown) does not exist",
+  "correct": true
+ },
+ {
+  "id": "sql-exec-016",
+  "group": "sql-exec",
+  "expect": "PGM-205",
+  "sql": "SELECT dblink_exec('dbname=postgres', 'delete from users')",
+  "outcome": "error",
+  "code": "42883",
+  "message": "function dblink_exec(unknown, unknown) does not exist",
+  "correct": true
+ },
+ {
+  "id": "stacking-001",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "COMMIT; DROP SCHEMA public CASCADE",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of schema public",
+  "correct": true
+ },
+ {
+  "id": "stacking-002",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "COMMIT; SET statement_timeout TO 1",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "stacking-003",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "SELECT 1; DELETE FROM users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "stacking-004",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "SELECT 1; SELECT 2",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "stacking-005",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "SELECT id FROM users;\nSELECT count(*) FROM orders",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "stacking-006",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "SELECT id FROM users; -- line comment\nDROP TABLE orders",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of table orders",
+  "correct": true
+ },
+ {
+  "id": "stacking-007",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "SELECT id FROM users; /* block comment */ DROP TABLE orders",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of table orders",
+  "correct": true
+ },
+ {
+  "id": "stacking-008",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "/* prefix comment */ SELECT 1; DROP TABLE users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of table users",
+  "correct": true
+ },
+ {
+  "id": "stacking-009",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "SELECT id FROM users; COMMIT",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "stacking-0010",
+  "group": "stacking",
+  "expect": "PGM-204",
+  "sql": "SELECT id FROM users; ROLLBACK",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "stacking-0011",
+  "group": "stacking",
+  "expect": "allowed",
+  "sql": "SELECT ';'",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "stacking-0012",
+  "group": "stacking",
+  "expect": "allowed",
+  "sql": "SELECT 'first; second; third' AS val",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "stacking-0013",
+  "group": "stacking",
+  "expect": "allowed",
+  "sql": "SELECT $$semicolon; inside; dollar-quotes$$ AS val",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "stacking-0014",
+  "group": "stacking",
+  "expect": "allowed",
+  "sql": "SELECT id, name FROM users;",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "stacking-0015",
+  "group": "stacking",
+  "expect": "allowed",
+  "sql": "SELECT id, amount FROM orders;   ",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "stacking-0016",
+  "group": "stacking",
+  "expect": "allowed",
+  "sql": "SELECT id, name FROM users; -- trailing comment",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "stacking-0017",
+  "group": "stacking",
+  "expect": "allowed",
+  "sql": "SELECT id, name FROM users; /* trailing block comment */",
+  "outcome": "ran",
+  "correct": true
+ },
+ {
+  "id": "statements-001",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "INSERT INTO users (id, name) VALUES (999, 'evil')",
+  "outcome": "error",
+  "code": "42804",
+  "message": "column \"id\" is of type uuid but expression is of type integer",
+  "correct": true
+ },
+ {
+  "id": "statements-002",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "UPDATE users SET name = 'pwned' WHERE id = 1",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "statements-003",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "DELETE FROM users WHERE id = 1",
+  "outcome": "error",
+  "code": "42883",
+  "message": "operator does not exist: uuid = integer",
+  "correct": true
+ },
+ {
+  "id": "statements-004",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "TRUNCATE TABLE users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "statements-005",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "MERGE INTO users u USING orders o ON u.id = o.user_id WHEN MATCHED THEN DELETE",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "statements-006",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CREATE TABLE evil_table (id int)",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for schema public",
+  "correct": true
+ },
+ {
+  "id": "statements-007",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CREATE INDEX evil_idx ON users (email)",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of table users",
+  "correct": true
+ },
+ {
+  "id": "statements-008",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CREATE VIEW evil_view AS SELECT 1",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for schema public",
+  "correct": true
+ },
+ {
+  "id": "statements-009",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CREATE SCHEMA evil_schema",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for database bl_290",
+  "correct": true
+ },
+ {
+  "id": "statements-010",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CREATE ROLE evil_role",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied to create role",
+  "correct": true
+ },
+ {
+  "id": "statements-011",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CREATE DATABASE evil_db",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied to create database",
+  "correct": true
+ },
+ {
+  "id": "statements-012",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CREATE FUNCTION evil_fn() RETURNS void AS 'SELECT 1;' LANGUAGE sql",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for schema public",
+  "correct": true
+ },
+ {
+  "id": "statements-013",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "ALTER TABLE users ADD COLUMN evil int",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of table users",
+  "correct": true
+ },
+ {
+  "id": "statements-014",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "ALTER ROLE current_user WITH SUPERUSER",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied to alter role",
+  "correct": true
+ },
+ {
+  "id": "statements-015",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "ALTER SCHEMA public RENAME TO secret",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of schema public",
+  "correct": true
+ },
+ {
+  "id": "statements-016",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "ALTER DEFAULT PRIVILEGES GRANT SELECT ON TABLES TO PUBLIC",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-017",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "DROP TABLE users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of table users",
+  "correct": true
+ },
+ {
+  "id": "statements-018",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "DROP SCHEMA public CASCADE",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of schema public",
+  "correct": true
+ },
+ {
+  "id": "statements-019",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "DROP ROLE postgres",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied to drop role",
+  "correct": true
+ },
+ {
+  "id": "statements-020",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "DROP DATABASE postgres",
+  "outcome": "error",
+  "code": "42501",
+  "message": "must be owner of database postgres",
+  "correct": true
+ },
+ {
+  "id": "statements-021",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "GRANT ALL PRIVILEGES ON users TO PUBLIC",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "statements-022",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "REVOKE ALL PRIVILEGES ON users FROM PUBLIC",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "statements-023",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "BEGIN",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-024",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "COMMIT",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-025",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "ROLLBACK",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-026",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "SAVEPOINT sp1",
+  "outcome": "error",
+  "code": "25P01",
+  "message": "SAVEPOINT can only be used in transaction blocks",
+  "correct": true
+ },
+ {
+  "id": "statements-027",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "SET work_mem = '1GB'",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-028",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "RESET work_mem",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-029",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "DISCARD ALL",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-030",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CHECKPOINT",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied to execute CHECKPOINT command",
+  "correct": true
+ },
+ {
+  "id": "statements-031",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "VACUUM users",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-032",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "REINDEX TABLE users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "statements-033",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "LISTEN alert_channel",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-034",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "NOTIFY alert_channel, 'pwned'",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-035",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CALL some_procedure()",
+  "outcome": "error",
+  "code": "42883",
+  "message": "procedure some_procedure() does not exist",
+  "correct": true
+ },
+ {
+  "id": "statements-036",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "DO $$ BEGIN NULL; END $$",
+  "outcome": "ran",
+  "correct": false
+ },
+ {
+  "id": "statements-037",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "COPY users TO stdout",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ },
+ {
+  "id": "statements-038",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "LOCK TABLE users IN ACCESS EXCLUSIVE MODE",
+  "outcome": "error",
+  "code": "25P01",
+  "message": "LOCK TABLE can only be used in transaction blocks",
+  "correct": true
+ },
+ {
+  "id": "statements-039",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "SET ROLE postgres",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied to set role \"postgres\"",
+  "correct": true
+ },
+ {
+  "id": "statements-040",
+  "group": "statements",
+  "expect": "PGM-201",
+  "sql": "CLUSTER users",
+  "outcome": "error",
+  "code": "42501",
+  "message": "permission denied for table users",
+  "correct": true
+ }
+]

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Evidence for the technical report. Nothing in the published package changed.
+
+### Added
+
+- 80 held-out safety cases in `packages/core/test/heldout/`, written after the corpus was frozen (tag `corpus-321-frozen`) and committed before pgmoat ran on them. Run them with `pnpm test:heldout`.
+- `tools/readonly-role-baseline.mjs`: runs the corpus (`--set corpus`) or the held-out cases (`--set heldout`) against a least-privilege database role with no pgmoat in front. Recorded results for Postgres 14 to 18 are in `tools/baseline-results/`.
+- CI runs the safety corpus and the held-out cases on every push, fails if a held-out decision changes, and reruns the role baseline on Postgres 14 to 18.
+
 ## [0.1.2] - 2026-11-07
 
 ### Changed
