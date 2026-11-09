@@ -51,6 +51,18 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: Safety corpus (321 cases)
+        run: pnpm test:corpus
+
+      - name: Held-out set (80 cases)
+        run: pnpm test:heldout
+
+      # The held-out test reports its result instead of failing, so that the published run stays
+      # exactly as it came out. Here, any change to a recorded decision or error code fails CI.
+      - name: Held-out results match the recorded run
+        if: runner.os != 'Windows'
+        run: git diff --exit-code -- packages/core/test/heldout/results.json
+
   license-check:
     name: License Check
     runs-on: ubuntu-latest
