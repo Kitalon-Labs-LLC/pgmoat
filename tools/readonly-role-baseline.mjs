@@ -12,6 +12,7 @@
 // Postgres version: use 15 or newer. Before 15, every role may CREATE in schema public, so on 14
 // (or on a database upgraded from 14 that kept that grant) the role also lets CREATE TABLE/VIEW/FUNCTION
 // and SELECT INTO through, and scores 262 instead of 266.
+// Measured 266 / 321 on Postgres 15.19, 16.15, 17.11 and 18.6, with the same result for every case.
 //
 // Setup (once): start a Postgres 15+ server, then run the repo's fixtures as a superuser:
 //   psql -d testdb -f packages/core/test/integration/harness/seed.sql
